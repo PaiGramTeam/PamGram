@@ -2,9 +2,7 @@ from telegram import Update, Chat, User
 from telegram.ext import CallbackContext, ChatMemberHandler
 
 from core.admin.services import BotAdminService
-from core.cookies.services import CookiesService
 from core.plugin import Plugin, handler
-from core.user.services import UserService
 from utils.chatmember import extract_status_change
 from utils.decorators.error import error_callable
 from utils.log import logger
@@ -13,12 +11,8 @@ from utils.log import logger
 class ChatMember(Plugin):
     def __init__(
         self,
-        bot_admin_service: BotAdminService = None,
-        user_service: UserService = None,
-        cookies_service: CookiesService = None,
+        bot_admin_service: BotAdminService = None
     ):
-        self.cookies_service = cookies_service
-        self.user_service = user_service
         self.bot_admin_service = bot_admin_service
 
     @handler.chat_member(chat_member_types=ChatMemberHandler.MY_CHAT_MEMBER, block=False)
