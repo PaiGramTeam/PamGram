@@ -386,7 +386,7 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         for index, _ in enumerate(post_handler_data.post_images):
             if index + 1 not in post_handler_data.delete_photo:
                 post_images.append(post_handler_data.post_images[index])
-        post_text += f" @{channel_name}"
+        post_text += f" @{escape_markdown(channel_name)}"
         for tag in post_handler_data.tags:
             post_text += f" \\#{tag}"
         try:
