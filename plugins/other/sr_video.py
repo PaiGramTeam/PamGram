@@ -157,6 +157,7 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         elif result == "confirm":
             reply_text = await message.reply_text("正在处理")
             video_post_handler_data.post_id = post_id
+            video_post_handler_data.post_video = ""
             status = await self.send_post_info(video_post_handler_data, message)
             await reply_text.delete()
             return status
@@ -218,6 +219,7 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
             await message.reply_text("获取作品ID错误，请检查连接是否合法", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         video_post_handler_data.post_id = post_id
+        video_post_handler_data.post_video = ""
         return await self.send_post_info(video_post_handler_data, message)
 
     @staticmethod
