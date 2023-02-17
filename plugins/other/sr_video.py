@@ -30,6 +30,7 @@ from utils.log import logger
 
 class SRVideoHandlerData:
     def __init__(self):
+        self.post: Optional[OffContent] = None
         self.post_id: int = 0
         self.post_text: str = ""
         self.post_images: Optional[List[ArtworkImage]] = None
@@ -156,6 +157,7 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
             await message.delete()
         elif result == "confirm":
             reply_text = await message.reply_text("正在处理")
+            video_post_handler_data.post = None
             video_post_handler_data.post_id = post_id
             video_post_handler_data.post_video = ""
             status = await self.send_post_info(video_post_handler_data, message)
@@ -218,6 +220,7 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         if post_id == -1:
             await message.reply_text("获取作品ID错误，请检查连接是否合法", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
+        video_post_handler_data.post = None
         video_post_handler_data.post_id = post_id
         video_post_handler_data.post_video = ""
         return await self.send_post_info(video_post_handler_data, message)
@@ -255,10 +258,13 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         return images
 
     async def send_post_info(self, video_post_handler_data: SRVideoHandlerData, message: Message) -> int:
-        post_info = await self.get_official_new(video_post_handler_data.post_id)
-        if post_info is None:
-            await message.reply_text(f"错误！获取文章 https://sr.mihoyo.com/news/{video_post_handler_data.post_id} 信息失败")
-            return ConversationHandler.END
+        post_info = video_post_handler_data.post
+        if not post_info:
+            post_info = await self.get_official_new(video_post_handler_data.post_id)
+            if post_info is None:
+                await message.reply_text(f"错误！获取文章 https://sr.mihoyo.com/news/{video_post_handler_data.post_id} 信息失败")
+                return ConversationHandler.END
+            video_post_handler_data.post = post_info
         post_soup = BeautifulSoup(post_info.sContent, features="html.parser")
         # content
         post_text = self.parse_post_text(post_soup, post_info)
