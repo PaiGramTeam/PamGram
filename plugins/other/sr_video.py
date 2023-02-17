@@ -1,6 +1,6 @@
 from typing import Optional, List, Tuple
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from httpx import AsyncClient
 from pydantic import BaseModel
 from telegram import (
@@ -226,16 +226,22 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         return await self.send_post_info(video_post_handler_data, message)
 
     @staticmethod
-    def parse_post_text(soup: BeautifulSoup, post_info: OffContent) -> str:
+    def parse_post_text(soup: BeautifulSoup, post_subject: str) -> str:
+        def parse_tag(_tag: Tag) -> str:
+            if _tag.name == "a" and _tag.get("href"):
+                return f"[{escape_markdown(_tag.get_text(), version=2)}]({_tag.get('href')})"
+            return escape_markdown(_tag.get_text(), version=2)
         post_p = soup.find_all("p")
-        post_text = f"*{escape_markdown(post_info.sTitle, version=2)}*\n\n"
+        post_text = f"*{escape_markdown(post_subject, version=2)}*\n\n"
         start = True
         for p in post_p:
             t = p.get_text()
             if not t and start:
                 continue
             start = False
-            post_text += f"{escape_markdown(p.get_text(), version=2)}\n"
+            for tag in p.contents:
+                post_text += parse_tag(tag)
+            post_text += "\n"
         return post_text
 
     @staticmethod

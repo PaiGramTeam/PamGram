@@ -1,6 +1,6 @@
 from typing import Optional, List, Tuple
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from telegram import (
     Update,
     ReplyKeyboardMarkup,
@@ -189,6 +189,10 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
 
     @staticmethod
     def parse_post_text(soup: BeautifulSoup, post_subject: str) -> str:
+        def parse_tag(_tag: Tag) -> str:
+            if _tag.name == "a" and _tag.get("href"):
+                return f"[{escape_markdown(_tag.get_text(), version=2)}]({_tag.get('href')})"
+            return escape_markdown(_tag.get_text(), version=2)
         post_p = soup.find_all("p")
         post_text = f"*{escape_markdown(post_subject, version=2)}*\n\n"
         start = True
@@ -197,7 +201,9 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
             if not t and start:
                 continue
             start = False
-            post_text += f"{escape_markdown(p.get_text(), version=2)}\n"
+            for tag in p.contents:
+                post_text += parse_tag(tag)
+            post_text += "\n"
         return post_text
 
     async def send_post_info(self, post_handler_data: SRPostHandlerData, message: Message, post_id: int) -> int:
