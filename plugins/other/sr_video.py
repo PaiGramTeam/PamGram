@@ -22,6 +22,7 @@ from core.bot import bot
 from core.config import config
 from core.plugin import Plugin, conversation, handler
 from modules.apihelper.models.genshin.hyperion import ArtworkImage
+from plugins.other.sr_post import SRPost
 from utils.decorators.admins import bot_admins_rights_check
 from utils.decorators.error import error_callable
 from utils.decorators.restricts import restricts
@@ -226,25 +227,6 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         return await self.send_post_info(video_post_handler_data, message)
 
     @staticmethod
-    def parse_post_text(soup: BeautifulSoup, post_subject: str) -> str:
-        def parse_tag(_tag: Tag) -> str:
-            if _tag.name == "a" and _tag.get("href"):
-                return f"[{escape_markdown(_tag.get_text(), version=2)}]({_tag.get('href')})"
-            return escape_markdown(_tag.get_text(), version=2)
-        post_p = soup.find_all("p")
-        post_text = f"*{escape_markdown(post_subject, version=2)}*\n\n"
-        start = True
-        for p in post_p:
-            t = p.get_text()
-            if not t and start:
-                continue
-            start = False
-            for tag in p.contents:
-                post_text += parse_tag(tag)
-            post_text += "\n"
-        return post_text
-
-    @staticmethod
     def parse_post_video(soup: BeautifulSoup) -> str:
         post_video = soup.find("video")
         if post_video is not None:
@@ -273,7 +255,7 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
             video_post_handler_data.post = post_info
         post_soup = BeautifulSoup(post_info.sContent, features="html.parser")
         # content
-        post_text = self.parse_post_text(post_soup, post_info)
+        post_text = SRPost.parse_post_text(post_soup, post_info.sTitle)
         post_text += f"\n[source](https://sr.mihoyo.com/news/{video_post_handler_data.post_id})"
         if len(post_text) >= MessageLimit.CAPTION_LENGTH:
             post_text = post_text[: MessageLimit.CAPTION_LENGTH]
@@ -335,11 +317,11 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
             await message.reply_text("退出任务", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         elif message.text == "推送频道":
-            return await self.get_channel(update, context)
+            return await SRPost.get_channel(update, context)
         elif message.text == "添加TAG":
-            return await self.add_tags(update, context)
+            return await SRPost.add_tags(update, context)
         elif message.text == "编辑文字":
-            return await self.edit_text(update, context)
+            return await SRPost.edit_text(update, context)
         elif message.text == "删除图片":
             return await self.delete_photo(update, context)
         return ConversationHandler.END
@@ -374,21 +356,6 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         await message.reply_text("请选择你的操作", reply_markup=self.MENU_KEYBOARD)
         return CHECK_COMMAND
 
-    @staticmethod
-    async def get_channel(update: Update, _: CallbackContext) -> int:
-        message = update.effective_message
-        reply_keyboard = []
-        try:
-            for channel_info in bot.config.channels:
-                name = channel_info.name
-                reply_keyboard.append([f"{name}"])
-        except KeyError as error:
-            logger.error("从配置文件获取频道信息发生错误，退出任务", exc_info=error)
-            await message.reply_text("从配置文件获取频道信息发生错误，退出任务", reply_markup=ReplyKeyboardRemove())
-            return ConversationHandler.END
-        await message.reply_text("请选择你要推送的频道", reply_markup=ReplyKeyboardMarkup(reply_keyboard, True, True))
-        return GET_POST_CHANNEL
-
     @conversation.state(state=GET_POST_CHANNEL)
     @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
     @error_callable
@@ -413,12 +380,6 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         await message.reply_text("请核对你修改的信息", reply_markup=ReplyKeyboardMarkup(reply_keyboard, True, True))
         return SEND_POST
 
-    @staticmethod
-    async def add_tags(update: Update, _: CallbackContext) -> int:
-        message = update.effective_message
-        await message.reply_text("请回复添加的tag名称，如果要添加多个tag请以空格作为分隔符，不用添加 # 作为开头，推送时程序会自动添加")
-        return GET_TAGS
-
     @conversation.state(state=GET_TAGS)
     @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
     @error_callable
@@ -430,12 +391,6 @@ class SRVideo(Plugin.Conversation, BasePlugin.Conversation):
         await message.reply_text("添加成功")
         await message.reply_text("请选择你的操作", reply_markup=self.MENU_KEYBOARD)
         return CHECK_COMMAND
-
-    @staticmethod
-    async def edit_text(update: Update, _: CallbackContext) -> int:
-        message = update.effective_message
-        await message.reply_text("请回复替换的文本")
-        return GET_TEXT
 
     @conversation.state(state=GET_TEXT)
     @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
