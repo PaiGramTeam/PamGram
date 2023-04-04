@@ -47,6 +47,7 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
 
     def __init__(self):
         self.bbs = Hyperion()
+        self.bbs.client.timeout = 60
         self.last_post_id_list: List[int] = []
         if config.channels and len(config.channels) > 0:
             logger.success("文章定时推送处理已经开启")
