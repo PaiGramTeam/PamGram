@@ -3,36 +3,29 @@ from telegram.ext import CallbackContext, CommandHandler
 from telegram.helpers import escape_markdown
 
 from core.plugin import handler, Plugin
-from utils.decorators.error import error_callable
-from utils.decorators.restricts import restricts
 from utils.log import logger
 
 
 class StartPlugin(Plugin):
     @handler.command("start", block=False)
-    @error_callable
-    @restricts()
-    async def start(self, update: Update, context: CallbackContext) -> None:
+    async def start(self, update: Update, _: CallbackContext) -> None:
         user = update.effective_user
         message = update.effective_message
-        args = context.args
-        if args is not None and len(args) >= 1:
-            await message.reply_html(f"你好 {user.mention_html()} ！\n请点击 /{args[0]} 命令进入对应流程")
-            return
         logger.info("用户 %s[%s] 发出start命令", user.full_name, user.id)
-        await message.reply_markdown_v2(f"你好 {user.mention_markdown_v2()} {escape_markdown('！')}")
+        await message.reply_markdown_v2(f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是派蒙 ！')}")
 
     @staticmethod
-    @restricts()
     async def unknown_command(update: Update, _: CallbackContext) -> None:
         await update.effective_message.reply_text("前面的区域，以后再来探索吧！")
 
+    @staticmethod
+    async def emergency_food(update: Update, _: CallbackContext) -> None:
+        await update.effective_message.reply_text("派蒙才不是应急食品！")
+
     @handler(CommandHandler, command="ping", block=False)
-    @restricts()
     async def ping(self, update: Update, _: CallbackContext) -> None:
         await update.effective_message.reply_text("online! ヾ(✿ﾟ▽ﾟ)ノ")
 
     @handler(CommandHandler, command="reply_keyboard_remove", block=False)
-    @restricts()
     async def reply_keyboard_remove(self, update: Update, _: CallbackContext) -> None:
         await update.message.reply_text("移除远程键盘成功", reply_markup=ReplyKeyboardRemove())

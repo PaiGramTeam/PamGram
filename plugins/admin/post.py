@@ -1,36 +1,38 @@
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
+from httpx import Timeout
 from telegram import (
-    Update,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    Message,
+    InputMediaPhoto,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    InputMediaDocument,
+    InputMediaVideo,
 )
-from telegram.constants import ParseMode, MessageLimit
+from telegram.constants import MessageLimit, ParseMode
 from telegram.error import BadRequest
-from telegram.ext import CallbackContext, ConversationHandler, filters
+from telegram.ext import ConversationHandler, filters
 from telegram.helpers import escape_markdown
 
-from core.baseplugin import BasePlugin
-from core.bot import bot
 from core.config import config
 from core.plugin import Plugin, conversation, handler
 from modules.apihelper.client.components.hyperion import Hyperion
 from modules.apihelper.error import APIHelperException
-from modules.apihelper.models.genshin.hyperion import ArtworkImage
-from utils.decorators.admins import bot_admins_rights_check
-from utils.decorators.error import error_callable
-from utils.decorators.restricts import restricts
 from utils.log import logger
 
+if TYPE_CHECKING:
+    from bs4 import Tag
+    from telegram import Update, Message
+    from telegram.ext import ContextTypes
+    from modules.apihelper.models.genshin.hyperion import ArtworkImage
 
-class SRPostHandlerData:
+
+class PostHandlerData:
     def __init__(self):
         self.post_text: str = ""
-        self.post_images: Optional[List[ArtworkImage]] = None
+        self.post_images: Optional[List["ArtworkImage"]] = None
         self.delete_photo: Optional[List[int]] = []
         self.channel_id: int = -1
         self.tags: Optional[List[str]] = []
@@ -40,21 +42,28 @@ CHECK_POST, SEND_POST, CHECK_COMMAND, GTE_DELETE_PHOTO = range(10900, 10904)
 GET_POST_CHANNEL, GET_TAGS, GET_TEXT = range(10904, 10907)
 
 
-class SRPost(Plugin.Conversation, BasePlugin.Conversation):
-    """星穹铁道文章推送"""
+class Post(Plugin.Conversation):
+    """文章推送"""
 
     MENU_KEYBOARD = ReplyKeyboardMarkup([["推送频道", "添加TAG"], ["编辑文字", "删除图片"], ["退出"]], True, True)
 
     def __init__(self):
-        self.bbs = Hyperion()
-        self.bbs.client.timeout = 60
+        self.bbs = Hyperion(
+            timeout=Timeout(
+                connect=config.connect_timeout,
+                read=config.read_timeout,
+                write=config.write_timeout,
+                pool=config.pool_timeout,
+            )
+        )
         self.last_post_id_list: List[int] = []
+
+    async def initialize(self):
         if config.channels and len(config.channels) > 0:
             logger.success("文章定时推送处理已经开启")
-            bot.app.job_queue.run_once(self.task, 20)
-            bot.app.job_queue.run_repeating(self.task, 60)
+            self.application.job_queue.run_repeating(self.task, 60)
 
-    async def task(self, context: CallbackContext):
+    async def task(self, context: "ContextTypes.DEFAULT_TYPE"):
         temp_post_id_list: List[int] = []
 
         # 请求推荐POST列表并处理
@@ -64,7 +73,9 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
             logger.error("获取首页推荐信息失败 %s", str(exc))
             return
 
-        temp_post_id_list.extend(data_list["post_id"] for data_list in official_recommended_posts["list"])
+        for data_list in official_recommended_posts["list"]:
+            temp_post_id_list.append(data_list["post_id"])
+
         # 判断是否为空
         if len(self.last_post_id_list) == 0:
             for temp_list in temp_post_id_list:
@@ -74,14 +85,14 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         # 筛选出新推送的文章
         new_post_id_list = set(temp_post_id_list).difference(set(self.last_post_id_list))
 
-        if not new_post_id_list:
+        if len(new_post_id_list) == 0:
             return
 
         self.last_post_id_list = temp_post_id_list
 
         for post_id in new_post_id_list:
             try:
-                post_info = await self.bbs.get_post_info(6, post_id)
+                post_info = await self.bbs.get_post_info(2, post_id)
             except APIHelperException as exc:
                 logger.error("获取文章信息失败 %s", str(exc))
                 text = f"获取 post_id[{post_id}] 文章信息失败 {str(exc)}"
@@ -89,7 +100,7 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
                     try:
                         await context.bot.send_message(user.user_id, text)
                     except BadRequest as _exc:
-                        logger.error("发送消息失败 %s", str(_exc))
+                        logger.error("发送消息失败 %s", _exc.message)
                 return
             buttons = [
                 [
@@ -99,22 +110,54 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
             ]
             url = f"https://www.miyoushe.com/sr/article/{post_info.post_id}"
             text = f"发现官网推荐文章 <a href='{url}'>{post_info.subject}</a>\n是否开始处理"
-            for user in config.admins:
-                try:
-                    await context.bot.send_message(
-                        user.user_id, text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(buttons)
-                    )
-                except BadRequest as exc:
-                    logger.error("发送消息失败 %s", exc.message)
+            try:
+                await context.bot.send_message(
+                    config.owner, text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(buttons)
+                )
+            except BadRequest as exc:
+                logger.error("发送消息失败 %s", exc.message)
+
+    @staticmethod
+    def parse_post_text(soup: BeautifulSoup, post_subject: str) -> str:
+        def parse_tag(_tag: "Tag") -> str:
+            if _tag.name == "a" and _tag.get("href"):
+                return f"[{escape_markdown(_tag.get_text(), version=2)}]({_tag.get('href')})"
+            return escape_markdown(_tag.get_text(), version=2)
+
+        post_p = soup.find_all("p")
+        post_text = f"*{escape_markdown(post_subject, version=2)}*\n\n"
+        start = True
+        if post_p := soup.find_all("p"):
+            for p in post_p:
+                t = p.get_text()
+                if not t and start:
+                    continue
+                start = False
+                for tag in p.contents:
+                    post_text += parse_tag(tag)
+                post_text += "\n"
+        else:
+            post_text += f"{escape_markdown(soup.get_text(), version=2)}\n"
+        return post_text
+
+    @staticmethod
+    def input_media(
+        media: "ArtworkImage", *args, **kwargs
+    ) -> Union[None, InputMediaDocument, InputMediaPhoto, InputMediaVideo]:
+        file_type = media.format
+        if file_type is not None:
+            if file_type.lower() in {"jpg", "jpeg", "png", "webp"}:
+                return InputMediaPhoto(media.data, *args, **kwargs)
+            if file_type.lower() in {"gif", "mp4", "mov", "avi", "mkv", "webm", "flv"}:
+                return InputMediaVideo(media.data, *args, **kwargs)
+        return InputMediaDocument(media.data, *args, **kwargs)
 
     @conversation.entry_point
     @handler.callback_query(pattern=r"^post_admin\|", block=False)
-    @bot_admins_rights_check
-    @error_callable
-    async def callback_query_start(self, update: Update, context: CallbackContext) -> int:
+    async def callback_query_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         post_handler_data = context.chat_data.get("post_handler_data")
         if post_handler_data is None:
-            post_handler_data = SRPostHandlerData()
+            post_handler_data = PostHandlerData()
             context.chat_data["post_handler_data"] = post_handler_data
         callback_query = update.callback_query
         user = callback_query.from_user
@@ -142,29 +185,15 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         await message.reply_text("非法参数")
         return ConversationHandler.END
 
-    @handler.command(command="post_refresh", filters=filters.ChatType.PRIVATE, block=True)
-    @restricts()
-    @bot_admins_rights_check
-    @error_callable
-    async def post_refresh(self, update: Update, context: CallbackContext) -> None:
-        user = update.effective_user
-        message = update.effective_message
-        logger.info("用户 %s[%s] POST刷新命令请求", user.full_name, user.id)
-        await self.task(context)
-        await message.reply_text("手动刷新完成")
-
     @conversation.entry_point
-    @handler.command(command="post", filters=filters.ChatType.PRIVATE, block=True)
-    @restricts()
-    @bot_admins_rights_check
-    @error_callable
-    async def command_start(self, update: Update, context: CallbackContext) -> int:
+    @handler.command(command="post", filters=filters.ChatType.PRIVATE, block=False, admin=True)
+    async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] POST命令请求", user.full_name, user.id)
         post_handler_data = context.chat_data.get("post_handler_data")
         if post_handler_data is None:
-            post_handler_data = SRPostHandlerData()
+            post_handler_data = PostHandlerData()
             context.chat_data["post_handler_data"] = post_handler_data
         text = f"✿✿ヽ（°▽°）ノ✿ 你好！ {user.username} ，\n" "只需复制URL回复即可 \n" "退出投稿只需回复退出"
         reply_keyboard = [["退出"]]
@@ -172,10 +201,9 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         return CHECK_POST
 
     @conversation.state(state=CHECK_POST)
-    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
-    @error_callable
-    async def check_post(self, update: Update, context: CallbackContext) -> int:
-        post_handler_data: SRPostHandlerData = context.chat_data.get("post_handler_data")
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def check_post(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
         message = update.effective_message
         if message.text == "退出":
             await message.reply_text("退出投稿", reply_markup=ReplyKeyboardRemove())
@@ -187,28 +215,7 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
             return ConversationHandler.END
         return await self.send_post_info(post_handler_data, message, post_id)
 
-    @staticmethod
-    def parse_post_text(soup: BeautifulSoup, post_subject: str) -> str:
-        def parse_tag(_tag: Tag) -> str:
-            if _tag.name == "a" and _tag.get("href"):
-                return f"[{escape_markdown(_tag.get_text(), version=2)}]({_tag.get('href')})"
-            return escape_markdown(_tag.get_text(), version=2)
-        post_text = f"*{escape_markdown(post_subject, version=2)}*\n\n"
-        start = True
-        if post_p := soup.find_all("p"):
-            for p in post_p:
-                t = p.get_text()
-                if not t and start:
-                    continue
-                start = False
-                for tag in p.contents:
-                    post_text += parse_tag(tag)
-                post_text += "\n"
-        else:
-            post_text += f"{escape_markdown(soup.get_text(), version=2)}\n"
-        return post_text
-
-    async def send_post_info(self, post_handler_data: SRPostHandlerData, message: Message, post_id: int) -> int:
+    async def send_post_info(self, post_handler_data: PostHandlerData, message: "Message", post_id: int) -> int:
         post_info = await self.bbs.get_post_info(6, post_id)
         post_images = await self.bbs.get_images_by_post_id(6, post_id)
         post_data = post_info["post"]["post"]
@@ -220,25 +227,29 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
             post_text = post_text[: MessageLimit.CAPTION_LENGTH]
             await message.reply_text(f"警告！图片字符描述已经超过 {MessageLimit.CAPTION_LENGTH} 个字，已经切割")
         if post_info.video_urls:
-            await message.reply_text("检测到视频，需要单独下载，视频链接：" + '\n'.join(post_info.video_urls))
+            await message.reply_text("检测到视频，需要单独下载，视频链接：" + "\n".join(post_info.video_urls))
         try:
             if len(post_images) > 1:
-                media = [img_info.input_media() for img_info in post_images if img_info.format]
-                media[0] = post_images[0].input_media(caption=post_text, parse_mode=ParseMode.MARKDOWN_V2)
+                media = [self.input_media(img_info) for img_info in post_images if img_info.format]
+                media[0] = self.input_media(media=post_images[0], caption=post_text, parse_mode=ParseMode.MARKDOWN_V2)
                 if len(media) > 10:
                     media = media[:10]
                     await message.reply_text("获取到的图片已经超过10张，为了保证发送成功，已经删除一部分图片")
-                await message.reply_media_group(media)
+                await message.reply_media_group(media, write_timeout=len(media) * 5)
             elif len(post_images) == 1:
                 image = post_images[0]
                 await message.reply_photo(image.data, caption=post_text, parse_mode=ParseMode.MARKDOWN_V2)
             else:
                 await message.reply_text(post_text, reply_markup=ReplyKeyboardRemove())
                 return ConversationHandler.END
-        except (BadRequest, TypeError) as exc:
+        except BadRequest as exc:
+            await message.reply_text(f"发送图片时发生错误 {exc.message}", reply_markup=ReplyKeyboardRemove())
+            logger.error("Post模块发送图片时发生错误 %s", exc.message)
+            return ConversationHandler.END
+        except TypeError as exc:
             await message.reply_text("发送图片时发生错误，错误信息已经写到日记", reply_markup=ReplyKeyboardRemove())
-            logger.error("SR_Post模块发送图片时发生错误")
-            logger.exception(exc)
+            logger.error("Post模块发送图片时发生错误", exc_info=exc)
+
             return ConversationHandler.END
         post_handler_data.post_text = post_text
         post_handler_data.post_images = post_images
@@ -249,36 +260,34 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         return CHECK_COMMAND
 
     @conversation.state(state=CHECK_COMMAND)
-    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
-    @error_callable
-    async def check_command(self, update: Update, context: CallbackContext) -> int:
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def check_command(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         if message.text == "退出":
             await message.reply_text("退出任务", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
-        elif message.text == "推送频道":
+        if message.text == "推送频道":
             return await self.get_channel(update, context)
-        elif message.text == "添加TAG":
+        if message.text == "添加TAG":
             return await self.add_tags(update, context)
-        elif message.text == "编辑文字":
+        if message.text == "编辑文字":
             return await self.edit_text(update, context)
-        elif message.text == "删除图片":
+        if message.text == "删除图片":
             return await self.delete_photo(update, context)
         return ConversationHandler.END
 
     @staticmethod
-    async def delete_photo(update: Update, context: CallbackContext) -> int:
-        post_handler_data: SRPostHandlerData = context.chat_data.get("post_handler_data")
+    async def delete_photo(update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
         photo_len = len(post_handler_data.post_images)
         message = update.effective_message
-        await message.reply_text(f"请回复你要删除的图片的序列，从1开始，如果删除多张图片回复的序列请以空格作为分隔符，当前一共有 {photo_len} 张图片")
+        await message.reply_text("请回复你要删除的图片的序列，从1开始，如果删除多张图片回复的序列请以空格作为分隔符，" f"当前一共有 {photo_len} 张图片")
         return GTE_DELETE_PHOTO
 
     @conversation.state(state=GTE_DELETE_PHOTO)
-    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
-    @error_callable
-    async def get_delete_photo(self, update: Update, context: CallbackContext) -> int:
-        post_handler_data: SRPostHandlerData = context.chat_data.get("post_handler_data")
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def get_delete_photo(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
         photo_len = len(post_handler_data.post_images)
         message = update.effective_message
         args = message.text.split(" ")
@@ -296,14 +305,13 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         await message.reply_text("请选择你的操作", reply_markup=self.MENU_KEYBOARD)
         return CHECK_COMMAND
 
-    @staticmethod
-    async def get_channel(update: Update, _: CallbackContext) -> int:
+    async def get_channel(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         reply_keyboard = []
         try:
-            for channel_info in bot.config.channels:
-                name = channel_info.name
-                reply_keyboard.append([f"{name}"])
+            for channel_id in config.channels:
+                chat = await self.get_chat(chat_id=channel_id)
+                reply_keyboard.append([f"{chat.username}"])
         except KeyError as error:
             logger.error("从配置文件获取频道信息发生错误，退出任务", exc_info=error)
             await message.reply_text("从配置文件获取频道信息发生错误，退出任务", reply_markup=ReplyKeyboardRemove())
@@ -312,16 +320,16 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         return GET_POST_CHANNEL
 
     @conversation.state(state=GET_POST_CHANNEL)
-    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
-    @error_callable
-    async def get_post_channel(self, update: Update, context: CallbackContext) -> int:
-        post_handler_data: SRPostHandlerData = context.chat_data.get("post_handler_data")
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def get_post_channel(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
         message = update.effective_message
         channel_id = -1
         try:
-            for channel_info in bot.config.channels:
-                if message.text == channel_info.name:
-                    channel_id = channel_info.chat_id
+            for channel_chat_id in config.channels:
+                chat = await self.get_chat(chat_id=channel_chat_id)
+                if message.text == chat.username:
+                    channel_id = channel_chat_id
         except KeyError as exc:
             logger.error("从配置文件获取频道信息发生错误，退出任务", exc_info=exc)
             logger.exception(exc)
@@ -336,16 +344,15 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         return SEND_POST
 
     @staticmethod
-    async def add_tags(update: Update, _: CallbackContext) -> int:
+    async def add_tags(update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         await message.reply_text("请回复添加的tag名称，如果要添加多个tag请以空格作为分隔符，不用添加 # 作为开头，推送时程序会自动添加")
         return GET_TAGS
 
     @conversation.state(state=GET_TAGS)
-    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
-    @error_callable
-    async def get_tags(self, update: Update, context: CallbackContext) -> int:
-        post_handler_data: SRPostHandlerData = context.chat_data.get("post_handler_data")
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def get_tags(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
         message = update.effective_message
         args = message.text.split(" ")
         post_handler_data.tags = args
@@ -354,16 +361,15 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         return CHECK_COMMAND
 
     @staticmethod
-    async def edit_text(update: Update, _: CallbackContext) -> int:
+    async def edit_text(update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         await message.reply_text("请回复替换的文本")
         return GET_TEXT
 
     @conversation.state(state=GET_TEXT)
-    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
-    @error_callable
-    async def get_edit_text(self, update: Update, context: CallbackContext) -> int:
-        post_handler_data: SRPostHandlerData = context.chat_data.get("post_handler_data")
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def get_edit_text(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
         message = update.effective_message
         post_handler_data.post_text = message.text_markdown_v2
         await message.reply_text("替换成功")
@@ -371,10 +377,9 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         return CHECK_COMMAND
 
     @conversation.state(state=SEND_POST)
-    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=True)
-    @error_callable
-    async def send_post(self, update: Update, context: CallbackContext) -> int:
-        post_handler_data: SRPostHandlerData = context.chat_data.get("post_handler_data")
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def send_post(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
         message = update.effective_message
         if message.text == "退出":
             await message.reply_text(text="退出任务", reply_markup=ReplyKeyboardRemove())
@@ -383,9 +388,10 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         channel_id = post_handler_data.channel_id
         channel_name = None
         try:
-            for channel_info in bot.config.channels:
-                if post_handler_data.channel_id == channel_info.chat_id:
-                    channel_name = channel_info.name
+            for channel_info in config.channels:
+                if post_handler_data.channel_id == channel_info:
+                    chat = await self.get_chat(chat_id=channel_id)
+                    channel_name = chat.username
         except KeyError as exc:
             logger.error("从配置文件获取频道信息发生错误，退出任务")
             logger.exception(exc)
@@ -396,14 +402,14 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
         for index, _ in enumerate(post_handler_data.post_images):
             if index + 1 not in post_handler_data.delete_photo:
                 post_images.append(post_handler_data.post_images[index])
-        post_text += f" @{escape_markdown(channel_name)}"
+        post_text += f" @{escape_markdown(channel_name, version=2)}"
         for tag in post_handler_data.tags:
             post_text += f" \\#{tag}"
         try:
             if len(post_images) > 1:
-                media = [img_info.input_media() for img_info in post_images if img_info.format]
-                media[0] = post_images[0].input_media(caption=post_text, parse_mode=ParseMode.MARKDOWN_V2)
-                await context.bot.send_media_group(channel_id, media=media)
+                media = [self.input_media(img_info) for img_info in post_images if img_info.format]
+                media[0] = self.input_media(media=post_images[0], caption=post_text, parse_mode=ParseMode.MARKDOWN_V2)
+                await context.bot.send_media_group(channel_id, media=media, write_timeout=len(media) * 5)
             elif len(post_images) == 1:
                 image = post_images[0]
                 await context.bot.send_photo(
@@ -414,10 +420,12 @@ class SRPost(Plugin.Conversation, BasePlugin.Conversation):
             else:
                 await message.reply_text("图片获取错误", reply_markup=ReplyKeyboardRemove())  # excuse?
                 return ConversationHandler.END
-        except (BadRequest, TypeError) as exc:
-            await message.reply_text("发送图片时发生错误，错误信息已经写到日记", reply_markup=ReplyKeyboardRemove())
-            logger.error("SR_Post模块发送图片时发生错误")
-            logger.exception(exc)
+        except BadRequest as exc:
+            await message.reply_text(f"发送图片时发生错误 {exc.message}", reply_markup=ReplyKeyboardRemove())
+            logger.error("Post模块发送图片时发生错误 %s", exc.message)
             return ConversationHandler.END
+        except TypeError as exc:
+            await message.reply_text("发送图片时发生错误，错误信息已经写到日记", reply_markup=ReplyKeyboardRemove())
+            logger.error("Post模块发送图片时发生错误", exc_info=exc)
         await message.reply_text("推送成功", reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
