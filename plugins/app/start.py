@@ -12,15 +12,11 @@ class StartPlugin(Plugin):
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] 发出start命令", user.full_name, user.id)
-        await message.reply_markdown_v2(f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是派蒙 ！')}")
+        await message.reply_markdown_v2(f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是彦卿 ！')}")
 
     @staticmethod
     async def unknown_command(update: Update, _: CallbackContext) -> None:
         await update.effective_message.reply_text("前面的区域，以后再来探索吧！")
-
-    @staticmethod
-    async def emergency_food(update: Update, _: CallbackContext) -> None:
-        await update.effective_message.reply_text("派蒙才不是应急食品！")
 
     @handler(CommandHandler, command="ping", block=False)
     async def ping(self, update: Update, _: CallbackContext) -> None:

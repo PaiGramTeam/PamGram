@@ -275,7 +275,7 @@ class ErrorHandler(Plugin):
                     chat.id,
                     update.update_id,
                 )
-                text = "出错了呜呜呜 ~ 派蒙这边发生了点问题无法处理！"
+                text = "出错了呜呜呜 ~ 彦卿这边发生了点问题无法处理！"
                 await context.bot.send_message(
                     effective_message.chat_id, text, reply_markup=ReplyKeyboardRemove(), parse_mode=ParseMode.HTML
                 )

@@ -35,4 +35,7 @@ services:
       - ./data:/app/data
       - ./logs:/app/logs
       - ./report:/app/report
+      - ./core:/app/core  # Use new core
+      - ./metadata:/app/metadata  # Use new metadata
+      - ./modules:/app/modules  # Use new modules
       - ./plugins:/app/plugins  # Use new plugins
