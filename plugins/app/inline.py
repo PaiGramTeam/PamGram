@@ -24,9 +24,9 @@ class Inline(Plugin):
     """Inline模块"""
 
     def __init__(
-            self,
-            wiki_service: WikiService,
-            search_service: SearchServices,
+        self,
+        wiki_service: WikiService,
+        search_service: SearchServices,
     ):
         self.wiki_service = wiki_service
         self.weapons_list: List[Dict[str, str]] = []
@@ -37,12 +37,20 @@ class Inline(Plugin):
     async def initialize(self):
         async def task_characters():
             logger.info("Inline 模块正在获取角色列表")
+            datas: Dict[str, str] = {}
             for character in self.wiki_service.character.all_avatars:
                 if not character.icon:
                     logger.warning(f"角色 {character.name} 无图标")
                     continue
-                data = {"name": character.name, "icon": character.icon}
-                self.characters_list.append(data)
+                datas[character.name] = character.icon
+            for character in self.wiki_service.raider.get_name_list():
+                if character in datas:
+                    self.characters_list.append({"name": character, "icon": datas[character]})
+                else:
+                    for key, value in datas.items():
+                        if character.startswith(key):
+                            self.characters_list.append({"name": character, "icon": value})
+                            break
             logger.success("Inline 模块获取角色列表成功")
 
         self.refresh_task.append(asyncio.create_task(task_characters()))
@@ -89,37 +97,35 @@ class Inline(Plugin):
                             id=str(uuid4()),
                             title=f"当前查询内容为 {args[0]}",
                             description="如果无查看图片描述 这是正常的 客户端问题",
-                            thumb_url="https://www.miyoushe.com/_nuxt/img/game-ys.dfc535b.jpg",
-                            input_message_content=InputTextMessageContent(
-                                f"当前查询内容为 {args[0]}\n如果无查看图片描述 这是正常的 客户端问题"),
+                            thumb_url="https://www.miyoushe.com/_nuxt/img/game-sr.4f80911.jpg",
+                            input_message_content=InputTextMessageContent(f"当前查询内容为 {args[0]}\n如果无查看图片描述 这是正常的 客户端问题"),
                         )
                     )
                     for simple_search_result in simple_search_results:
+                        description = simple_search_result.description
+                        if len(description) >= 10:
+                            description = description[:10]
+                        item = None
                         if simple_search_result.photo_file_id:
-                            description = simple_search_result.description
-                            if len(description) >= 10:
-                                description = description[:10]
-                            item = None
-                            if simple_search_result.photo_file_id:
-                                item = InlineQueryResultCachedPhoto(
-                                    id=str(uuid4()),
-                                    title=simple_search_result.title,
-                                    photo_file_id=simple_search_result.photo_file_id,
-                                    description=description,
-                                    caption=simple_search_result.caption,
-                                    parse_mode=simple_search_result.parse_mode,
-                                )
-                            elif simple_search_result.docu:
-                                item = InlineQueryResultCachedDocument(
-                                    id=str(uuid4()),
-                                    title=simple_search_result.title,
-                                    document_file_id=simple_search_result.document_file_id,
-                                    description=description,
-                                    caption=simple_search_result.caption,
-                                    parse_mode=simple_search_result.parse_mode,
-                                )
-                            if item:
-                                results_list.append(item)
+                            item = InlineQueryResultCachedPhoto(
+                                id=str(uuid4()),
+                                title=simple_search_result.title,
+                                photo_file_id=simple_search_result.photo_file_id,
+                                description=description,
+                                caption=simple_search_result.caption,
+                                parse_mode=simple_search_result.parse_mode,
+                            )
+                        elif simple_search_result.document_file_id:
+                            item = InlineQueryResultCachedDocument(
+                                id=str(uuid4()),
+                                title=simple_search_result.title,
+                                document_file_id=simple_search_result.document_file_id,
+                                description=description,
+                                caption=simple_search_result.caption,
+                                parse_mode=simple_search_result.parse_mode,
+                            )
+                        if item:
+                            results_list.append(item)
         if not results_list:
             results_list.append(
                 InlineQueryResultArticle(

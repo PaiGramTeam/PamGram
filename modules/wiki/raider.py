@@ -10,7 +10,7 @@ class Raider(WikiModel):
 
     def __init__(self):
         super().__init__()
-        self.all_raiders = []
+        self.all_raiders: List[str] = []
 
     def clear_class_data(self) -> None:
         self.all_raiders.clear()
@@ -35,3 +35,6 @@ class Raider(WikiModel):
 
     def get_name_list(self) -> List[str]:
         return self.all_raiders.copy()
+
+    def get_item_id(self, name: str) -> int:
+        return self.all_raiders.index(name)

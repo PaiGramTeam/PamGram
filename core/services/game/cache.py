@@ -27,3 +27,12 @@ class GameCache:
 
 class GameCacheForStrategy(BaseService.Component, GameCache):
     qname = "game:strategy"
+
+    async def get_file(self, character_name: str):
+        qname = f"{self.qname}:{character_name}"
+        return await self.client.get(qname)
+
+    async def set_file(self, character_name: str, file: str):
+        qname = f"{self.qname}:{character_name}"
+        await self.client.set(qname, file)
+        await self.client.expire(qname, self.ttl)
