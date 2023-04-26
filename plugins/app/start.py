@@ -27,17 +27,17 @@ class StartPlugin(Plugin):
         if args is not None and len(args) >= 1:
             if args[0] == "inline_message":
                 await message.reply_markdown_v2(
-                    f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是派蒙 ！')}\n"
+                    f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是彦卿 ！')}\n"
                     f"{escape_markdown('发送 /help 命令即可查看命令帮助')}"
                 )
             elif args[0] == "set_cookie":
                 await message.reply_markdown_v2(
-                    f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是派蒙 ！')}\n"
+                    f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是彦卿 ！')}\n"
                     f"{escape_markdown('发送 /setcookie 命令进入绑定账号流程')}"
                 )
             elif args[0] == "set_uid":
                 await message.reply_markdown_v2(
-                    f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是派蒙 ！')}\n"
+                    f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是彦卿 ！')}\n"
                     f"{escape_markdown('发送 /setuid 或 /setcookie 命令进入绑定账号流程')}"
                 )
             elif args[0] == "verify_verification":
@@ -54,18 +54,14 @@ class StartPlugin(Plugin):
                     logger.info("用户 %s[%s] 通过start命令 进入签到流程", user.full_name, user.id)
                     await self.process_sign_validate(message, user, _challenge)
             else:
-                await message.reply_html(f"你好 {user.mention_html()} ！我是派蒙 ！\n请点击 /{args[0]} 命令进入对应流程")
+                await message.reply_html(f"你好 {user.mention_html()} ！我是彦卿 ！\n请点击 /{args[0]} 命令进入对应流程")
             return
         logger.info("用户 %s[%s] 发出start命令", user.full_name, user.id)
-        await message.reply_markdown_v2(f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是派蒙 ！')}")
+        await message.reply_markdown_v2(f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是彦卿 ！')}")
 
     @staticmethod
     async def unknown_command(update: Update, _: CallbackContext) -> None:
         await update.effective_message.reply_text("前面的区域，以后再来探索吧！")
-
-    @staticmethod
-    async def emergency_food(update: Update, _: CallbackContext) -> None:
-        await update.effective_message.reply_text("派蒙才不是应急食品！")
 
     @handler(CommandHandler, command="ping", block=False)
     async def ping(self, update: Update, _: CallbackContext) -> None:

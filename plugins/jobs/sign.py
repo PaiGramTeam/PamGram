@@ -2,7 +2,7 @@ import datetime
 from typing import TYPE_CHECKING
 
 from core.plugin import Plugin, job
-from plugins.genshin.sign import SignSystem
+from plugins.starrail.sign import SignSystem
 from plugins.tools.sign import SignJobType
 from utils.log import logger
 

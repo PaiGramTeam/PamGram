@@ -7,11 +7,11 @@ from typing import Dict, List, Optional
 import ujson as json
 from aiofiles import open as async_open
 from httpx import AsyncClient, HTTPError, Response
-
-from modules.wiki.base import HONEY_HOST
 from utils.const import PROJECT_ROOT
 from utils.log import logger
 from utils.typedefs import StrOrInt
+
+HONEY_HOST = ""
 
 __all__ = [
     "get_avatar_data",

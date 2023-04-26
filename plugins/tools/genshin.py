@@ -259,7 +259,7 @@ class GenshinHelper(Plugin):
         client = genshin.Client(
             cookies,
             lang="zh-cn",
-            game=genshin.types.Game.GENSHIN,
+            game=genshin.types.Game.STARRAIL,
             region=game_region,
             uid=uid,
             hoyolab_id=player.account_id,
@@ -286,7 +286,7 @@ class GenshinHelper(Plugin):
             raise TypeError("Region is not `RegionEnum.NULL`")
 
         client = genshin.Client(
-            cookies.data, region=game_region, uid=uid, game=genshin.types.Game.GENSHIN, lang="zh-cn"
+            cookies.data, region=game_region, uid=uid, game=genshin.types.Game.STARRAIL, lang="zh-cn"
         )
 
         if self.genshin_cache is not None:

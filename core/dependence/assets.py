@@ -23,7 +23,6 @@ from metadata.genshin import AVATAR_DATA, HONEY_DATA, MATERIAL_DATA, NAMECARD_DA
 from metadata.scripts.honey import update_honey_metadata
 from metadata.scripts.metadatas import update_metadata_from_ambr, update_metadata_from_github
 from metadata.shortname import roleToId, weaponToId
-from modules.wiki.base import HONEY_HOST
 from utils.const import AMBR_HOST, ENKA_HOST, PROJECT_ROOT
 from utils.log import logger
 from utils.typedefs import StrOrInt, StrOrURL
@@ -39,7 +38,7 @@ NAME_MAP_TYPE = Dict[str, StrOrURL]
 
 ASSETS_PATH = PROJECT_ROOT.joinpath("resources/assets")
 ASSETS_PATH.mkdir(exist_ok=True, parents=True)
-
+HONEY_HOST = ""
 DATA_MAP = {"avatar": AVATAR_DATA, "weapon": WEAPON_DATA, "material": MATERIAL_DATA}
 
 DEFAULT_EnkaAssets = EnkaAssets(lang="chs")
@@ -472,7 +471,6 @@ class _NamecardAssets(_AssetsService):
 
     def __call__(self, target: int) -> "_NamecardAssets":
         result = _NamecardAssets(self.client)
-        target = int(target) if not isinstance(target, int) else target
         if target > 10000000:
             target = self._get_id_from_avatar_id(target)
         result.id = target
@@ -532,15 +530,6 @@ class AssetsService(BaseService.Dependence):
             lambda x: (not x[0].startswith("_")) and x[1].endswith("Assets"), self.__annotations__.items()
         ):
             setattr(self, attr, globals()[assets_type_name]())
-
-    async def initialize(self) -> None:  # pylint: disable=R0201
-        """启动 AssetsService 服务，刷新元数据"""
-        logger.info("正在刷新元数据")
-        # todo 这3个任务同时异步下载
-        await update_metadata_from_github(False)
-        await update_metadata_from_ambr(False)
-        await update_honey_metadata(False)
-        logger.info("刷新元数据成功")
 
 
 AssetsServiceType = TypeVar("AssetsServiceType", bound=_AssetsService)

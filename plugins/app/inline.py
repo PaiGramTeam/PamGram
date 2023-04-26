@@ -6,6 +6,7 @@ from telegram import (
     InlineQuery,
     InlineQueryResultArticle,
     InlineQueryResultCachedPhoto,
+    InlineQueryResultCachedDocument,
     InputTextMessageContent,
     Update,
 )
@@ -13,7 +14,6 @@ from telegram.constants import ParseMode
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext, InlineQueryHandler
 
-from core.dependence.assets import AssetsCouldNotFound, AssetsService
 from core.plugin import Plugin, handler
 from core.services.search.services import SearchServices
 from core.services.wiki.services import WikiService
@@ -26,10 +26,8 @@ class Inline(Plugin):
     def __init__(
         self,
         wiki_service: WikiService,
-        assets_service: AssetsService,
         search_service: SearchServices,
     ):
-        self.assets_service = assets_service
         self.wiki_service = wiki_service
         self.weapons_list: List[Dict[str, str]] = []
         self.characters_list: List[Dict[str, str]] = []
@@ -37,38 +35,24 @@ class Inline(Plugin):
         self.search_service = search_service
 
     async def initialize(self):
-        # todo: 整合进 wiki 或者单独模块 从Redis中读取
-        async def task_weapons():
-            logger.info("Inline 模块正在获取武器列表")
-            weapons_list = await self.wiki_service.get_weapons_name_list()
-            for weapons_name in weapons_list:
-                try:
-                    icon = await self.assets_service.weapon(weapons_name).get_link("icon")
-                except AssetsCouldNotFound:
-                    continue
-                except Exception as exc:
-                    logger.error("获取武器信息失败 %s", str(exc))
-                    continue
-                data = {"name": weapons_name, "icon": icon}
-                self.weapons_list.append(data)
-            logger.success("Inline 模块获取武器列表成功")
-
         async def task_characters():
             logger.info("Inline 模块正在获取角色列表")
-            characters_list = await self.wiki_service.get_characters_name_list()
-            for character_name in characters_list:
-                try:
-                    icon = await self.assets_service.avatar(character_name).get_link("icon")
-                except AssetsCouldNotFound:
+            datas: Dict[str, str] = {}
+            for character in self.wiki_service.character.all_avatars:
+                if not character.icon:
+                    logger.warning(f"角色 {character.name} 无图标")
                     continue
-                except Exception as exc:
-                    logger.error("获取角色信息失败 %s", str(exc))
-                    continue
-                data = {"name": character_name, "icon": icon}
-                self.characters_list.append(data)
+                datas[character.name] = character.icon
+            for character in self.wiki_service.raider.get_name_list():
+                if character in datas:
+                    self.characters_list.append({"name": character, "icon": datas[character]})
+                else:
+                    for key, value in datas.items():
+                        if character.startswith(key):
+                            self.characters_list.append({"name": character, "icon": value})
+                            break
             logger.success("Inline 模块获取角色列表成功")
 
-        self.refresh_task.append(asyncio.create_task(task_weapons()))
         self.refresh_task.append(asyncio.create_task(task_characters()))
 
     @handler(InlineQueryHandler, block=False)
@@ -84,36 +68,13 @@ class Inline(Plugin):
             results_list.append(
                 InlineQueryResultArticle(
                     id=str(uuid4()),
-                    title="武器图鉴查询",
-                    description="输入武器名称即可查询武器图鉴",
-                    input_message_content=InputTextMessageContent("武器图鉴查询"),
-                )
-            )
-            results_list.append(
-                InlineQueryResultArticle(
-                    id=str(uuid4()),
                     title="角色攻略查询",
                     description="输入角色名即可查询角色攻略",
                     input_message_content=InputTextMessageContent("角色攻略查询"),
                 )
             )
         else:
-            if args[0] == "查看武器列表并查询":
-                for weapon in self.weapons_list:
-                    name = weapon["name"]
-                    icon = weapon["icon"]
-                    results_list.append(
-                        InlineQueryResultArticle(
-                            id=str(uuid4()),
-                            title=name,
-                            description=f"查看武器列表并查询 {name}",
-                            thumb_url=icon,
-                            input_message_content=InputTextMessageContent(
-                                f"武器查询{name}", parse_mode=ParseMode.MARKDOWN_V2
-                            ),
-                        )
-                    )
-            elif args[0] == "查看角色攻略列表并查询":
+            if args[0] == "查看角色攻略列表并查询":
                 for character in self.characters_list:
                     name = character["name"]
                     icon = character["icon"]
@@ -128,19 +89,6 @@ class Inline(Plugin):
                             ),
                         )
                     )
-            elif args[0] == "查看角色培养素材列表并查询":
-                characters_list = await self.wiki_service.get_characters_name_list()
-                for role_name in characters_list:
-                    results_list.append(
-                        InlineQueryResultArticle(
-                            id=str(uuid4()),
-                            title=role_name,
-                            description=f"查看角色培养素材列表并查询 {role_name}",
-                            input_message_content=InputTextMessageContent(
-                                f"角色培养素材查询{role_name}", parse_mode=ParseMode.MARKDOWN_V2
-                            ),
-                        )
-                    )
             else:
                 simple_search_results = await self.search_service.search(args[0])
                 if simple_search_results:
@@ -149,33 +97,42 @@ class Inline(Plugin):
                             id=str(uuid4()),
                             title=f"当前查询内容为 {args[0]}",
                             description="如果无查看图片描述 这是正常的 客户端问题",
-                            thumb_url="https://www.miyoushe.com/_nuxt/img/game-ys.dfc535b.jpg",
+                            thumb_url="https://www.miyoushe.com/_nuxt/img/game-sr.4f80911.jpg",
                             input_message_content=InputTextMessageContent(f"当前查询内容为 {args[0]}\n如果无查看图片描述 这是正常的 客户端问题"),
                         )
                     )
                     for simple_search_result in simple_search_results:
+                        description = simple_search_result.description
+                        if len(description) >= 10:
+                            description = description[:10]
+                        item = None
                         if simple_search_result.photo_file_id:
-                            description = simple_search_result.description
-                            if len(description) >= 10:
-                                description = description[:10]
-                            results_list.append(
-                                InlineQueryResultCachedPhoto(
-                                    id=str(uuid4()),
-                                    title=simple_search_result.title,
-                                    photo_file_id=simple_search_result.photo_file_id,
-                                    description=description,
-                                    caption=simple_search_result.caption,
-                                    parse_mode=simple_search_result.parse_mode,
-                                )
+                            item = InlineQueryResultCachedPhoto(
+                                id=str(uuid4()),
+                                title=simple_search_result.title,
+                                photo_file_id=simple_search_result.photo_file_id,
+                                description=description,
+                                caption=simple_search_result.caption,
+                                parse_mode=simple_search_result.parse_mode,
                             )
-
+                        elif simple_search_result.document_file_id:
+                            item = InlineQueryResultCachedDocument(
+                                id=str(uuid4()),
+                                title=simple_search_result.title,
+                                document_file_id=simple_search_result.document_file_id,
+                                description=description,
+                                caption=simple_search_result.caption,
+                                parse_mode=simple_search_result.parse_mode,
+                            )
+                        if item:
+                            results_list.append(item)
         if not results_list:
             results_list.append(
                 InlineQueryResultArticle(
                     id=str(uuid4()),
                     title="好像找不到问题呢",
-                    description="这个问题我也不知道，因为我就是个应急食品。",
-                    input_message_content=InputTextMessageContent("这个问题我也不知道，因为我就是个应急食品。"),
+                    description="这个问题我也不知道。",
+                    input_message_content=InputTextMessageContent("这个问题我也不知道。"),
                 )
             )
         try:

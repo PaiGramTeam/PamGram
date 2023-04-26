@@ -20,6 +20,7 @@ class BaseEntry(BaseModel):
     parse_mode: Optional[str] = None
     photo_url: Optional[str] = None
     photo_file_id: Optional[str] = None
+    document_file_id: Optional[str] = None
 
     @abstractmethod
     def compare_to_query(self, search_query: str) -> float:

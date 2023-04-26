@@ -1,81 +1,46 @@
-import re
-from typing import List, Optional, Tuple, Union
+from typing import List, Dict, Optional
 
-from bs4 import BeautifulSoup
-from httpx import URL
-
-from modules.wiki.base import HONEY_HOST, WikiModel
-
-__all__ = ["Material"]
-
-WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+from modules.wiki.base import WikiModel
+from modules.wiki.models.material import Material as MaterialModel
 
 
 class Material(WikiModel):
-    # noinspection PyUnresolvedReferences
-    """武器、角色培养素材
+    material_url = WikiModel.BASE_URL + "materials.json"
+    material_path = WikiModel.BASE_PATH / "materials.json"
 
-    Attributes:
-        type: 类型
-        weekdays: 每周开放的时间
-        source: 获取方式
-        description: 描述
-    """
-    type: str
-    source: Optional[List[str]] = None
-    weekdays: Optional[List[int]] = None
-    description: str
+    def __init__(self):
+        super().__init__()
+        self.all_materials: List[MaterialModel] = []
+        self.all_materials_map: Dict[int, MaterialModel] = {}
+        self.all_materials_name: Dict[str, MaterialModel] = {}
 
-    @staticmethod
-    def scrape_urls() -> List[URL]:
-        weapon = [HONEY_HOST.join(f"fam_wep_{i}/?lang=CHS") for i in ["primary", "secondary", "common"]]
-        talent = [HONEY_HOST.join(f"fam_talent_{i}/?lang=CHS") for i in ["book", "boss", "common", "reward"]]
-        return weapon + talent
+    def clear_class_data(self) -> None:
+        self.all_materials.clear()
+        self.all_materials_map.clear()
+        self.all_materials_name.clear()
 
-    @classmethod
-    async def get_name_list(cls, *, with_url: bool = False) -> List[Union[str, Tuple[str, URL]]]:
-        return list(sorted(set(await super(Material, cls).get_name_list(with_url=with_url)), key=lambda x: x[0]))
+    async def refresh(self):
+        datas = await self.remote_get(self.material_url)
+        await self.dump(datas.json(), self.material_path)
+        await self.read()
 
-    @classmethod
-    async def _parse_soup(cls, soup: BeautifulSoup) -> "Material":
-        """解析突破素材页"""
-        soup = soup.select(".wp-block-post-content")[0]
-        tables = soup.find_all("table")
-        table_rows = tables[0].find_all("tr")
+    async def read(self):
+        if not self.material_path.exists():
+            await self.refresh()
+            return
+        datas = await WikiModel.read(self.material_path)
+        self.clear_class_data()
+        for data in datas:
+            m = MaterialModel(**data)
+            self.all_materials.append(m)
+            self.all_materials_map[m.id] = m
+            self.all_materials_name[m.name] = m
 
-        def get_table_row(target: str):
-            """一个便捷函数，用于返回对应表格头的对应行的最后一个单元格中的文本"""
-            for row in table_rows:
-                if target in row.find("td").text:
-                    return row.find_all("td")[-1]
-            return None
+    def get_by_id(self, cid: int) -> Optional[MaterialModel]:
+        return self.all_materials_map.get(cid, None)
 
-        def get_table_text(row_num: int) -> str:
-            """一个便捷函数，用于返回表格对应行的最后一个单元格中的文本"""
-            return table_rows[row_num].find_all("td")[-1].text.replace("\xa0", "")
+    def get_by_name(self, name: str) -> Optional[MaterialModel]:
+        return self.all_materials_name.get(name, None)
 
-        id_ = re.findall(r"/img/(.*?)\.webp", str(table_rows[0]))[0]
-        name = get_table_text(0)
-        rarity = len(table_rows[3].find_all("img"))
-        type_ = get_table_text(1)
-        if (item_source := get_table_row("Item Source")) is not None:
-            item_source = list(
-                # filter 在这里的作用是过滤掉为空的数据
-                filter(lambda x: x, item_source.encode_contents().decode().split("<br/>"))
-            )
-        if (alter_source := get_table_row("Alternative Item")) is not None:
-            alter_source = list(
-                # filter 在这里的作用是过滤掉为空的数据
-                filter(lambda x: x, alter_source.encode_contents().decode().split("<br/>"))
-            )
-        source = list(sorted(set((item_source or []) + (alter_source or []))))
-        if (weekdays := get_table_row("Weekday")) is not None:
-            weekdays = [*(WEEKDAYS.index(weekdays.text.replace("\xa0", "").split(",")[0]) + 3 * i for i in range(2)), 6]
-        description = get_table_text(-1)
-        return Material(
-            id=id_, name=name, rarity=rarity, type=type_, description=description, source=source, weekdays=weekdays
-        )
-
-    @property
-    def icon(self) -> str:
-        return str(HONEY_HOST.join(f"/img/{self.id}.webp"))
+    def get_name_list(self) -> List[str]:
+        return list(self.all_materials_name.keys())

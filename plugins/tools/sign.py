@@ -117,14 +117,14 @@ class SignSystem(Plugin):
             else:
                 await asyncio.sleep(random.randint(0, 3))  # nosec
         try:
-            rewards = await client.get_monthly_rewards(game=Game.GENSHIN, lang="zh-cn")
+            rewards = await client.get_monthly_rewards(game=Game.STARRAIL, lang="zh-cn")
         except GenshinException as error:
             logger.warning("UID[%s] 获取签到信息失败，API返回信息为 %s", client.uid, str(error))
             if is_raise:
                 raise error
             return f"获取签到信息失败，API返回信息为 {str(error)}"
         try:
-            daily_reward_info = await client.get_reward_info(game=Game.GENSHIN, lang="zh-cn")  # 获取签到信息失败
+            daily_reward_info = await client.get_reward_info(game=Game.STARRAIL, lang="zh-cn")  # 获取签到信息失败
         except GenshinException as error:
             logger.warning("UID[%s] 获取签到状态失败，API返回信息为 %s", client.uid, str(error))
             if is_raise:
@@ -137,7 +137,7 @@ class SignSystem(Plugin):
                 request_daily_reward = await client.request_daily_reward(
                     "sign",
                     method="POST",
-                    game=Game.GENSHIN,
+                    game=Game.STARRAIL,
                     lang="zh-cn",
                     challenge=challenge,
                     validate=validate,
@@ -158,7 +158,7 @@ class SignSystem(Plugin):
                         request_daily_reward = await client.request_daily_reward(
                             "sign",
                             method="POST",
-                            game=Game.GENSHIN,
+                            game=Game.STARRAIL,
                             lang="zh-cn",
                             challenge=challenge,
                             validate=validate,
@@ -178,7 +178,7 @@ class SignSystem(Plugin):
                         _request_daily_reward = await client.request_daily_reward(
                             "sign",
                             method="POST",
-                            game=Game.GENSHIN,
+                            game=Game.STARRAIL,
                             lang="zh-cn",
                         )
                         logger.debug("request_daily_reward 返回\n%s", _request_daily_reward)
@@ -192,7 +192,7 @@ class SignSystem(Plugin):
                                 request_daily_reward = await client.request_daily_reward(
                                     "sign",
                                     method="POST",
-                                    game=Game.GENSHIN,
+                                    game=Game.STARRAIL,
                                     lang="zh-cn",
                                     challenge=_challenge,
                                     validate=_validate,
@@ -210,7 +210,7 @@ class SignSystem(Plugin):
                                 logger.success("UID[%s] 通过 recognize 签到成功", client.uid)
                             else:
                                 request_daily_reward = await client.request_daily_reward(
-                                    "sign", method="POST", game=Game.GENSHIN, lang="zh-cn"
+                                    "sign", method="POST", game=Game.STARRAIL, lang="zh-cn"
                                 )
                                 gt = request_daily_reward.get("gt", "")
                                 challenge = request_daily_reward.get("challenge", "")
@@ -218,7 +218,7 @@ class SignSystem(Plugin):
                                 raise NeedChallenge(uid=client.uid, gt=gt, challenge=challenge)
                     else:
                         request_daily_reward = await client.request_daily_reward(
-                            "sign", method="POST", game=Game.GENSHIN, lang="zh-cn"
+                            "sign", method="POST", game=Game.STARRAIL, lang="zh-cn"
                         )
                         gt = request_daily_reward.get("gt", "")
                         challenge = request_daily_reward.get("challenge", "")
@@ -235,7 +235,7 @@ class SignSystem(Plugin):
                 logger.warning("UID[%s] 已经签到", client.uid)
                 if is_raise:
                     raise error
-                result = "今天旅行者已经签到过了~"
+                result = "今天开拓者已经签到过了~"
             except GenshinException as error:
                 logger.warning("UID %s 签到失败，API返回信息为 %s", client.uid, str(error))
                 if is_raise:
@@ -245,7 +245,7 @@ class SignSystem(Plugin):
                 result = "OK"
         else:
             logger.info("UID[%s] 已经签到", client.uid)
-            result = "今天旅行者已经签到过了~"
+            result = "今天开拓者已经签到过了~"
         logger.info("UID[%s] 签到结果 %s", client.uid, result)
         reward = rewards[daily_reward_info.claimed_rewards - (1 if daily_reward_info.signed_in else 0)]
         today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -289,7 +289,7 @@ class SignSystem(Plugin):
                 text = "自动签到执行失败，Cookie无效"
                 sign_db.status = SignStatusEnum.INVALID_COOKIES
             except AlreadyClaimed:
-                text = "今天旅行者已经签到过了~"
+                text = "今天开拓者已经签到过了~"
                 sign_db.status = SignStatusEnum.ALREADY_CLAIMED
             except GenshinException as exc:
                 text = f"自动签到执行失败，API返回信息为 {str(exc)}"

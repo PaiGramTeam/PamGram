@@ -16,7 +16,6 @@ from core.services.players.models import PlayersDataBase as Player, PlayerInfoSQ
 from core.services.players.services import PlayersService, PlayerInfoService
 from utils.log import logger
 
-
 if TYPE_CHECKING:
     from telegram import Update
     from telegram.ext import ContextTypes
@@ -86,11 +85,13 @@ class BindAccountPlugin(Plugin.Conversation):
         if message.text == "米游社":
             bind_account_plugin_data.region = RegionEnum.HYPERION
         elif message.text == "HoYoLab":
+            await message.reply_text("很抱歉，暂不支持HoYoLab服务器", reply_markup=ReplyKeyboardRemove())
+            return ConversationHandler.END
             bind_account_plugin_data.region = RegionEnum.HOYOLAB
         else:
             await message.reply_text("选择错误，请重新选择")
             return CHECK_SERVER
-        reply_keyboard = [["通过玩家ID", "用过账号ID"], ["退出"]]
+        reply_keyboard = [["通过玩家ID", "通过账号ID"], ["退出"]]
         await message.reply_markdown_v2(
             "请选择你要绑定的方式", reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         )
@@ -133,15 +134,20 @@ class BindAccountPlugin(Plugin.Conversation):
             await message.reply_text("用户查询次数过多，请稍后重试", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         if region == RegionEnum.HYPERION:
-            client = genshin.Client(cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.CHINESE)
+            client = genshin.Client(cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.CHINESE)
         elif region == RegionEnum.HOYOLAB:
             client = genshin.Client(
-                cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.OVERSEAS, lang="zh-cn"
+                cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.OVERSEAS, lang="zh-cn"
             )
         else:
             return ConversationHandler.END
         try:
-            record_card = await client.get_record_card(account_id)
+            record_cards = await client.get_record_card(account_id)
+            record_card = record_cards[0]
+            for card in record_cards:
+                if card.game == types.Game.STARRAIL:
+                    record_card = card
+                    break
         except DataNotPublic:
             await message.reply_text("角色未公开", reply_markup=ReplyKeyboardRemove())
             logger.warning("获取账号信息发生错误 %s 账户信息未公开", account_id)
@@ -151,8 +157,8 @@ class BindAccountPlugin(Plugin.Conversation):
             logger.error("获取账号信息发生错误")
             logger.exception(exc)
             return ConversationHandler.END
-        if record_card.game != types.Game.GENSHIN:
-            await message.reply_text("角色信息查询返回非原神游戏信息，请设置展示主界面为原神", reply_markup=ReplyKeyboardRemove())
+        if record_card.game != types.Game.STARRAIL:
+            await message.reply_text("角色信息查询返回无星穹铁道游戏信息，请确定你有星穹铁道账号", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         player_info = await self.players_service.get(
             user.id, player_id=record_card.uid, region=bind_account_plugin_data.region
@@ -197,10 +203,10 @@ class BindAccountPlugin(Plugin.Conversation):
             await message.reply_text("用户查询次数过多，请稍后重试", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         if region == RegionEnum.HYPERION:
-            client = genshin.Client(cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.CHINESE)
+            client = genshin.Client(cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.CHINESE)
         elif region == RegionEnum.HOYOLAB:
             client = genshin.Client(
-                cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.OVERSEAS, lang="zh-cn"
+                cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.OVERSEAS, lang="zh-cn"
             )
         else:
             return ConversationHandler.END
@@ -273,16 +279,14 @@ class BindAccountPlugin(Plugin.Conversation):
                 is_chosen=is_chosen,  # todo 多账号
             )
             await self.players_service.add(player)
-            player_info = await self.player_info_service.get(player)
-            if player_info is None:
-                player_info = PlayerInfoSQLModel(
-                    user_id=player.user_id,
-                    player_id=player.player_id,
-                    nickname=nickname,
-                    create_time=datetime.now(),
-                    is_update=True,
-                )  # 不添加更新时间
-                await self.player_info_service.add(player_info)
+            player_info = PlayerInfoSQLModel(
+                user_id=player.user_id,
+                player_id=player.player_id,
+                nickname=nickname,
+                create_time=datetime.now(),
+                is_update=True,
+            )  # 不添加更新时间
+            await self.player_info_service.add(player_info)
             logger.success("用户 %s[%s] 绑定UID账号成功", user.full_name, user.id)
             await message.reply_text("保存成功", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END

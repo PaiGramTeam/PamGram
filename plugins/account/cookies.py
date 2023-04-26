@@ -129,6 +129,8 @@ class AccountCookiesPlugin(Plugin.Conversation):
             region = RegionEnum.HYPERION
             bbs_name = "米游社"
         elif message.text == "HoYoLab":
+            await message.reply_text("很抱歉，暂不支持HoYoLab服务器", reply_markup=ReplyKeyboardRemove())
+            return ConversationHandler.END
             bbs_name = "HoYoLab"
             region = RegionEnum.HOYOLAB
         else:
@@ -236,7 +238,8 @@ class AccountCookiesPlugin(Plugin.Conversation):
                     logger.warning("用户 %s[%s] region[%s] 也许是不正确的", user.full_name, user.id, client.region.name)
             else:
                 account_cookies_plugin_data.account_id = client.cookie_manager.user_id
-            genshin_accounts = await client.genshin_accounts()
+            accounts = await client.get_game_accounts()
+            starrail_accounts = [account for account in accounts if account.game == types.Game.STARRAIL]
         except DataNotPublic:
             logger.info("用户 %s[%s] 账号疑似被注销", user.full_name, user.id)
             await message.reply_text("账号疑似被注销，请检查账号状态", reply_markup=ReplyKeyboardRemove())
@@ -283,19 +286,19 @@ class AccountCookiesPlugin(Plugin.Conversation):
         if account_cookies_plugin_data.account_id is None:
             await message.reply_text("无法获取账号ID，请检查Cookie是否正确或请稍后重试")
             return ConversationHandler.END
-        genshin_account: Optional[GenshinAccount] = None
+        starrail_account: Optional[GenshinAccount] = None
         level: int = 0
         # todo : 多账号绑定
-        for temp in genshin_accounts:
+        for temp in starrail_accounts:
             if temp.level >= level:  # 获取账号等级最高的
                 level = temp.level
-                genshin_account = temp
-        if genshin_account is None:
-            await message.reply_text("未找到原神账号，请确认账号信息无误。")
+                starrail_account = temp
+        if starrail_account is None:
+            await message.reply_text("未找到星穹铁道账号，请确认账号信息无误。")
             return ConversationHandler.END
-        account_cookies_plugin_data.genshin_account = genshin_account
+        account_cookies_plugin_data.genshin_account = starrail_account
         player_info = await self.players_service.get(
-            user.id, player_id=genshin_account.uid, region=account_cookies_plugin_data.region
+            user.id, player_id=starrail_account.uid, region=account_cookies_plugin_data.region
         )
         account_cookies_plugin_data.player = player_info
         if player_info:
@@ -308,14 +311,14 @@ class AccountCookiesPlugin(Plugin.Conversation):
         reply_keyboard = [["确认", "退出"]]
         await message.reply_text("获取角色基础信息成功，请检查是否正确！")
         logger.info(
-            "用户 %s[%s] 获取账号 %s[%s] 信息成功", user.full_name, user.id, genshin_account.nickname, genshin_account.uid
+            "用户 %s[%s] 获取账号 %s[%s] 信息成功", user.full_name, user.id, starrail_account.nickname, starrail_account.uid
         )
         text = (
             f"*角色信息*\n"
-            f"角色名称：{escape_markdown(genshin_account.nickname, version=2)}\n"
-            f"角色等级：{genshin_account.level}\n"
-            f"UID：`{genshin_account.uid}`\n"
-            f"服务器名称：`{genshin_account.server_name}`\n"
+            f"角色名称：{escape_markdown(starrail_account.nickname, version=2)}\n"
+            f"角色等级：{starrail_account.level}\n"
+            f"UID：`{starrail_account.uid}`\n"
+            f"服务器名称：`{starrail_account.server_name}`\n"
         )
         await message.reply_markdown_v2(text, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         account_cookies_plugin_data.cookies = cookies.to_dict()
@@ -358,16 +361,14 @@ class AccountCookiesPlugin(Plugin.Conversation):
                     region=account_cookies_plugin_data.region,
                     is_chosen=True,  # todo 多账号
                 )
-                player_info = await self.player_info_service.get(player)
-                if player_info is None:
-                    player_info = PlayerInfoSQLModel(
-                        user_id=player.user_id,
-                        player_id=player.player_id,
-                        nickname=genshin_account.nickname,
-                        create_time=datetime.now(),
-                        is_update=True,
-                    )  # 不添加更新时间
-                    await self.player_info_service.add(player_info)
+                player_info = PlayerInfoSQLModel(
+                    user_id=player.user_id,
+                    player_id=player.player_id,
+                    nickname=genshin_account.nickname,
+                    create_time=datetime.now(),
+                    is_update=True,
+                )  # 不添加更新时间
+                await self.player_info_service.add(player_info)
                 await self.players_service.add(player)
                 cookies = Cookies(
                     user_id=user.id,

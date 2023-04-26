@@ -52,8 +52,8 @@ class Post(Plugin.Conversation):
     MENU_KEYBOARD = ReplyKeyboardMarkup([["推送频道", "添加TAG"], ["编辑文字", "删除图片"], ["退出"]], True, True)
 
     def __init__(self):
-        self.gids = 2
-        self.short_name = "ys"
+        self.gids = 6
+        self.short_name = "sr"
         self.bbs = Hyperion(
             timeout=Timeout(
                 connect=config.connect_timeout,
@@ -300,10 +300,12 @@ class Post(Plugin.Conversation):
         post_subject = post_data["subject"]
         post_soup = BeautifulSoup(post_data["content"], features="html.parser")
         post_text = self.parse_post_text(post_soup, post_subject)
-        post_text += f"[source](https://www.miyoushe.com/{self.short_name}/article/{post_id})"
+        post_text += f"\n[source](https://www.miyoushe.com/{self.short_name}/article/{post_id})"
         if len(post_text) >= MessageLimit.CAPTION_LENGTH:
             post_text = post_text[: MessageLimit.CAPTION_LENGTH]
             await message.reply_text(f"警告！图片字符描述已经超过 {MessageLimit.CAPTION_LENGTH} 个字，已经切割")
+        if post_info.video_urls:
+            await message.reply_text("检测到视频，需要单独下载，视频链接：" + "\n".join(post_info.video_urls))
         try:
             if len(post_images) > 1:
                 media = [self.input_media(img_info) for img_info in post_images if not img_info.is_error]

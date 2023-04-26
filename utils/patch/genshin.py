@@ -304,10 +304,10 @@ class DailyRewardClient:
 
         elif self.region == types.Region.CHINESE:
             # TODO: Support cn honkai
-            player_id = await self._get_uid(types.Game.GENSHIN)
+            player_id = await self._get_uid(types.Game.STARRAIL)
 
             params["uid"] = player_id
-            params["region"] = utility.recognize_genshin_server(player_id)
+            params["region"] = utility.recognize_server(player_id, types.Game.STARRAIL)
 
             account_id = self.cookie_manager.user_id
             if account_id:

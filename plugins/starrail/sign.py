@@ -39,7 +39,7 @@ class Sign(Plugin):
         try:
             await self.genshin_helper.get_genshin_client(user_id)
         except (PlayerNotFoundError, CookiesNotFoundError):
-            return "未查询到账号信息，请先私聊派蒙绑定账号"
+            return "未查询到账号信息，请先私聊彦卿绑定账号"
         user: SignUser = await self.sign_service.get_by_user_id(user_id)
         if user:
             if method == "关闭":
@@ -114,7 +114,7 @@ class Sign(Plugin):
             buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
             if filters.ChatType.GROUPS.filter(message):
                 reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊派蒙绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
+                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
                 )
                 self.add_delete_message_job(reply_message, delay=30)
 

@@ -59,7 +59,7 @@ class GetChat(Plugin):
             if player_info.region == RegionEnum.HYPERION:
                 text += "米游社绑定："
             else:
-                text += "原神绑定："
+                text += "星穹铁道绑定："
             cookies_info = await self.cookies_service.get(chat.id, player_info.account_id, player_info.region)
             if cookies_info is None:
                 temp = "UID 绑定"
