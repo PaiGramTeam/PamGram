@@ -23,12 +23,15 @@ class WikiService(BaseService):
 
     async def initialize(self) -> None:
         logger.info("正在加载 Wiki 数据")
-        await self.character.read()
-        await self.material.read()
-        await self.monster.read()
-        await self.relic.read()
-        await self.light_cone.read()
-        await self.raider.read()
+        try:
+            await self.character.read()
+            await self.material.read()
+            await self.monster.read()
+            await self.relic.read()
+            await self.light_cone.read()
+            await self.raider.read()
+        except Exception as e:
+            logger.error("加载 Wiki 数据失败", exc_info=e)
         logger.info("加载 Wiki 数据完成")
 
     async def refresh_wiki(self) -> NoReturn:

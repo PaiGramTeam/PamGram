@@ -2,7 +2,7 @@ from typing import Optional
 
 from genshin import Client
 from genshin.client.routes import InternationalRoute  # noqa F401
-from genshin.utility import recognize_genshin_server
+from genshin.utility import recognize_starrail_server
 
 from modules.apihelper.utility.helpers import hex_digest, get_ds
 
@@ -23,8 +23,8 @@ GACHA_HEADERS = {
 }
 
 
-def recognize_genshin_game_biz(game_uid: int) -> str:
-    return "hk4e_cn" if game_uid < 600000000 else "hk4e_global"
+def recognize_starrail_game_biz(game_uid: int) -> str:
+    return "hkrpg_cn" if game_uid < 600000000 else "hkrpg_global"
 
 
 async def get_authkey_by_stoken(client: Client) -> Optional[str]:
@@ -32,9 +32,9 @@ async def get_authkey_by_stoken(client: Client) -> Optional[str]:
     headers = GACHA_HEADERS.copy()
     json = {
         "auth_appid": "webview_gacha",
-        "game_biz": recognize_genshin_game_biz(client.uid),
+        "game_biz": recognize_starrail_game_biz(client.uid),
         "game_uid": client.uid,
-        "region": recognize_genshin_server(client.uid),
+        "region": recognize_starrail_server(client.uid),
     }
     device_id = hex_digest(str(client.uid))
     headers["x-rpc-device_id"] = device_id
@@ -56,9 +56,9 @@ async def fetch_hk4e_token_by_cookie(client: Client) -> None:
         "Content-Type": "application/json;charset=UTF-8",
     }
     json = {
-        "game_biz": recognize_genshin_game_biz(client.uid),
+        "game_biz": recognize_starrail_game_biz(client.uid),
         "lang": "zh-cn",
         "uid": str(client.uid),
-        "region": recognize_genshin_server(client.uid),
+        "region": recognize_starrail_server(client.uid),
     }
     await client.cookie_manager.request(url, method="POST", json=json, headers=headers)

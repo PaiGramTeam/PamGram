@@ -4,15 +4,13 @@ from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel, validator
 
-from metadata.shortname import not_real_roles, roleToId, weaponToId
-from modules.gacha_log.const import UIGF_VERSION
+from metadata.shortname import not_real_roles, roleToId, lightConeToId
+from modules.gacha_log.const import UIWF_VERSION
 
 
 class ImportType(Enum):
     PaiGram = "PaiGram"
-    PAIMONMOE = "PAIMONMOE"
-    FXQ = "FXQ"
-    UIGF = "UIGF"
+    UIWF = "UIWF"
     UNKNOWN = "UNKNOWN"
 
 
@@ -44,20 +42,20 @@ class GachaItem(BaseModel):
 
     @validator("name")
     def name_validator(cls, v):
-        if item_id := (roleToId(v) or weaponToId(v)):
+        if item_id := (roleToId(v) or lightConeToId(v)):
             if item_id not in not_real_roles:
                 return v
         raise ValueError("Invalid name")
 
     @validator("gacha_type")
     def check_gacha_type(cls, v):
-        if v not in {"100", "200", "301", "302", "400"}:
-            raise ValueError("gacha_type must be 200, 301, 302 or 400")
+        if v not in {"1", "2", "11", "12"}:
+            raise ValueError("gacha_type must be 1, 2, 11 or 12")
         return v
 
     @validator("item_type")
     def check_item_type(cls, item):
-        if item not in {"角色", "武器"}:
+        if item not in {"角色", "光锥"}:
             raise ValueError("error item type")
         return item
 
@@ -74,10 +72,10 @@ class GachaLogInfo(BaseModel):
     update_time: datetime.datetime
     import_type: str = ""
     item_list: Dict[str, List[GachaItem]] = {
-        "角色祈愿": [],
-        "武器祈愿": [],
-        "常驻祈愿": [],
-        "新手祈愿": [],
+        "角色跃迁": [],
+        "光锥跃迁": [],
+        "常驻跃迁": [],
+        "新手跃迁": [],
     }
 
     @property
@@ -131,37 +129,36 @@ class Pool:
 
 class ItemType(Enum):
     CHARACTER = "角色"
-    WEAPON = "武器"
+    LIGHTCONE = "光锥"
 
 
-class UIGFGachaType(Enum):
-    BEGINNER = "100"
-    STANDARD = "200"
-    CHARACTER = "301"
-    WEAPON = "302"
-    CHARACTER2 = "400"
+class UIWFGachaType(Enum):
+    BEGINNER = "2"
+    STANDARD = "1"
+    CHARACTER = "11"
+    LIGHTCONE = "12"
 
 
-class UIGFItem(BaseModel):
+class UIWFItem(BaseModel):
     id: str
     name: str
     count: str = "1"
-    gacha_type: UIGFGachaType
+    gacha_type: UIWFGachaType
     item_id: str = ""
     item_type: ItemType
     rank_type: str
     time: str
-    uigf_gacha_type: UIGFGachaType
+    uigf_gacha_type: UIWFGachaType
 
 
-class UIGFInfo(BaseModel):
+class UIWFInfo(BaseModel):
     uid: str = "0"
     lang: str = "zh-cn"
     export_time: str = ""
     export_timestamp: int = 0
     export_app: str = ""
     export_app_version: str = ""
-    uigf_version: str = UIGF_VERSION
+    uigf_version: str = UIWF_VERSION
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -170,6 +167,6 @@ class UIGFInfo(BaseModel):
             self.export_timestamp = int(datetime.datetime.now().timestamp())
 
 
-class UIGFModel(BaseModel):
-    info: UIGFInfo
-    list: List[UIGFItem]
+class UIWFModel(BaseModel):
+    info: UIWFInfo
+    list: List[UIWFItem]

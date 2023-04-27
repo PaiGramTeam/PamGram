@@ -1,13 +1,11 @@
-from genshin.models import BannerType
+from genshin.models import StarRailBannerType
 
-PAIMONMOE_VERSION = 3
-UIGF_VERSION = "v2.2"
+UIWF_VERSION = "v1.0"
 
 
 GACHA_TYPE_LIST = {
-    BannerType.NOVICE: "新手祈愿",
-    BannerType.PERMANENT: "常驻祈愿",
-    BannerType.WEAPON: "武器祈愿",
-    BannerType.CHARACTER1: "角色祈愿",
-    BannerType.CHARACTER2: "角色祈愿",
+    StarRailBannerType.NOVICE: "新手跃迁",
+    StarRailBannerType.PERMANENT: "常驻跃迁",
+    StarRailBannerType.CHARACTER: "角色跃迁",
+    StarRailBannerType.WEAPON: "光锥跃迁",
 }
