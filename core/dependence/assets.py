@@ -85,12 +85,15 @@ class _AvatarAssets(_AssetsService):
             gacha_path = base_path / "gacha.webp"
             icon_path = base_path / "icon.webp"
             normal_path = base_path / "normal.webp"
+            square_path = base_path / "square.png"
             if not gacha_path.exists():
                 tasks.append(self._download(icon.gacha, gacha_path))
             if not icon_path.exists():
                 tasks.append(self._download(icon.icon_, icon_path))
             if not normal_path.exists():
                 tasks.append(self._download(icon.normal, normal_path))
+            if not square_path.exists() and icon.square:
+                tasks.append(self._download(icon.square, square_path))
             if len(tasks) >= 100:
                 await asyncio.gather(*tasks)
                 tasks = []
@@ -98,10 +101,10 @@ class _AvatarAssets(_AssetsService):
             await asyncio.gather(*tasks)
         logger.info("角色素材图标初始化完成")
 
-    def get_path(self, icon: AvatarIcon, name: str) -> Path:
+    def get_path(self, icon: AvatarIcon, name: str, ext: str = "webp") -> Path:
         path = self.path / f"{icon.id}"
         path.mkdir(exist_ok=True, parents=True)
-        return path / f"{name}.webp"
+        return path / f"{name}.{ext}"
 
     def get_by_id(self, id_: int) -> Optional[AvatarIcon]:
         return self.id_map.get(id_, None)
@@ -109,30 +112,36 @@ class _AvatarAssets(_AssetsService):
     def get_by_name(self, name: str) -> Optional[AvatarIcon]:
         return self.name_map.get(name, None)
 
-    def get_target(self, target: StrOrInt) -> Optional[AvatarIcon]:
+    def get_target(self, target: StrOrInt) -> AvatarIcon:
+        data = None
         if isinstance(target, int):
-            return self.get_by_id(target)
+            data = self.get_by_id(target)
         elif isinstance(target, str):
-            return self.get_by_name(target)
-        return None
+            data = self.get_by_name(target)
+        if data is None:
+            raise AssetsCouldNotFound("角色素材图标不存在", target)
+        return data
 
     def gacha(self, target: StrOrInt) -> Path:
         icon = self.get_target(target)
-        if icon is None:
-            raise AssetsCouldNotFound("角色素材图标不存在", target)
         return self.get_path(icon, "gacha")
 
     def icon(self, target: StrOrInt) -> Path:
         icon = self.get_target(target)
-        if icon is None:
-            raise AssetsCouldNotFound("角色素材图标不存在", target)
         return self.get_path(icon, "icon")
 
     def normal(self, target: StrOrInt) -> Path:
         icon = self.get_target(target)
-        if icon is None:
-            raise AssetsCouldNotFound("角色素材图标不存在", target)
         return self.get_path(icon, "normal")
+
+    def square(self, target: StrOrInt, allow_icon: bool = True) -> Path:
+        icon = self.get_target(target)
+        path = self.get_path(icon, "square", "png")
+        if not path.exists():
+            if allow_icon:
+                return self.get_path(icon, "icon")
+            raise AssetsCouldNotFound("角色素材图标不存在", target)
+        return path
 
 
 class _LightConeAssets(_AssetsService):

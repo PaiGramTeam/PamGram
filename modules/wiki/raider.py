@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 from modules.wiki.base import WikiModel
 
@@ -15,14 +16,19 @@ class Raider(WikiModel):
     def clear_class_data(self) -> None:
         self.all_raiders.clear()
 
+    async def refresh_task(self, name: str):
+        photo = await self.remote_get(f"{self.raider_url}{name}.png")
+        await self.save_file(photo.content, self.raider_path / f"{name}.png")
+
     async def refresh(self):
         datas = await self.remote_get(self.raider_url + "info.json")
         data = datas.json()
+        tasks = []
         for name in data:
-            photo = await self.remote_get(f"{self.raider_url}{name}.png")
-            await self.save_file(photo.content, self.raider_path / f"{name}.png")
-            self.all_raiders.append(name)
+            tasks.append(self.refresh_task(name))
+        await asyncio.gather(*tasks)
         await self.dump(data, self.raider_info_path)
+        await self.read()
 
     async def read(self):
         if not self.raider_info_path.exists():

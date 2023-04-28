@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -25,12 +25,16 @@ class AvatarIcon(BaseModel):
 
     @property
     def gacha(self) -> str:
-        return self.icon[2]
+        return self.icon[3]
 
     @property
     def icon_(self) -> str:
         return self.icon[0]
 
     @property
-    def normal(self) -> str:
+    def square(self) -> Optional[str]:
         return self.icon[1]
+
+    @property
+    def normal(self) -> str:
+        return self.icon[2]

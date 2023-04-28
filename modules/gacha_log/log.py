@@ -276,12 +276,15 @@ class GachaLog:
                     if pool_name == "新手跃迁":
                         isUp, isBig = True, False
                     elif pool_name == "角色跃迁":
-                        isUp, isBig = self.check_avatar_up(item.name, item.time), (not result[-1].isUp) if result else False
+                        isUp, isBig = (
+                            self.check_avatar_up(item.name, item.time),
+                            (not result[-1].isUp) if result else False,
+                        )
                     else:
                         isUp, isBig = False, False
                     data = {
                         "name": item.name,
-                        "icon": assets.avatar.icon(item.name).as_uri(),
+                        "icon": assets.avatar.square(item.name).as_uri(),
                         "count": count,
                         "type": "角色",
                         "isUp": isUp,
@@ -320,7 +323,7 @@ class GachaLog:
                 if item.item_type == "角色":
                     data = {
                         "name": item.name,
-                        "icon": assets.avatar.icon(item.name).as_uri(),
+                        "icon": assets.avatar.square(item.name).as_uri(),
                         "count": count,
                         "type": "角色",
                         "time": item.time,
