@@ -142,7 +142,7 @@ class BindAccountPlugin(Plugin.Conversation):
         else:
             return ConversationHandler.END
         try:
-            record_cards = await client.get_record_card(account_id)
+            record_cards = await client.get_record_cards(account_id)
             record_card = record_cards[0]
             for card in record_cards:
                 if card.game == types.Game.STARRAIL:
