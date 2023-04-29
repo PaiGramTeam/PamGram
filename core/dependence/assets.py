@@ -112,30 +112,32 @@ class _AvatarAssets(_AssetsService):
     def get_by_name(self, name: str) -> Optional[AvatarIcon]:
         return self.name_map.get(name, None)
 
-    def get_target(self, target: StrOrInt) -> AvatarIcon:
+    def get_target(self, target: StrOrInt, second_target: StrOrInt = None) -> AvatarIcon:
         data = None
         if isinstance(target, int):
             data = self.get_by_id(target)
         elif isinstance(target, str):
             data = self.get_by_name(target)
         if data is None:
+            if second_target:
+                return self.get_target(second_target)
             raise AssetsCouldNotFound("角色素材图标不存在", target)
         return data
 
-    def gacha(self, target: StrOrInt) -> Path:
-        icon = self.get_target(target)
+    def gacha(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
         return self.get_path(icon, "gacha")
 
-    def icon(self, target: StrOrInt) -> Path:
-        icon = self.get_target(target)
+    def icon(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
         return self.get_path(icon, "icon")
 
-    def normal(self, target: StrOrInt) -> Path:
-        icon = self.get_target(target)
+    def normal(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
         return self.get_path(icon, "normal")
 
-    def square(self, target: StrOrInt, allow_icon: bool = True) -> Path:
-        icon = self.get_target(target)
+    def square(self, target: StrOrInt, second_target: StrOrInt = None, allow_icon: bool = True) -> Path:
+        icon = self.get_target(target, second_target)
         path = self.get_path(icon, "square", "png")
         if not path.exists():
             if allow_icon:
@@ -189,23 +191,21 @@ class _LightConeAssets(_AssetsService):
     def get_by_name(self, name: str) -> Optional[LightConeIcon]:
         return self.name_map.get(name, None)
 
-    def get_target(self, target: StrOrInt) -> Optional[LightConeIcon]:
+    def get_target(self, target: StrOrInt, second_target: StrOrInt = None) -> Optional[LightConeIcon]:
         if isinstance(target, int):
             return self.get_by_id(target)
         elif isinstance(target, str):
             return self.get_by_name(target)
-        return None
+        if second_target:
+            return self.get_target(second_target)
+        raise AssetsCouldNotFound("光锥素材图标不存在", target)
 
-    def gacha(self, target: StrOrInt) -> Path:
-        icon = self.get_target(target)
-        if icon is None:
-            raise AssetsCouldNotFound("光锥素材图标不存在", target)
+    def gacha(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
         return self.get_path(icon, "gacha")
 
-    def icon(self, target: StrOrInt) -> Path:
-        icon = self.get_target(target)
-        if icon is None:
-            raise AssetsCouldNotFound("光锥素材图标不存在", target)
+    def icon(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
         return self.get_path(icon, "icon")
 
 

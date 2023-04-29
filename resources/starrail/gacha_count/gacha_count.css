@@ -50,11 +50,11 @@ body {
     font-size: 20px;
 }
 
-.head_box .genshin_logo {
+.head_box .starrail_logo {
     position: absolute;
-    top: 1px;
-    right: 15px;
-    width: 97px;
+    top: 5px;
+    right: 30px;
+    width: 120px;
 }
 
 .base_info {
