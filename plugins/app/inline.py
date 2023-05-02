@@ -15,6 +15,7 @@ from telegram.error import BadRequest
 from telegram.ext import CallbackContext, InlineQueryHandler
 
 from core.plugin import Plugin, handler
+from core.dependence.assets import AssetsService
 from core.services.search.services import SearchServices
 from core.services.wiki.services import WikiService
 from utils.log import logger
@@ -25,25 +26,40 @@ class Inline(Plugin):
 
     def __init__(
         self,
-        wiki_service: WikiService,
+        asset_service: AssetsService,
         search_service: SearchServices,
+        wiki_service: WikiService,
     ):
+        self.asset_service = asset_service
         self.wiki_service = wiki_service
         self.weapons_list: List[Dict[str, str]] = []
         self.characters_list: List[Dict[str, str]] = []
+        self.characters_material_list: List[Dict[str, str]] = []
+        self.light_cone_list: List[Dict[str, str]] = []
         self.refresh_task: List[Awaitable] = []
         self.search_service = search_service
 
     async def initialize(self):
+        async def task_light_cone():
+            logger.info("Inline 模块正在获取光锥列表")
+            light_cone_datas: Dict[str, str] = {}
+            for light_cone in self.asset_service.light_cone.data:
+                light_cone_datas[light_cone.name] = light_cone.icon_
+            # 光锥列表
+            for light_cone in self.wiki_service.raider.all_light_cone_raiders:
+                if light_cone in light_cone_datas:
+                    self.light_cone_list.append({"name": light_cone, "icon": light_cone_datas[light_cone]})
+                else:
+                    logger.warning(f"未找到光锥 {light_cone} 的图标，inline 不显示此光锥")
+            logger.success("Inline 模块获取光锥列表完成")
+
         async def task_characters():
             logger.info("Inline 模块正在获取角色列表")
             datas: Dict[str, str] = {}
-            for character in self.wiki_service.character.all_avatars:
-                if not character.icon:
-                    logger.warning(f"角色 {character.name} 无图标")
-                    continue
-                datas[character.name] = character.icon
-            for character in self.wiki_service.raider.get_name_list():
+            for character in self.asset_service.avatar.data:
+                datas[character.name] = character.square or character.normal
+            # 角色攻略
+            for character in self.wiki_service.raider.all_role_raiders:
                 if character in datas:
                     self.characters_list.append({"name": character, "icon": datas[character]})
                 else:
@@ -51,11 +67,21 @@ class Inline(Plugin):
                         if character.startswith(key):
                             self.characters_list.append({"name": character, "icon": value})
                             break
+            # 角色培养素材
+            for character in self.wiki_service.raider.all_role_material_raiders:
+                if character in datas:
+                    self.characters_material_list.append({"name": character, "icon": datas[character]})
+                else:
+                    for key, value in datas.items():
+                        if character.startswith(key):
+                            self.characters_material_list.append({"name": character, "icon": value})
+                            break
             logger.success("Inline 模块获取角色列表成功")
 
         self.refresh_task.append(asyncio.create_task(task_characters()))
+        self.refresh_task.append(asyncio.create_task(task_light_cone()))
 
-    @handler(InlineQueryHandler, block=False)
+    @handler.inline_query(block=False)
     async def inline_query(self, update: Update, _: CallbackContext) -> None:
         user = update.effective_user
         ilq = cast(InlineQuery, update.inline_query)
@@ -65,27 +91,34 @@ class Inline(Plugin):
         results_list = []
         args = query.split(" ")
         if args[0] == "":
-            results_list.append(
-                InlineQueryResultArticle(
-                    id=str(uuid4()),
-                    title="角色攻略查询",
-                    description="输入角色名即可查询角色攻略",
-                    input_message_content=InputTextMessageContent("角色攻略查询"),
+            temp_data = [("光锥图鉴查询", "输入光锥名称即可查询光锥图鉴"), ("角色攻略查询", "输入角色名即可查询角色攻略图鉴")]
+            for i in temp_data:
+                results_list.append(
+                    InlineQueryResultArticle(
+                        id=str(uuid4()),
+                        title=i[0],
+                        description=i[1],
+                        input_message_content=InputTextMessageContent(i[0]),
+                    )
                 )
-            )
         else:
-            if args[0] == "查看角色攻略列表并查询":
-                for character in self.characters_list:
+            if args[0] in ["查看角色攻略列表并查询", "查看角色培养素材列表并查询", "查看光锥列表并查询"]:
+                temp_data = {
+                    "查看角色攻略列表并查询": (self.characters_list, "角色攻略查询"),
+                    "查看角色培养素材列表并查询": (self.characters_material_list, "角色培养素材查询"),
+                    "查看光锥列表并查询": (self.light_cone_list, "光锥查询"),
+                }[args[0]]
+                for character in temp_data[0]:
                     name = character["name"]
                     icon = character["icon"]
                     results_list.append(
                         InlineQueryResultArticle(
                             id=str(uuid4()),
                             title=name,
-                            description=f"查看角色攻略列表并查询 {name}",
+                            description=f"{args[0]} {name}",
                             thumb_url=icon,
                             input_message_content=InputTextMessageContent(
-                                f"角色攻略查询{name}", parse_mode=ParseMode.MARKDOWN_V2
+                                f"{temp_data[1]}{name}", parse_mode=ParseMode.MARKDOWN_V2
                             ),
                         )
                     )

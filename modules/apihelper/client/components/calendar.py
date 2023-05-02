@@ -16,54 +16,32 @@ if TYPE_CHECKING:
 
 
 class Calendar:
-    """原神活动日历"""
+    """活动日历"""
 
-    ANNOUNCEMENT_LIST = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnList"
-    ANNOUNCEMENT_CONTENT = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnContent"
+    ANNOUNCEMENT_LIST = "https://hkrpg-api.mihoyo.com/common/hkrpg_cn/announcement/api/getAnnList"
+    ANNOUNCEMENT_CONTENT = "https://hkrpg-api-static.mihoyo.com/common/hkrpg_cn/announcement/api/getAnnContent"
     ANNOUNCEMENT_PARAMS = {
-        "game": "hk4e",
-        "game_biz": "hk4e_cn",
+        "game": "hkrpg",
+        "game_biz": "hkrpg_cn",
         "lang": "zh-cn",
-        "bundle_id": "hk4e_cn",
+        "bundle_id": "hkrpg_cn",
         "platform": "pc",
-        "region": "cn_gf01",
+        "region": "prod_gf_cn",
         "level": "55",
         "uid": "100000000",
     }
-    MIAO_API = "http://miaoapi.cn/api/calendar"
     IGNORE_IDS = [
-        495,  # 有奖问卷调查开启！
-        1263,  # 米游社《原神》专属工具一览
-        423,  # 《原神》玩家社区一览
-        422,  # 《原神》防沉迷系统说明
-        762,  # 《原神》公平运营声明
-        762,  # 《原神》公平运营声明
+        194,  # 有奖问卷调查开启！
+        183,  # 官方社群一览
+        171,  # 米游社《崩坏：星穹铁道》专属工具一览
+        187,  # 《崩坏：星穹铁道》防沉迷系统公告
+        185,  # 《崩坏：星穹铁道》公平运营声明
     ]
-    IGNORE_RE = re.compile(r"(内容专题页|版本更新说明|调研|防沉迷|米游社|专项意见|更新修复与优化|问卷调查|版本更新通知|更新时间说明|预下载功能|周边限时|周边上新|角色演示)")
+    IGNORE_RE = re.compile(r"(内容专题页|版本更新说明|调研|防沉迷|米游社|专项意见|游戏优化及已知问题说明|问卷调查|版本更新通知|更新时间说明|预下载功能|周边限时|周边上新|角色演示)")
     FULL_TIME_RE = re.compile(r"(魔神任务)")
 
     def __init__(self):
         self.client = AsyncClient()
-
-    @staticmethod
-    async def async_gen_birthday_list() -> Dict[str, List[str]]:
-        """生成生日列表并且合并云端生日列表"""
-        birthday_list = Calendar.gen_birthday_list()
-        remote_data = await Remote.get_remote_birthday()
-        if remote_data:
-            birthday_list.update(remote_data)
-        return birthday_list
-
-    @staticmethod
-    def gen_birthday_list() -> Dict[str, List[str]]:
-        """生成生日列表"""
-        birthday_list = {}
-        for value in AVATAR_DATA.values():
-            key = "_".join([str(i) for i in value["birthday"]])
-            data = birthday_list.get(key, [])
-            data.append(value["name"])
-            birthday_list[key] = data
-        return birthday_list
 
     @staticmethod
     def get_now_hour() -> datetime:

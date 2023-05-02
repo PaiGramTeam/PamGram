@@ -58,7 +58,7 @@ class DailyNotePlugin(Plugin):
             "expeditions": bool(daily_info.expeditions),
             "remained_time": remained_time,
             "current_expeditions": len(daily_info.expeditions),
-            "max_expeditions": daily_info.accepted_epedition_num,
+            "max_expeditions": daily_info.total_expedition_num,
         }
         render_result = await self.template_service.render(
             "starrail/daily_note/daily_note.html",

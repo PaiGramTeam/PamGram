@@ -147,3 +147,10 @@ def roleToTag(role_name: str) -> List[str]:
     """通过角色名获取TAG"""
     role_name = str.casefold(role_name)
     return next((value for value in roles.values() if value[0] == role_name), [role_name])
+
+
+@functools.lru_cache()
+def lightConeToTag(name: str) -> List[str]:
+    """通过光锥名获取TAG"""
+    name = str.casefold(name)
+    return next((value for value in light_cones.values() if value[0] == name), [name])
