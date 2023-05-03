@@ -64,7 +64,7 @@ class Inline(Plugin):
                     self.characters_list.append({"name": character, "icon": datas[character]})
                 else:
                     for key, value in datas.items():
-                        if character.startswith(key):
+                        if character.startswith(key) or character.endswith(key):
                             self.characters_list.append({"name": character, "icon": value})
                             break
             # 角色培养素材
@@ -73,7 +73,7 @@ class Inline(Plugin):
                     self.characters_material_list.append({"name": character, "icon": datas[character]})
                 else:
                     for key, value in datas.items():
-                        if character.startswith(key):
+                        if character.startswith(key) or character.endswith(key):
                             self.characters_material_list.append({"name": character, "icon": value})
                             break
             logger.success("Inline 模块获取角色列表成功")
