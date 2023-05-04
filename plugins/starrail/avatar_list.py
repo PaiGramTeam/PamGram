@@ -124,13 +124,13 @@ class AvatarListPlugin(Plugin):
                 logger.warning("未找到角色 %s[%s] 的资源: %s", character.name, character.id, e)
         return data
 
-    @handler.command("avatars", filters.Regex(r"^/avatars\s*(?:(\d+)|(all))?$"), block=False)
+    @handler.command("avatars", block=False)
     @handler.message(filters.Regex(r"^(全部)?练度统计$"), block=False)
     async def avatar_list(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"):
         user = update.effective_user
         message = update.effective_message
         args = [i.lower() for i in context.match.groups() if i]
-        all_avatars = any(["all" in args, "全部" in args])  # 是否发送全部角色
+        all_avatars = "全部" in args or "all" in message.text  # 是否发送全部角色
         logger.info("用户 %s[%s] [bold]练度统计[/bold]: all=%s", user.full_name, user.id, all_avatars, extra={"markup": True})
         client = await self.get_user_client(update, context)
         if not client:
