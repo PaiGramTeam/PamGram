@@ -45,7 +45,9 @@ async def get_avatar_data() -> DATA_TYPE:
     result = {}
     url = "https://genshin.honeyhunterworld.com/fam_chars/?lang=CHS"
     response = await request(url)
-    chaos_data = re.findall(r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text)[0]
+    chaos_data = re.findall(
+        r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text
+    )[0]
     json_data = json.loads(chaos_data)  # 转为 json
     for data in json_data:
         cid = int("10000" + re.findall(r"\d+", data[1])[0])
@@ -60,10 +62,14 @@ async def get_weapon_data() -> DATA_TYPE:
     from modules.wiki.other import WeaponType
 
     result = {}
-    urls = [HONEY_HOST.join(f"fam_{i.lower()}/?lang=CHS") for i in WeaponType.__members__]
+    urls = [
+        HONEY_HOST.join(f"fam_{i.lower()}/?lang=CHS") for i in WeaponType.__members__
+    ]
     for url in urls:
         response = await request(url)
-        chaos_data = re.findall(r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text)[0]
+        chaos_data = re.findall(
+            r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text
+        )[0]
         json_data = json.loads(chaos_data)  # 转为 json
         for data in json_data:
             name = re.findall(r">(.*)<", data[1])[0]
@@ -79,8 +85,14 @@ async def get_weapon_data() -> DATA_TYPE:
 async def get_material_data() -> DATA_TYPE:
     result = {}
 
-    weapon = [HONEY_HOST.join(f"fam_wep_{i}/?lang=CHS") for i in ["primary", "secondary", "common"]]
-    talent = [HONEY_HOST.join(f"fam_talent_{i}/?lang=CHS") for i in ["book", "boss", "common", "reward"]]
+    weapon = [
+        HONEY_HOST.join(f"fam_wep_{i}/?lang=CHS")
+        for i in ["primary", "secondary", "common"]
+    ]
+    talent = [
+        HONEY_HOST.join(f"fam_talent_{i}/?lang=CHS")
+        for i in ["book", "boss", "common", "reward"]
+    ]
     namecard = [HONEY_HOST.join("fam_nameplate/?lang=CHS")]
     urls = weapon + talent + namecard
 
@@ -89,7 +101,9 @@ async def get_material_data() -> DATA_TYPE:
 
     for url in urls:
         response = await request(url)
-        chaos_data = re.findall(r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text)[0]
+        chaos_data = re.findall(
+            r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text
+        )[0]
         json_data = json.loads(chaos_data)  # 转为 json
         for data in json_data:
             honey_id = re.findall(r"/(.*?)/", data[1])[0]
@@ -107,7 +121,9 @@ async def get_material_data() -> DATA_TYPE:
 async def get_artifact_data() -> DATA_TYPE:
     async def get_first_id(_link) -> str:
         _response = await request(_link)
-        _chaos_data = re.findall(r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", _response.text)[0]
+        _chaos_data = re.findall(
+            r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", _response.text
+        )[0]
         _json_data = json.loads(_chaos_data)
         return re.findall(r"/(.*?)/", _json_data[-1][1])[0]
 
@@ -118,7 +134,9 @@ async def get_artifact_data() -> DATA_TYPE:
     ambr_data = json.loads(response.text)["data"]["items"]
 
     response = await request(url)
-    chaos_data = re.findall(r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text)[0]
+    chaos_data = re.findall(
+        r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text
+    )[0]
     json_data = json.loads(chaos_data)  # 转为 json
     for data in json_data:
         honey_id = re.findall(r"/(.*?)/", data[1])[0]
@@ -150,13 +168,17 @@ async def get_namecard_data() -> DATA_TYPE:
     result = {}
 
     response = await request(url)
-    chaos_data = re.findall(r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text)[0]
+    chaos_data = re.findall(
+        r"sortable_data\.push\((.*?)\);\s*sortable_cur_page", response.text
+    )[0]
     json_data = json.loads(chaos_data)
     for data in json_data:
         honey_id = re.findall(r"/(.*?)/", data[1])[0]
         name = re.findall(r"alt=\"(.*?)\"", data[0])[0]
         try:
-            nid = [key for key, value in NAMECARD_DATA.items() if value["name"] == name][0]
+            nid = [
+                key for key, value in NAMECARD_DATA.items() if value["name"] == name
+            ][0]
         except IndexError:  # 暂不支持 beta 的名片
             continue
         rarity = int(re.findall(r">(\d)<", data[2])[0])

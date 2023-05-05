@@ -6,7 +6,11 @@ import aiofiles
 from genshin import Client, AuthkeyTimeout, InvalidAuthkey
 from genshin.models import TransactionKind, BaseTransaction
 
-from modules.pay_log.error import PayLogAuthkeyTimeout, PayLogInvalidAuthkey, PayLogNotFound
+from modules.pay_log.error import (
+    PayLogAuthkeyTimeout,
+    PayLogInvalidAuthkey,
+    PayLogNotFound,
+)
 from modules.pay_log.models import PayLog as PayLogModel, BaseInfo
 from utils.const import PROJECT_ROOT
 
@@ -92,7 +96,9 @@ class PayLog:
             return True
         return False
 
-    async def save_pay_log_info(self, user_id: str, uid: str, info: PayLogModel) -> None:
+    async def save_pay_log_info(
+        self, user_id: str, uid: str, info: PayLogModel
+    ) -> None:
         """保存日志记录数据
         :param user_id: 用户id
         :param uid: 原神uid
@@ -125,7 +131,9 @@ class PayLog:
         pay_log, have_old = await self.load_history_info(str(user_id), str(client.uid))
         history_ids = [i.id for i in pay_log.list]
         try:
-            async for data in client.transaction_log(TransactionKind.CRYSTAL, authkey=authkey):
+            async for data in client.transaction_log(
+                TransactionKind.CRYSTAL, authkey=authkey
+            ):
                 if data.id not in history_ids:
                     pay_log.list.append(data)
                     new_num += 1
@@ -140,7 +148,9 @@ class PayLog:
         return new_num
 
     @staticmethod
-    async def get_month_data(pay_log: PayLogModel, price_data: List[Dict]) -> Tuple[int, List[Dict]]:
+    async def get_month_data(
+        pay_log: PayLogModel, price_data: List[Dict]
+    ) -> Tuple[int, List[Dict]]:
         """获取月份数据
         :param pay_log: 日志数据
         :param price_data: 商品数据
@@ -195,13 +205,24 @@ class PayLog:
                 "price": price,
                 "count": 0,
             }
-            for price in [[680], [300], [8080, 12960], [3880, 6560], [2240, 3960], [1090, 1960], [330, 600], [60, 120]]
+            for price in [
+                [680],
+                [300],
+                [8080, 12960],
+                [3880, 6560],
+                [2240, 3960],
+                [1090, 1960],
+                [330, 600],
+                [60, 120],
+            ]
         ]
         price_data_name = ["大月卡", "小月卡", "648", "328", "198", "98", "30", "6"]
         real_price = [68, 30, 648, 328, 198, 98, 30, 6]
         all_amount, month_datas = await PayLog.get_month_data(pay_log, price_data)
         month_data = sorted(month_datas, key=lambda k: k["amount"], reverse=True)
-        all_pay = sum((price_data[i]["count"] * real_price[i]) for i in range(len(price_data)))
+        all_pay = sum(
+            (price_data[i]["count"] * real_price[i]) for i in range(len(price_data))
+        )
         datas = [
             {"value": f"￥{all_pay:.0f}", "name": "总消费"},
             {"value": all_amount, "name": "总结晶"},

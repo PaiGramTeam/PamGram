@@ -11,7 +11,13 @@ import aiofiles
 from async_lru import alru_cache
 
 from core.base_service import BaseService
-from core.services.search.models import BaseEntry, StrategyEntry, StrategyEntryList, WeaponEntry, WeaponsEntry
+from core.services.search.models import (
+    BaseEntry,
+    StrategyEntry,
+    StrategyEntryList,
+    WeaponEntry,
+    WeaponsEntry,
+)
 from utils.const import PROJECT_ROOT
 
 __all__ = ("SearchServices",)
@@ -112,7 +118,9 @@ class SearchServices(BaseService):
         return entry.compare_to_query(search_query)
 
     @alru_cache(maxsize=64)
-    async def multi_search_combinations(self, search_queries: Tuple[str], results_per_query: int = 3):
+    async def multi_search_combinations(
+        self, search_queries: Tuple[str], results_per_query: int = 3
+    ):
         """多个关键词搜索
         :param search_queries: 搜索文本
         :param results_per_query: 约定返回的数目
@@ -125,7 +133,9 @@ class SearchServices(BaseService):
                 results[query] = res
 
     @alru_cache(maxsize=64)
-    async def search(self, search_query: Optional[str], amount: int = None) -> Optional[List[BaseEntry]]:
+    async def search(
+        self, search_query: Optional[str], amount: int = None
+    ) -> Optional[List[BaseEntry]]:
         """在所有可用条目中搜索适当的结果
         :param search_query: 搜索文本
         :param amount: 约定返回的数目
@@ -136,7 +146,11 @@ class SearchServices(BaseService):
             search_entries = itertools.chain(self.weapons, self.strategy)
 
             if not search_query:
-                return search_entries if isinstance(search_entries, list) else list(search_entries)
+                return (
+                    search_entries
+                    if isinstance(search_entries, list)
+                    else list(search_entries)
+                )
 
             if not amount:
                 return sorted(

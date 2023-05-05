@@ -23,7 +23,9 @@ class MapHelper:
 
     MAP_API_URL = "https://map.minigg.cn/map/get_map"
     LABEL_URL = "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/map/label/tree?app_sn=ys_obc"
-    COUNT_URL = "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/map/point/list"
+    COUNT_URL = (
+        "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/map/point/list"
+    )
     COUNT_PARAMS = {"app_sn": "ys_obc", "map_id": "2"}
     MAP_ID_LIST = [
         "2",
@@ -83,7 +85,9 @@ class MapHelper:
             list_data = ListData(**count_data.json().get("data", {}))
             for label in list_data.label_list:
                 if label.depth == 2:
-                    data[map_id][label.name] = len([i for i in list_data.point_list if i.label_id == label.id])
+                    data[map_id][label.name] = len(
+                        [i for i in list_data.point_list if i.label_id == label.id]
+                    )
         self.save(data, self.label_count_path)
 
     def get_label_count(self, map_id: Union[str, int], label_name: str) -> int:

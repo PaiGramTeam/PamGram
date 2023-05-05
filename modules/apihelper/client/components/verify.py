@@ -64,7 +64,11 @@ class Verify:
 
     async def verify(self, challenge: str, validate: str):
         url = self.get_url(self.HOST, self.VERIFY_VERIFICATION_URL)
-        data = {"geetest_challenge": challenge, "geetest_validate": validate, "geetest_seccode": f"{validate}|jordan"}
+        data = {
+            "geetest_challenge": challenge,
+            "geetest_validate": validate,
+            "geetest_seccode": f"{validate}|jordan",
+        }
 
         headers = self.get_headers(data=data)
         response = await self.client.post(url, json=data, headers=headers)
@@ -81,7 +85,9 @@ class Verify:
             "client_type": "web_mobile",
             "callback": f"geetest_{int(time.time() * 1000)}",
         }
-        response = await self.client.get(url, headers=headers, params=params, de_json=False)
+        response = await self.client.get(
+            url, headers=headers, params=params, de_json=False
+        )
         text = response.text
         json_data = re.findall(r"^.*?\((\{.*?)\)$", text)[0]
         data = json.loads(json_data)

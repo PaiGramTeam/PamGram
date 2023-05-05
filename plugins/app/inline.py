@@ -45,11 +45,15 @@ class Inline(Plugin):
                 datas[character.name] = character.icon
             for character in self.wiki_service.raider.get_name_list():
                 if character in datas:
-                    self.characters_list.append({"name": character, "icon": datas[character]})
+                    self.characters_list.append(
+                        {"name": character, "icon": datas[character]}
+                    )
                 else:
                     for key, value in datas.items():
                         if character.startswith(key):
-                            self.characters_list.append({"name": character, "icon": value})
+                            self.characters_list.append(
+                                {"name": character, "icon": value}
+                            )
                             break
             logger.success("Inline 模块获取角色列表成功")
 
@@ -60,7 +64,9 @@ class Inline(Plugin):
         user = update.effective_user
         ilq = cast(InlineQuery, update.inline_query)
         query = ilq.query
-        logger.info("用户 %s[%s] inline_query 查询\nquery[%s]", user.full_name, user.id, query)
+        logger.info(
+            "用户 %s[%s] inline_query 查询\nquery[%s]", user.full_name, user.id, query
+        )
         switch_pm_text = "需要帮助嘛？"
         results_list = []
         args = query.split(" ")
@@ -98,7 +104,9 @@ class Inline(Plugin):
                             title=f"当前查询内容为 {args[0]}",
                             description="如果无查看图片描述 这是正常的 客户端问题",
                             thumb_url="https://www.miyoushe.com/_nuxt/img/game-sr.4f80911.jpg",
-                            input_message_content=InputTextMessageContent(f"当前查询内容为 {args[0]}\n如果无查看图片描述 这是正常的 客户端问题"),
+                            input_message_content=InputTextMessageContent(
+                                f"当前查询内容为 {args[0]}\n如果无查看图片描述 这是正常的 客户端问题"
+                            ),
                         )
                     )
                     for simple_search_result in simple_search_results:

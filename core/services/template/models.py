@@ -91,7 +91,10 @@ class RenderResult:
             raise ErrorFileType
 
         media = InputMediaPhoto(
-            media=self.photo, caption=self.caption, parse_mode=self.parse_mode, filename=self.filename
+            media=self.photo,
+            caption=self.caption,
+            parse_mode=self.parse_mode,
+            filename=self.filename,
         )
 
         try:
@@ -133,7 +136,10 @@ class RenderGroupResult:
         reply = await message.reply_media_group(
             media=[
                 FileType.media_type(result.file_type)(
-                    media=result.photo, caption=result.caption, parse_mode=result.parse_mode, filename=result.filename
+                    media=result.photo,
+                    caption=result.caption,
+                    parse_mode=result.parse_mode,
+                    filename=result.filename,
                 )
                 for result in self.results
             ],

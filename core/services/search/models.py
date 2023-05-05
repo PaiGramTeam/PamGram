@@ -4,7 +4,13 @@ from typing import List, Optional
 from pydantic import BaseModel
 from thefuzz import fuzz
 
-__all__ = ("BaseEntry", "WeaponEntry", "WeaponsEntry", "StrategyEntry", "StrategyEntryList")
+__all__ = (
+    "BaseEntry",
+    "WeaponEntry",
+    "WeaponsEntry",
+    "StrategyEntry",
+    "StrategyEntryList",
+)
 
 
 class BaseEntry(BaseModel):
@@ -26,7 +32,8 @@ class BaseEntry(BaseModel):
     def compare_to_query(self, search_query: str) -> float:
         """返回一个数字 ∈[0,100] 描述搜索查询与此条目的相似程度。
 
-        Gives a number ∈[0,100] describing how similar the search query is to this entry."""
+        Gives a number ∈[0,100] describing how similar the search query is to this entry.
+        """
 
 
 class WeaponEntry(BaseEntry):

@@ -14,7 +14,13 @@ from utils.log import logger
 class StrategyPlugin(Plugin):
     """角色攻略查询"""
 
-    KEYBOARD = [[InlineKeyboardButton(text="查看角色攻略列表并查询", switch_inline_query_current_chat="查看角色攻略列表并查询")]]
+    KEYBOARD = [
+        [
+            InlineKeyboardButton(
+                text="查看角色攻略列表并查询", switch_inline_query_current_chat="查看角色攻略列表并查询"
+            )
+        ]
+    ]
 
     def __init__(
         self,
@@ -35,7 +41,9 @@ class StrategyPlugin(Plugin):
         if len(args) >= 1:
             character_name = args[0]
         else:
-            reply_message = await message.reply_text("请回复你要查询的攻略的角色名", reply_markup=InlineKeyboardMarkup(self.KEYBOARD))
+            reply_message = await message.reply_text(
+                "请回复你要查询的攻略的角色名", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
+            )
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
@@ -44,13 +52,16 @@ class StrategyPlugin(Plugin):
         file_path = self.wiki_service.raider.raider_path / f"{character_name}.png"
         if not file_path.exists():
             reply_message = await message.reply_text(
-                f"没有找到 {character_name} 的攻略", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
+                f"没有找到 {character_name} 的攻略",
+                reply_markup=InlineKeyboardMarkup(self.KEYBOARD),
             )
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
             return
-        logger.info("用户 %s[%s] 查询角色攻略命令请求 || 参数 %s", user.full_name, user.id, character_name)
+        logger.info(
+            "用户 %s[%s] 查询角色攻略命令请求 || 参数 %s", user.full_name, user.id, character_name
+        )
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         caption = "From 米游社"
         if file_id := await self.cache_service.get_strategy_cache(character_name):

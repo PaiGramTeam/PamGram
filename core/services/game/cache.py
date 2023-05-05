@@ -15,7 +15,10 @@ class GameCache:
 
     async def get_url_list(self, character_name: str):
         qname = f"{self.qname}:{character_name}"
-        return [str(str_data, encoding="utf-8") for str_data in await self.client.lrange(qname, 0, -1)][::-1]
+        return [
+            str(str_data, encoding="utf-8")
+            for str_data in await self.client.lrange(qname, 0, -1)
+        ][::-1]
 
     async def set_url_list(self, character_name: str, str_list: List[str]):
         qname = f"{self.qname}:{character_name}"

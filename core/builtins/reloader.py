@@ -26,12 +26,16 @@ class FileFilter:
 
     def __init__(self, includes: List[str], excludes: List[str]) -> None:
         default_includes = ["*.py"]
-        self.includes = [default for default in default_includes if default not in excludes]
+        self.includes = [
+            default for default in default_includes if default not in excludes
+        ]
         self.includes.extend(includes)
         self.includes = list(set(self.includes))
 
         default_excludes = [".*", ".py[cod]", ".sw.*", "~*", __file__]
-        self.excludes = [default for default in default_excludes if default not in includes]
+        self.excludes = [
+            default for default in default_excludes if default not in includes
+        ]
         self.exclude_dirs = []
         for e in excludes:
             p = Path(e)
@@ -109,7 +113,10 @@ class Reloader:
 
         frame = inspect.currentframe().f_back
 
-        self.watch_filter = FileFilter(reload_includes or [], (reload_excludes or []) + [frame.f_globals["__file__"]])
+        self.watch_filter = FileFilter(
+            reload_includes or [],
+            (reload_excludes or []) + [frame.f_globals["__file__"]],
+        )
         self.watcher = watch(
             *self.reload_dirs,
             watch_filter=None,
@@ -142,7 +149,10 @@ class Reloader:
             if changes:
                 logger.warning(
                     "检测到文件 %s 发生改变, 正在重载...",
-                    [str(c.relative_to(PROJECT_ROOT)).replace(os.sep, "/") for c in changes],
+                    [
+                        str(c.relative_to(PROJECT_ROOT)).replace(os.sep, "/")
+                        for c in changes
+                    ],
                     extra={"tag": "Reloader"},
                 )
                 self.restart()

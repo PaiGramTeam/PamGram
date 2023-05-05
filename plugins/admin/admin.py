@@ -22,7 +22,9 @@ class AdminPlugin(Plugin):
             from_user = reply_to_message.from_user
             if from_user:
                 if await self.user_admin_service.add_admin(from_user.id):
-                    logger.success("成功添加用户 %s[%s] 到Bot的管理员权限", from_user.full_name, from_user.id)
+                    logger.success(
+                        "成功添加用户 %s[%s] 到Bot的管理员权限", from_user.full_name, from_user.id
+                    )
                     await message.reply_text("添加成功")
                 else:
                     await message.reply_text("该用户已经存在管理员列表")
@@ -41,7 +43,9 @@ class AdminPlugin(Plugin):
             from_user = reply_to_message.from_user
             if from_user:
                 if await self.user_admin_service.delete_admin(from_user.id):
-                    logger.success("成功移除用户 %s[%s] 在Bot的管理员权限", from_user.full_name, from_user.id)
+                    logger.success(
+                        "成功移除用户 %s[%s] 在Bot的管理员权限", from_user.full_name, from_user.id
+                    )
                     await message.reply_text("移除成功")
                 else:
                     await message.reply_text("移除失败 该用户不存在管理员列表")

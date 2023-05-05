@@ -2,7 +2,16 @@
 import inspect
 from functools import cached_property
 from multiprocessing import RLock as Lock
-from typing import Callable, ClassVar, Dict, Generic, Optional, TYPE_CHECKING, Type, TypeVar
+from typing import (
+    Callable,
+    ClassVar,
+    Dict,
+    Generic,
+    Optional,
+    TYPE_CHECKING,
+    Type,
+    TypeVar,
+)
 
 from telegram import Update
 from telegram.ext import CallbackContext
@@ -40,7 +49,9 @@ class BaseExecutor:
     @property
     def application(self) -> "Application":
         if self._application is None:
-            raise RuntimeError(f"No application was set for this {self.__class__.__name__}.")
+            raise RuntimeError(
+                f"No application was set for this {self.__class__.__name__}."
+            )
         return self._application
 
     def __new__(cls: Type[T], name: str, *args, **kwargs) -> T:
@@ -56,7 +67,9 @@ class BaseExecutor:
         """当前执行器的名称"""
         return self._name
 
-    def __init__(self, name: str, dispatcher: Optional[Type["AbstractDispatcher"]] = None) -> None:
+    def __init__(
+        self, name: str, dispatcher: Optional[Type["AbstractDispatcher"]] = None
+    ) -> None:
         self._name = name
         self._dispatcher = dispatcher
 
@@ -88,7 +101,11 @@ class HandlerExecutor(BaseExecutor, Generic[P, R]):
     _callback: Callable[P, R]
     _dispatcher: "HandlerDispatcher"
 
-    def __init__(self, func: Callable[P, R], dispatcher: Optional[Type["HandlerDispatcher"]] = None) -> None:
+    def __init__(
+        self,
+        func: Callable[P, R],
+        dispatcher: Optional[Type["HandlerDispatcher"]] = None,
+    ) -> None:
         if dispatcher is None:
             from core.builtins.dispatcher import HandlerDispatcher
 
@@ -104,14 +121,20 @@ class HandlerExecutor(BaseExecutor, Generic[P, R]):
 
     async def __call__(self, update: Update, context: CallbackContext) -> R:
         with handler_contexts(update, context):
-            dispatched_func = self._dispatcher.dispatch(self._callback, update=update, context=context)
+            dispatched_func = self._dispatcher.dispatch(
+                self._callback, update=update, context=context
+            )
             return await dispatched_func()
 
 
 class JobExecutor(BaseExecutor):
     """Job 专用执行器"""
 
-    def __init__(self, func: Callable[P, R], dispatcher: Optional[Type["AbstractDispatcher"]] = None) -> None:
+    def __init__(
+        self,
+        func: Callable[P, R],
+        dispatcher: Optional[Type["AbstractDispatcher"]] = None,
+    ) -> None:
         if dispatcher is None:
             from core.builtins.dispatcher import JobDispatcher
 

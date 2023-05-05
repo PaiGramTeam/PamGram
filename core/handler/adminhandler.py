@@ -21,7 +21,9 @@ CCT = TypeVar("CCT", bound="CallbackContext[Any, Any, Any, Any]")
 class AdminHandler(BaseHandler[Update, CCT]):
     _lock = asyncio.Lock()
 
-    def __init__(self, handler: BaseHandler[Update, CCT], application: "Application") -> None:
+    def __init__(
+        self, handler: BaseHandler[Update, CCT], application: "Application"
+    ) -> None:
         self.handler = handler
         self.application = application
         self.user_service: Optional["UserAdminService"] = None
@@ -36,7 +38,9 @@ class AdminHandler(BaseHandler[Update, CCT]):
         async with self._lock:
             if self.user_service is not None:
                 return self.user_service
-            user_service: UserAdminService = self.application.managers.services_map.get(UserAdminService, None)
+            user_service: UserAdminService = self.application.managers.services_map.get(
+                UserAdminService, None
+            )
             if user_service is None:
                 raise ServiceNotFoundError("UserAdminService")
             self.user_service = user_service
@@ -52,7 +56,9 @@ class AdminHandler(BaseHandler[Update, CCT]):
         user_service = await self._user_service()
         user = update.effective_user
         if await user_service.is_admin(user.id):
-            return await self.handler.handle_update(update, application, check_result, context)
+            return await self.handler.handle_update(
+                update, application, check_result, context
+            )
         message = update.effective_message
         logger.warning("用户 %s[%s] 触发尝试调用Admin命令但权限不足", user.full_name, user.id)
         await message.reply_text("权限不足")

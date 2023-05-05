@@ -21,7 +21,15 @@ class BannerPool:
         self.fallback_items4_pool2 = banner.fallback_items4_pool2
 
         if banner.auto_strip_rate_up_from_fallback:  # 把UP四星从非UP四星排除
-            self.fallback_items5_pool1 = set_subtract(banner.fallback_items5_pool1, banner.rate_up_items5)
-            self.fallback_items5_pool2 = set_subtract(banner.fallback_items5_pool2, banner.rate_up_items5)
-            self.fallback_items4_pool1 = set_subtract(banner.fallback_items4_pool1, banner.rate_up_items4)
-            self.fallback_items4_pool2 = set_subtract(banner.fallback_items4_pool2, banner.rate_up_items4)
+            self.fallback_items5_pool1 = set_subtract(
+                banner.fallback_items5_pool1, banner.rate_up_items5
+            )
+            self.fallback_items5_pool2 = set_subtract(
+                banner.fallback_items5_pool2, banner.rate_up_items5
+            )
+            self.fallback_items4_pool1 = set_subtract(
+                banner.fallback_items4_pool1, banner.rate_up_items4
+            )
+            self.fallback_items4_pool2 = set_subtract(
+                banner.fallback_items4_pool2, banner.rate_up_items4
+            )

@@ -31,7 +31,9 @@ class TitlePlugin(Plugin):
             self.add_delete_message_job(reply)
             return
         try:
-            await context.bot.set_chat_administrator_custom_title(message.chat.id, user.id, title)
+            await context.bot.set_chat_administrator_custom_title(
+                message.chat.id, user.id, title
+            )
         except Exception:
             reply = await message.reply_text("设置失败，可能是参数不合法。")
             self.add_delete_message_job(message)

@@ -80,7 +80,9 @@ class AbstractDispatcher(ABC):
     @property
     def application(self) -> "Application":
         if self._application is None:
-            raise RuntimeError(f"No application was set for this {self.__class__.__name__}.")
+            raise RuntimeError(
+                f"No application was set for this {self.__class__.__name__}."
+            )
         return self._application
 
     def __init__(self, *args, **kwargs) -> None:
@@ -104,7 +106,9 @@ class AbstractDispatcher(ABC):
             ArkoWrapper(dir(self))
             .filter(lambda x: not x.startswith("_"))
             .filter(
-                lambda x: x not in self.IGNORED_ATTRS + ["dispatch", "catch_funcs", "catch_func_map", "dispatch_funcs"]
+                lambda x: x
+                not in self.IGNORED_ATTRS
+                + ["dispatch", "catch_funcs", "catch_func_map", "dispatch_funcs"]
             )
             .map(lambda x: getattr(self, x))
             .filter(lambda x: isinstance(x, MethodType))
@@ -202,7 +206,10 @@ class BaseDispatcher(AbstractDispatcher):
     def dispatch_by_default(self, parameter: Parameter) -> Parameter:
         annotation = parameter.annotation
         # noinspection PyTypeChecker
-        if isinstance(annotation, type) and (value := self._get_kwargs().get(annotation, None)) is not None:
+        if (
+            isinstance(annotation, type)
+            and (value := self._get_kwargs().get(annotation, None)) is not None
+        ):
             parameter._default = value  # pylint: disable=W0212
         return parameter
 
@@ -211,7 +218,9 @@ class BaseDispatcher(AbstractDispatcher):
         if annotation != Any and isinstance(annotation, GenericAlias):
             return parameter
 
-        catch_func = self.catch_func_map.get(annotation) or self.catch_func_map.get(parameter.name)
+        catch_func = self.catch_func_map.get(annotation) or self.catch_func_map.get(
+            parameter.name
+        )
         if catch_func is not None:
             # noinspection PyUnresolvedReferences,PyProtectedMember
             parameter._default = catch_func()  # pylint: disable=W0212
@@ -225,13 +234,22 @@ class BaseDispatcher(AbstractDispatcher):
 class HandlerDispatcher(BaseDispatcher):
     """Handler 参数分发器"""
 
-    def __init__(self, update: Optional[Update] = None, context: Optional[CallbackContext] = None, **kwargs) -> None:
+    def __init__(
+        self,
+        update: Optional[Update] = None,
+        context: Optional[CallbackContext] = None,
+        **kwargs,
+    ) -> None:
         super().__init__(update=update, context=context, **kwargs)
         self._update = update
         self._context = context
 
     def dispatch(
-        self, func: Callable[P, R], *, update: Optional[Update] = None, context: Optional[CallbackContext] = None
+        self,
+        func: Callable[P, R],
+        *,
+        update: Optional[Update] = None,
+        context: Optional[CallbackContext] = None,
     ) -> Callable[..., R]:
         self._update = update or self._update
         self._context = context or self._context
@@ -277,7 +295,9 @@ class JobDispatcher(BaseDispatcher):
         super().__init__(context=context, **kwargs)
         self._context = context
 
-    def dispatch(self, func: Callable[P, R], *, context: Optional[CallbackContext] = None) -> Callable[..., R]:
+    def dispatch(
+        self, func: Callable[P, R], *, context: Optional[CallbackContext] = None
+    ) -> Callable[..., R]:
         self._context = context or self._context
         if self._context is None:
             from core.builtins.contexts import CallbackContextCV

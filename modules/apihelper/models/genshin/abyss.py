@@ -43,13 +43,18 @@ class TeamRateResult(BaseModel):
         super().__init__(**data)
         for team_up in self.rate_list_up:
             for team_down in self.rate_list_down:
-                if {member.name for member in team_up.formation} & {member.name for member in team_down.formation}:
+                if {member.name for member in team_up.formation} & {
+                    member.name for member in team_down.formation
+                }:
                     continue
                 self.rate_list_full.append(FullTeamRate(up=team_up, down=team_down))
 
     def sort(self, characters: List[str]):
         for team in self.rate_list_full:
-            team.owner_num = sum(member.name in characters for member in team.up.formation + team.down.formation)
+            team.owner_num = sum(
+                member.name in characters
+                for member in team.up.formation + team.down.formation
+            )
             team.nice = team.owner_num / 8 + team.rate
         self.rate_list_full.sort(key=lambda x: x.nice, reverse=True)
 
@@ -58,10 +63,14 @@ class TeamRateResult(BaseModel):
         for team in self.rate_list_full:
             add = True
             for team_ in data:
-                if {member.name for member in team.up.formation} & {member.name for member in team_.up.formation}:
+                if {member.name for member in team.up.formation} & {
+                    member.name for member in team_.up.formation
+                }:
                     add = False
                     break
-                if {member.name for member in team.down.formation} & {member.name for member in team_.down.formation}:
+                if {member.name for member in team.down.formation} & {
+                    member.name for member in team_.down.formation
+                }:
                     add = False
                     break
             if add:

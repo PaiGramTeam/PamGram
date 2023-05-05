@@ -7,7 +7,12 @@ import aiofiles
 from aiohttp import ClientError, ClientConnectorError
 from genshin import DataNotPublic, GenshinException, InvalidCookies, TooManyRequests
 from httpx import HTTPError, TimeoutException
-from telegram import ReplyKeyboardRemove, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import (
+    ReplyKeyboardRemove,
+    Update,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 from telegram.constants import ParseMode
 from telegram.error import BadRequest, Forbidden, TelegramError, TimedOut, NetworkError
 from telegram.ext import CallbackContext, ApplicationHandlerStop, filters
@@ -15,7 +20,12 @@ from telegram.helpers import create_deep_linked_url
 
 from core.config import config
 from core.plugin import Plugin, error_handler
-from modules.apihelper.error import APIHelperException, APIHelperTimedOut, ResponseException, ReturnCodeError
+from modules.apihelper.error import (
+    APIHelperException,
+    APIHelperTimedOut,
+    ResponseException,
+    ReturnCodeError,
+)
 from modules.errorpush import (
     PbClient,
     PbClientException,
@@ -45,7 +55,9 @@ class ErrorHandler(Plugin):
         self.report_dir = os.path.join(current_dir, "report")
         if not os.path.exists(self.report_dir):
             os.mkdir(self.report_dir)
-        self.pb_client = PbClient(config.error.pb_url, config.error.pb_sunset, config.error.pb_max_lines)
+        self.pb_client = PbClient(
+            config.error.pb_url, config.error.pb_sunset, config.error.pb_max_lines
+        )
         self.sentry = SentryClient(config.error.sentry_dsn)
 
     async def notice_user(self, update: object, context: CallbackContext, content: str):
@@ -57,14 +69,26 @@ class ErrorHandler(Plugin):
 
         if "重新绑定" in content:
             buttons = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("点我重新绑定", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
+                [
+                    [
+                        InlineKeyboardButton(
+                            "点我重新绑定",
+                            url=create_deep_linked_url(
+                                context.bot.username, "set_cookie"
+                            ),
+                        )
+                    ]
+                ]
             )
         elif "通过验证" in content:
             buttons = InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
-                            "点我通过验证", url=create_deep_linked_url(context.bot.username, "verify_verification")
+                            "点我通过验证",
+                            url=create_deep_linked_url(
+                                context.bot.username, "verify_verification"
+                            ),
                         )
                     ]
                 ]
@@ -79,13 +103,22 @@ class ErrorHandler(Plugin):
         if chat.id == user.id:
             logger.info("尝试通知用户 %s[%s] 错误信息[%s]", user.full_name, user.id, content)
         else:
-            logger.info("尝试通知用户 %s[%s] 在 %s[%s] 的错误信息[%s]", user.full_name, user.id, chat.title, chat.id, content)
+            logger.info(
+                "尝试通知用户 %s[%s] 在 %s[%s] 的错误信息[%s]",
+                user.full_name,
+                user.id,
+                chat.title,
+                chat.id,
+                content,
+            )
         try:
             if update.callback_query:
                 await update.callback_query.answer(content, show_alert=True)
                 return
             if message:
-                reply_text = await message.reply_text(content, reply_markup=buttons, allow_sending_without_reply=True)
+                reply_text = await message.reply_text(
+                    content, reply_markup=buttons, allow_sending_without_reply=True
+                )
                 if filters.ChatType.GROUPS.filter(reply_text):
                     self.add_delete_message_job(reply_text, context=context)
                     self.add_delete_message_job(message, context=context)
@@ -93,14 +126,22 @@ class ErrorHandler(Plugin):
         except TelegramError as exc:
             logger.error(self.SEND_MSG_ERROR_NOTICE, update.update_id, exc.message)
         except Exception as exc:
-            logger.error(self.SEND_MSG_ERROR_NOTICE, update.update_id, repr(exc), exc_info=exc)
+            logger.error(
+                self.SEND_MSG_ERROR_NOTICE, update.update_id, repr(exc), exc_info=exc
+            )
 
-    def create_notice_task(self, update: object, context: CallbackContext, content: str):
-        context.application.create_task(self.notice_user(update, context, content), update)
+    def create_notice_task(
+        self, update: object, context: CallbackContext, content: str
+    ):
+        context.application.create_task(
+            self.notice_user(update, context, content), update
+        )
 
     @error_handler()
     async def process_genshin_exception(self, update: object, context: CallbackContext):
-        if not isinstance(context.error, GenshinException) or not isinstance(update, Update):
+        if not isinstance(context.error, GenshinException) or not isinstance(
+            update, Update
+        ):
             return
         exc = context.error
         notice: Optional[str] = None
@@ -110,10 +151,15 @@ class ErrorHandler(Plugin):
             if exc.retcode in (10001, -100):
                 notice = self.ERROR_MSG_PREFIX + "Cookie 无效，请尝试重新绑定"
             elif exc.retcode == 10103:
-                notice = self.ERROR_MSG_PREFIX + "Cookie 有效，但没有绑定到游戏帐户，请尝试登录通行证，在账号管理里面选择账号游戏信息，将原神设置为默认角色。"
+                notice = (
+                    self.ERROR_MSG_PREFIX
+                    + "Cookie 有效，但没有绑定到游戏帐户，请尝试登录通行证，在账号管理里面选择账号游戏信息，将原神设置为默认角色。"
+                )
             else:
                 logger.error("未知Cookie错误", exc_info=exc)
-                notice = self.ERROR_MSG_PREFIX + f"Cookie 无效 错误信息为 {exc.original} 请尝试重新绑定"
+                notice = (
+                    self.ERROR_MSG_PREFIX + f"Cookie 无效 错误信息为 {exc.original} 请尝试重新绑定"
+                )
         elif isinstance(exc, DataNotPublic):
             notice = self.ERROR_MSG_PREFIX + "查询的用户数据未公开"
         else:
@@ -130,15 +176,20 @@ class ErrorHandler(Plugin):
             else:
                 logger.error("GenshinException", exc_info=exc)
                 notice = (
-                    self.ERROR_MSG_PREFIX + f"获取账号信息发生错误 错误信息为 {exc.original if exc.original else exc.retcode} ~ 请稍后再试"
+                    self.ERROR_MSG_PREFIX
+                    + f"获取账号信息发生错误 错误信息为 {exc.original if exc.original else exc.retcode} ~ 请稍后再试"
                 )
         if notice:
             self.create_notice_task(update, context, notice)
             raise ApplicationHandlerStop
 
     @error_handler()
-    async def process_telegram_exception(self, update: object, context: CallbackContext):
-        if not isinstance(context.error, TelegramError) or not isinstance(update, Update):
+    async def process_telegram_exception(
+        self, update: object, context: CallbackContext
+    ):
+        if not isinstance(context.error, TelegramError) or not isinstance(
+            update, Update
+        ):
             return
         notice: Optional[str] = None
         if isinstance(context.error, TimedOut):
@@ -166,23 +217,35 @@ class ErrorHandler(Plugin):
             raise ApplicationHandlerStop
 
     @error_handler()
-    async def process_telegram_update_exception(self, update: object, context: CallbackContext):
+    async def process_telegram_update_exception(
+        self, update: object, context: CallbackContext
+    ):
         if update is None and isinstance(context.error, NetworkError):
             logger.error("python-telegram-bot NetworkError : %s", context.error.message)
             raise ApplicationHandlerStop
 
     @error_handler()
-    async def process_apihelper_exception(self, update: object, context: CallbackContext):
-        if not isinstance(context.error, APIHelperException) or not isinstance(update, Update):
+    async def process_apihelper_exception(
+        self, update: object, context: CallbackContext
+    ):
+        if not isinstance(context.error, APIHelperException) or not isinstance(
+            update, Update
+        ):
             return
         exc = context.error
         notice: Optional[str] = None
         if isinstance(exc, APIHelperTimedOut):
             notice = self.ERROR_MSG_PREFIX + " 服务器熟啦 ~ 请稍后再试"
         elif isinstance(exc, ReturnCodeError):
-            notice = self.ERROR_MSG_PREFIX + f"API请求错误 错误信息为 {exc.message if exc.message else exc.code} ~ 请稍后再试"
+            notice = (
+                self.ERROR_MSG_PREFIX
+                + f"API请求错误 错误信息为 {exc.message if exc.message else exc.code} ~ 请稍后再试"
+            )
         elif isinstance(exc, ResponseException):
-            notice = self.ERROR_MSG_PREFIX + f"API请求错误 错误信息为 {exc.message if exc.message else exc.code} ~ 请稍后再试"
+            notice = (
+                self.ERROR_MSG_PREFIX
+                + f"API请求错误 错误信息为 {exc.message if exc.message else exc.code} ~ 请稍后再试"
+            )
         if notice:
             self.create_notice_task(update, context, notice)
             raise ApplicationHandlerStop
@@ -221,12 +284,17 @@ class ErrorHandler(Plugin):
         logger the error and send a telegram message to notify the developer."""
 
         logger.error("处理函数时发生异常")
-        logger.exception(context.error, exc_info=(type(context.error), context.error, context.error.__traceback__))
+        logger.exception(
+            context.error,
+            exc_info=(type(context.error), context.error, context.error.__traceback__),
+        )
 
         if not self.notice_chat_id:
             return
 
-        tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+        tb_list = traceback.format_exception(
+            None, context.error, context.error.__traceback__
+        )
         tb_string = "".join(tb_list)
 
         update_str = update.to_dict() if isinstance(update, Update) else str(update)
@@ -277,10 +345,15 @@ class ErrorHandler(Plugin):
                 )
                 text = "出错了呜呜呜 ~ 彦卿这边发生了点问题无法处理！"
                 await context.bot.send_message(
-                    effective_message.chat_id, text, reply_markup=ReplyKeyboardRemove(), parse_mode=ParseMode.HTML
+                    effective_message.chat_id,
+                    text,
+                    reply_markup=ReplyKeyboardRemove(),
+                    parse_mode=ParseMode.HTML,
                 )
         except NetworkError as exc:
-            logger.error("发送 update_id[%s] 错误信息失败 错误信息为 %s", update.update_id, exc.message)
+            logger.error(
+                "发送 update_id[%s] 错误信息失败 错误信息为 %s", update.update_id, exc.message
+            )
         if self.pb_client.enabled:
             logger.info("正在上传日记到 pb")
             try:
@@ -300,7 +373,10 @@ class ErrorHandler(Plugin):
         if self.sentry.enabled:
             logger.info("正在上传日记到 sentry")
             try:
-                self.sentry.report_error(update, (type(context.error), context.error, context.error.__traceback__))
+                self.sentry.report_error(
+                    update,
+                    (type(context.error), context.error, context.error.__traceback__),
+                )
                 logger.success("上传日记到 sentry 成功")
             except SentryClientException as exc:
                 logger.warning("上传错误信息至 sentry 失败", exc_info=exc)

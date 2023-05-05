@@ -49,7 +49,10 @@ class QuizService(BaseService):
             return question_count
 
     async def get_question_id_list(self) -> List[int]:
-        return [int(question_id) for question_id in await self._cache.get_all_question_id_list()]
+        return [
+            int(question_id)
+            for question_id in await self._cache.get_all_question_id_list()
+        ]
 
     async def get_answer(self, answer_id: int) -> Answer:
         return await self._cache.get_one_answer(answer_id)

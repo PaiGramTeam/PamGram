@@ -8,7 +8,17 @@ from functools import cached_property, lru_cache, partial
 from multiprocessing import RLock as Lock
 from pathlib import Path
 from ssl import SSLZeroReturnError
-from typing import AsyncIterator, Awaitable, Callable, ClassVar, Dict, Optional, TYPE_CHECKING, TypeVar, Union
+from typing import (
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    ClassVar,
+    Dict,
+    Optional,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+)
 
 from aiofiles import open as async_open
 from aiofiles.os import remove as async_remove
@@ -19,9 +29,18 @@ from typing_extensions import Self
 
 from core.base_service import BaseService
 from core.config import config
-from metadata.genshin import AVATAR_DATA, HONEY_DATA, MATERIAL_DATA, NAMECARD_DATA, WEAPON_DATA
+from metadata.genshin import (
+    AVATAR_DATA,
+    HONEY_DATA,
+    MATERIAL_DATA,
+    NAMECARD_DATA,
+    WEAPON_DATA,
+)
 from metadata.scripts.honey import update_honey_metadata
-from metadata.scripts.metadatas import update_metadata_from_ambr, update_metadata_from_github
+from metadata.scripts.metadatas import (
+    update_metadata_from_ambr,
+    update_metadata_from_github,
+)
 from metadata.shortname import roleToId, weaponToId
 from utils.const import AMBR_HOST, ENKA_HOST, PROJECT_ROOT
 from utils.log import logger
@@ -31,9 +50,18 @@ if TYPE_CHECKING:
     from httpx import Response
     from multiprocessing.synchronize import RLock
 
-__all__ = ("AssetsServiceType", "AssetsService", "AssetsServiceError", "AssetsCouldNotFound", "DEFAULT_EnkaAssets")
+__all__ = (
+    "AssetsServiceType",
+    "AssetsService",
+    "AssetsServiceError",
+    "AssetsCouldNotFound",
+    "DEFAULT_EnkaAssets",
+)
 
-ICON_TYPE = Union[Callable[[bool], Awaitable[Optional[Path]]], Callable[..., Awaitable[Optional[Path]]]]
+ICON_TYPE = Union[
+    Callable[[bool], Awaitable[Optional[Path]]],
+    Callable[..., Awaitable[Optional[Path]]],
+]
 NAME_MAP_TYPE = Dict[str, StrOrURL]
 
 ASSETS_PATH = PROJECT_ROOT.joinpath("resources/assets")
@@ -108,7 +136,10 @@ class _AssetsService(ABC):
 
         cls.icon_types = [  # 支持的图标类型
             k
-            for k, v in chain(cls.__annotations__.items(), *map(lambda x: x.__annotations__.items(), cls.__bases__))
+            for k, v in chain(
+                cls.__annotations__.items(),
+                *map(lambda x: x.__annotations__.items(), cls.__bases__),
+            )
             if v in [ICON_TYPE, "ICON_TYPE"]
         ]
         cls.type = cls.__name__.lstrip("_").split("Assets")[0].lower()  # 当前 assert 的类型
@@ -131,11 +162,16 @@ class _AssetsService(ABC):
         """从 url 下载图标至 path"""
         logger.debug("正在从 %s 下载图标至 %s", url, path)
         headers = None
-        if config.enka_network_api_agent is not None and URL(url).host == "enka.network":
+        if (
+            config.enka_network_api_agent is not None
+            and URL(url).host == "enka.network"
+        ):
             headers = {"user-agent": config.enka_network_api_agent}
         for time in range(retry):
             try:
-                response = await self.client.get(url, follow_redirects=False, headers=headers)
+                response = await self.client.get(
+                    url, follow_redirects=False, headers=headers
+                )
             except Exception as error:  # pylint: disable=W0703
                 if not isinstance(error, (HTTPError, SSLZeroReturnError)):
                     logger.error(error)  # 打印未知错误
@@ -150,11 +186,15 @@ class _AssetsService(ABC):
                 await file.write(response.content)  # 保存图标
             return path.resolve()
 
-    async def _get_from_ambr(self, item: str) -> AsyncIterator[str | None]:  # pylint: disable=W0613,R0201
+    async def _get_from_ambr(
+        self, item: str
+    ) -> AsyncIterator[str | None]:  # pylint: disable=W0613,R0201
         """从 ambr.top 上获取目标链接"""
         yield None
 
-    async def _get_from_enka(self, item: str) -> AsyncIterator[str | None]:  # pylint: disable=W0613,R0201
+    async def _get_from_enka(
+        self, item: str
+    ) -> AsyncIterator[str | None]:  # pylint: disable=W0613,R0201
         """从 enke.network 上获取目标链接"""
         yield None
 
@@ -166,7 +206,10 @@ class _AssetsService(ABC):
 
     async def _download_url_generator(self, item: str) -> AsyncIterator[str]:
         # 获取当前 `AssetsService` 的所有爬虫
-        for func in map(lambda x: getattr(self, x), sorted(filter(lambda x: x.startswith("_get_from_"), dir(self)))):
+        for func in map(
+            lambda x: getattr(self, x),
+            sorted(filter(lambda x: x.startswith("_get_from_"), dir(self))),
+        ):
             async for url in func(item):
                 if url is not None:
                     try:
@@ -258,7 +301,9 @@ class _AvatarAssets(_AssetsService):
         cid = getattr(self, "id", None)
         return None if api is None or cid is None else api.character(cid)
 
-    def __init__(self, client: Optional[AsyncClient] = None, enka: Optional[EnkaAssets] = None):
+    def __init__(
+        self, client: Optional[AsyncClient] = None, enka: Optional[EnkaAssets] = None
+    ):
         super().__init__(client)
         self._enka_api = enka or DEFAULT_EnkaAssets
 
@@ -373,7 +418,9 @@ class _MaterialAssets(_AssetsService):
             if target.isnumeric():
                 target = int(target)
             else:
-                target = {v["name"]: int(k) for k, v in MATERIAL_DATA.items()}.get(target)
+                target = {v["name"]: int(k) for k, v in MATERIAL_DATA.items()}.get(
+                    target
+                )
         if isinstance(target, str) or target is None:
             raise AssetsCouldNotFound("找不到对应的素材", temp)
         result.id = target
@@ -418,7 +465,9 @@ class _ArtifactAssets(_AssetsService):
 
     async def _get_from_ambr(self, item: str) -> AsyncIterator[str | None]:
         if item in self.game_name_map:
-            yield str(AMBR_HOST.join(f"assets/UI/reliquary/{self.game_name_map[item]}.png"))
+            yield str(
+                AMBR_HOST.join(f"assets/UI/reliquary/{self.game_name_map[item]}.png")
+            )
 
     @cached_property
     def game_name_map(self) -> dict[str, str]:
@@ -463,7 +512,9 @@ class _NamecardAssets(_AssetsService):
 
     @lru_cache
     def _get_id_from_avatar_id(self, avatar_id: Union[int, str]) -> int:
-        avatar_icon_name = AVATAR_DATA[str(avatar_id)]["icon"].replace("AvatarIcon", "NameCardIcon")
+        avatar_icon_name = AVATAR_DATA[str(avatar_id)]["icon"].replace(
+            "AvatarIcon", "NameCardIcon"
+        )
         for namecard_id, namecard_data in NAMECARD_DATA.items():
             if namecard_data["icon"] == avatar_icon_name:
                 return int(namecard_id)
@@ -479,10 +530,14 @@ class _NamecardAssets(_AssetsService):
 
     async def _get_from_ambr(self, item: str) -> AsyncIterator[str | None]:
         if item == "profile":
-            yield AMBR_HOST.join(f"assets/UI/namecard/{self.game_name_map[item]}.png.png")
+            yield AMBR_HOST.join(
+                f"assets/UI/namecard/{self.game_name_map[item]}.png.png"
+            )
 
     async def _get_from_enka(self, item: str) -> AsyncIterator[str | None]:
-        if (url := getattr(self.enka, {"profile": "banner"}.get(item, item), None)) is not None:
+        if (
+            url := getattr(self.enka, {"profile": "banner"}.get(item, item), None)
+        ) is not None:
             yield url.url
 
     @cached_property
@@ -527,7 +582,8 @@ class AssetsService(BaseService.Dependence):
 
     def __init__(self):
         for attr, assets_type_name in filter(
-            lambda x: (not x[0].startswith("_")) and x[1].endswith("Assets"), self.__annotations__.items()
+            lambda x: (not x[0].startswith("_")) and x[1].endswith("Assets"),
+            self.__annotations__.items(),
         ):
             setattr(self, attr, globals()[assets_type_name]())
 

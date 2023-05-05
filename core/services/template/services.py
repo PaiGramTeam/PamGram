@@ -40,7 +40,9 @@ class TemplateService(BaseService):
             autoescape=True,
             auto_reload=application_config.debug,
         )
-        self.using_preview = application_config.debug and application_config.webserver.enable
+        self.using_preview = (
+            application_config.debug and application_config.webserver.enable
+        )
 
         if self.using_preview:
             self.previewer = TemplatePreviewer(self, preview_cache, app.web_app)
@@ -95,7 +97,9 @@ class TemplateService(BaseService):
         template = self.get_template(template_name)
 
         if self.using_preview:
-            preview_url = await self.previewer.get_preview_url(template_name, template_data)
+            preview_url = await self.previewer.get_preview_url(
+                template_name, template_data
+            )
             logger.debug("调试模板 URL: \n%s", preview_url)
 
         html = await template.render_async(**template_data)
@@ -149,7 +153,9 @@ class TemplateService(BaseService):
         )
 
 
-class TemplatePreviewer(BaseService, load=application_config.webserver.enable and application_config.debug):
+class TemplatePreviewer(
+    BaseService, load=application_config.webserver.enable and application_config.debug
+):
     def __init__(
         self,
         template_service: TemplateService,
@@ -180,18 +186,24 @@ class TemplatePreviewer(BaseService, load=application_config.webserver.enable an
         """注册预览用到的路由"""
 
         @self.web_app.get("/preview/{path:path}")
-        async def preview_template(path: str, key: Optional[str] = None):  # pylint: disable=W0612
+        async def preview_template(
+            path: str, key: Optional[str] = None
+        ):  # pylint: disable=W0612
             # 如果是 /preview/ 开头的静态文件，直接返回内容。比如使用相对链接 ../ 引入的静态资源
             if not path.endswith(".html"):
                 full_path = self.template_service.template_dir / path
                 if not full_path.is_file():
-                    raise HTTPException(status_code=404, detail=f"Template '{path}' not found")
+                    raise HTTPException(
+                        status_code=404, detail=f"Template '{path}' not found"
+                    )
                 return FileResponse(full_path)
 
             # 取回暂存的渲染数据
             data = await self.cache.get_data(key) if key else {}
             if key and data is None:
-                raise HTTPException(status_code=404, detail=f"Template data {key} not found")
+                raise HTTPException(
+                    status_code=404, detail=f"Template data {key} not found"
+                )
 
             # 渲染 jinja2 模板
             html = await self.template_service.render_async(path, data)
@@ -204,4 +216,6 @@ class TemplatePreviewer(BaseService, load=application_config.webserver.enable an
         for name in ["cache", "resources"]:
             directory = PROJECT_ROOT / name
             directory.mkdir(exist_ok=True)
-            self.web_app.mount(f"/{name}", StaticFiles(directory=PROJECT_ROOT / name), name=name)
+            self.web_app.mount(
+                f"/{name}", StaticFiles(directory=PROJECT_ROOT / name), name=name
+            )

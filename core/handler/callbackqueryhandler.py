@@ -3,7 +3,10 @@ from contextlib import AbstractAsyncContextManager
 from types import TracebackType
 from typing import TypeVar, TYPE_CHECKING, Any, Optional, Type
 
-from telegram.ext import CallbackQueryHandler as BaseCallbackQueryHandler, ApplicationHandlerStop
+from telegram.ext import (
+    CallbackQueryHandler as BaseCallbackQueryHandler,
+    ApplicationHandlerStop,
+)
 
 from utils.log import logger
 

@@ -9,8 +9,15 @@ from httpx import URL, AsyncClient, RemoteProtocolError, Response
 from utils.const import AMBR_HOST, PROJECT_ROOT
 from utils.log import logger
 
-__all__ = ["update_metadata_from_ambr", "update_metadata_from_github", "make_github_fast", "RESOURCE_DEFAULT_PATH"]
-GENSHIN_PY_DATA_REPO = parse_token("aHR0cHM6Ly9naXRsYWIuY29tL0RpbWJyZWF0aC9nYW1lZGF0YS8tL3Jhdy9tYXN0ZXIv").decode()
+__all__ = [
+    "update_metadata_from_ambr",
+    "update_metadata_from_github",
+    "make_github_fast",
+    "RESOURCE_DEFAULT_PATH",
+]
+GENSHIN_PY_DATA_REPO = parse_token(
+    "aHR0cHM6Ly9naXRsYWIuY29tL0RpbWJyZWF0aC9nYW1lZGF0YS8tL3Jhdy9tYXN0ZXIv"
+).decode()
 RESOURCE_REPO = "PaiGramTeam/PaiGram_Resources"
 RESOURCE_BRANCH = "remote"
 RESOURCE_ROOT = "Resources"
@@ -50,8 +57,12 @@ async def update_metadata_from_github(overwrite: bool = True):
         return
 
     hosts = [
-        URL(f"https://ghproxy.net/https://raw.githubusercontent.com/{RESOURCE_DEFAULT_PATH}"),
-        URL(f"https://github.91chi.fun/https://raw.githubusercontent.com/{RESOURCE_DEFAULT_PATH}"),
+        URL(
+            f"https://ghproxy.net/https://raw.githubusercontent.com/{RESOURCE_DEFAULT_PATH}"
+        ),
+        URL(
+            f"https://github.91chi.fun/https://raw.githubusercontent.com/{RESOURCE_DEFAULT_PATH}"
+        ),
         URL(f"https://raw.fastgit.org/{RESOURCE_DEFAULT_PATH}"),
         URL(f"https://raw.githubusercontent.com/{RESOURCE_DEFAULT_PATH}"),
     ]
@@ -71,7 +82,9 @@ async def update_metadata_from_github(overwrite: bool = True):
                     if line in ["  },\n", "  }\n"]:
                         started = False
                         if any("MATERIAL_NAMECARD" in x for x in cell):
-                            material_json_data.append(json.loads("{" + "".join(cell) + "}"))
+                            material_json_data.append(
+                                json.loads("{" + "".join(cell) + "}")
+                            )
                         cell = []
                         continue
                     if started:
@@ -89,7 +102,9 @@ async def update_metadata_from_github(overwrite: bool = True):
             text_map_json_data = {}
             async with client.stream("GET", text_map_url) as response:
                 async for line in response.aiter_lines():
-                    if (string_id := (splits := line.split(":"))[0].strip(' "')) in string_ids:
+                    if (
+                        string_id := (splits := line.split(":"))[0].strip(' "')
+                    ) in string_ids:
                         text_map_json_data[string_id] = splits[1].strip('\n ,"')
                         string_ids.remove(string_id)
                     if not string_ids:
@@ -102,7 +117,9 @@ async def update_metadata_from_github(overwrite: bool = True):
                 navbar = namecard_data["picPath"][0]
                 banner = namecard_data["picPath"][1]
                 rank = namecard_data["rankLevel"]
-                description = text_map_json_data[str(namecard_data["descTextMapHash"])].replace("\\n", "\n")
+                description = text_map_json_data[
+                    str(namecard_data["descTextMapHash"])
+                ].replace("\\n", "\n")
                 data.update(
                     {
                         str(namecard_data["id"]): {

@@ -41,7 +41,11 @@ class MTProto(BaseService.Dependence):
         http_proxy = os.environ.get("HTTP_PROXY")
         if http_proxy is not None:
             http_proxy_url = urlparse(http_proxy)
-            self.proxy = {"scheme": "http", "hostname": http_proxy_url.hostname, "port": http_proxy_url.port}
+            self.proxy = {
+                "scheme": "http",
+                "hostname": http_proxy_url.hostname,
+                "port": http_proxy_url.port,
+            }
 
     async def initialize(self):  # pylint: disable=W0221
         if not PYROGRAM_AVAILABLE:

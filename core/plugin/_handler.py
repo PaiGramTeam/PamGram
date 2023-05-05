@@ -97,7 +97,12 @@ class _Handler:
 
         cls._type = getattr(Module, handler_name, None)
 
-    def __init__(self, admin: bool = False, dispatcher: Optional[Type["AbstractDispatcher"]] = None, **kwargs) -> None:
+    def __init__(
+        self,
+        admin: bool = False,
+        dispatcher: Optional[Type["AbstractDispatcher"]] = None,
+        **kwargs,
+    ) -> None:
         self.dispatcher = dispatcher
         self.admin = admin
         self.kwargs = kwargs
@@ -107,7 +112,12 @@ class _Handler:
 
         handler_datas = getattr(func, HANDLER_DATA_ATTR_NAME, [])
         handler_datas.append(
-            HandlerData(type=self._type, admin=self.admin, kwargs=self.kwargs, dispatcher=self.dispatcher)
+            HandlerData(
+                type=self._type,
+                admin=self.admin,
+                kwargs=self.kwargs,
+                dispatcher=self.dispatcher,
+            )
         )
         setattr(func, HANDLER_DATA_ATTR_NAME, handler_datas)
 
@@ -123,11 +133,18 @@ class _CallbackQuery(_Handler):
         admin: bool = False,
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):
-        super(_CallbackQuery, self).__init__(pattern=pattern, block=block, admin=admin, dispatcher=dispatcher)
+        super(_CallbackQuery, self).__init__(
+            pattern=pattern, block=block, admin=admin, dispatcher=dispatcher
+        )
 
 
 class _ChatJoinRequest(_Handler):
-    def __init__(self, *, block: DVInput[bool] = DEFAULT_TRUE, dispatcher: Optional[Type["AbstractDispatcher"]] = None):
+    def __init__(
+        self,
+        *,
+        block: DVInput[bool] = DEFAULT_TRUE,
+        dispatcher: Optional[Type["AbstractDispatcher"]] = None,
+    ):
         super(_ChatJoinRequest, self).__init__(block=block, dispatcher=dispatcher)
 
 
@@ -139,7 +156,9 @@ class _ChatMember(_Handler):
         block: DVInput[bool] = DEFAULT_TRUE,
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):
-        super().__init__(chat_member_types=chat_member_types, block=block, dispatcher=dispatcher)
+        super().__init__(
+            chat_member_types=chat_member_types, block=block, dispatcher=dispatcher
+        )
 
 
 class _ChosenInlineResult(_Handler):
@@ -164,7 +183,11 @@ class _Command(_Handler):
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):
         super(_Command, self).__init__(
-            command=command, filters=filters, block=block, admin=admin, dispatcher=dispatcher
+            command=command,
+            filters=filters,
+            block=block,
+            admin=admin,
+            dispatcher=dispatcher,
         )
 
 
@@ -177,7 +200,9 @@ class _InlineQuery(_Handler):
         block: DVInput[bool] = DEFAULT_TRUE,
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):
-        super(_InlineQuery, self).__init__(pattern=pattern, block=block, chat_types=chat_types, dispatcher=dispatcher)
+        super(_InlineQuery, self).__init__(
+            pattern=pattern, block=block, chat_types=chat_types, dispatcher=dispatcher
+        )
 
 
 class _Message(_Handler):
@@ -189,21 +214,38 @@ class _Message(_Handler):
         admin: bool = False,
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ) -> None:
-        super(_Message, self).__init__(filters=filters, block=block, admin=admin, dispatcher=dispatcher)
+        super(_Message, self).__init__(
+            filters=filters, block=block, admin=admin, dispatcher=dispatcher
+        )
 
 
 class _PollAnswer(_Handler):
-    def __init__(self, *, block: DVInput[bool] = DEFAULT_TRUE, dispatcher: Optional[Type["AbstractDispatcher"]] = None):
+    def __init__(
+        self,
+        *,
+        block: DVInput[bool] = DEFAULT_TRUE,
+        dispatcher: Optional[Type["AbstractDispatcher"]] = None,
+    ):
         super(_PollAnswer, self).__init__(block=block, dispatcher=dispatcher)
 
 
 class _Poll(_Handler):
-    def __init__(self, *, block: DVInput[bool] = DEFAULT_TRUE, dispatcher: Optional[Type["AbstractDispatcher"]] = None):
+    def __init__(
+        self,
+        *,
+        block: DVInput[bool] = DEFAULT_TRUE,
+        dispatcher: Optional[Type["AbstractDispatcher"]] = None,
+    ):
         super(_Poll, self).__init__(block=block, dispatcher=dispatcher)
 
 
 class _PreCheckoutQuery(_Handler):
-    def __init__(self, *, block: DVInput[bool] = DEFAULT_TRUE, dispatcher: Optional[Type["AbstractDispatcher"]] = None):
+    def __init__(
+        self,
+        *,
+        block: DVInput[bool] = DEFAULT_TRUE,
+        dispatcher: Optional[Type["AbstractDispatcher"]] = None,
+    ):
         super(_PreCheckoutQuery, self).__init__(block=block, dispatcher=dispatcher)
 
 
@@ -218,12 +260,21 @@ class _Prefix(_Handler):
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):
         super(_Prefix, self).__init__(
-            prefix=prefix, command=command, filters=filters, block=block, dispatcher=dispatcher
+            prefix=prefix,
+            command=command,
+            filters=filters,
+            block=block,
+            dispatcher=dispatcher,
         )
 
 
 class _ShippingQuery(_Handler):
-    def __init__(self, *, block: DVInput[bool] = DEFAULT_TRUE, dispatcher: Optional[Type["AbstractDispatcher"]] = None):
+    def __init__(
+        self,
+        *,
+        block: DVInput[bool] = DEFAULT_TRUE,
+        dispatcher: Optional[Type["AbstractDispatcher"]] = None,
+    ):
         super(_ShippingQuery, self).__init__(block=block, dispatcher=dispatcher)
 
 
@@ -236,7 +287,9 @@ class _StringCommand(_Handler):
         block: DVInput[bool] = DEFAULT_TRUE,
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):
-        super(_StringCommand, self).__init__(command=command, block=block, admin=admin, dispatcher=dispatcher)
+        super(_StringCommand, self).__init__(
+            command=command, block=block, admin=admin, dispatcher=dispatcher
+        )
 
 
 class _StringRegex(_Handler):
@@ -248,7 +301,9 @@ class _StringRegex(_Handler):
         admin: bool = False,
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):
-        super(_StringRegex, self).__init__(pattern=pattern, block=block, admin=admin, dispatcher=dispatcher)
+        super(_StringRegex, self).__init__(
+            pattern=pattern, block=block, admin=admin, dispatcher=dispatcher
+        )
 
 
 class _Type(_Handler):
@@ -261,7 +316,9 @@ class _Type(_Handler):
         block: DVInput[bool] = DEFAULT_TRUE,
         dispatcher: Optional[Type["AbstractDispatcher"]] = None,
     ):  # pylint: disable=redefined-builtin
-        super(_Type, self).__init__(type=type, strict=strict, block=block, dispatcher=dispatcher)
+        super(_Type, self).__init__(
+            type=type, strict=strict, block=block, dispatcher=dispatcher
+        )
 
 
 # noinspection PyPep8Naming
@@ -317,7 +374,11 @@ class _ConversationType:
 
 
 def _entry(func: Callable[P, R]) -> Callable[P, R]:
-    setattr(func, CONVERSATION_HANDLER_ATTR_NAME, ConversationData(type=ConversationDataType.Entry))
+    setattr(
+        func,
+        CONVERSATION_HANDLER_ATTR_NAME,
+        ConversationData(type=ConversationDataType.Entry),
+    )
 
     @wraps(func, assigned=WRAPPER_ASSIGNMENTS)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
@@ -331,12 +392,20 @@ class _State(_ConversationType):
         self.state = state
 
     def __call__(self, func: Callable[P, T] = None) -> Callable[P, T]:
-        setattr(func, CONVERSATION_HANDLER_ATTR_NAME, ConversationData(type=self._type, state=self.state))
+        setattr(
+            func,
+            CONVERSATION_HANDLER_ATTR_NAME,
+            ConversationData(type=self._type, state=self.state),
+        )
         return func
 
 
 def _fallback(func: Callable[P, R]) -> Callable[P, R]:
-    setattr(func, CONVERSATION_HANDLER_ATTR_NAME, ConversationData(type=ConversationDataType.Fallback))
+    setattr(
+        func,
+        CONVERSATION_HANDLER_ATTR_NAME,
+        ConversationData(type=ConversationDataType.Fallback),
+    )
 
     @wraps(func, assigned=WRAPPER_ASSIGNMENTS)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:

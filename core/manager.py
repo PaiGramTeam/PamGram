@@ -7,7 +7,12 @@ from arkowrapper import ArkoWrapper
 from async_timeout import timeout
 from typing_extensions import ParamSpec
 
-from core.base_service import BaseServiceType, ComponentType, DependenceType, get_all_services
+from core.base_service import (
+    BaseServiceType,
+    ComponentType,
+    DependenceType,
+    get_all_services,
+)
 from core.config import config as bot_config
 from utils.const import PLUGIN_DIR, PROJECT_ROOT
 from utils.helpers import gen_pkg
@@ -18,7 +23,13 @@ if TYPE_CHECKING:
     from core.plugin import PluginType
     from core.builtins.executor import Executor
 
-__all__ = ("DependenceManager", "PluginManager", "ComponentManager", "ServiceManager", "Managers")
+__all__ = (
+    "DependenceManager",
+    "PluginManager",
+    "ComponentManager",
+    "ServiceManager",
+    "Managers",
+)
 
 R = TypeVar("R")
 T = TypeVar("T")
@@ -32,7 +43,11 @@ def _load_module(path: Path) -> None:
             import_module(pkg)
         except Exception as e:
             logger.exception(
-                '在导入 "%s" 的过程中遇到了错误 [red bold]%s[/]', pkg, type(e).__name__, exc_info=e, extra={"markup": True}
+                '在导入 "%s" 的过程中遇到了错误 [red bold]%s[/]',
+                pkg,
+                type(e).__name__,
+                exc_info=e,
+                extra={"markup": True},
             )
             raise SystemExit from e
 
@@ -50,14 +65,18 @@ class Manager(Generic[T]):
     @property
     def application(self) -> "Application":
         if self._application is None:
-            raise RuntimeError(f"No application was set for this {self.__class__.__name__}.")
+            raise RuntimeError(
+                f"No application was set for this {self.__class__.__name__}."
+            )
         return self._application
 
     @property
     def executor(self) -> "Executor":
         """执行器"""
         if self._executor is None:
-            raise RuntimeError(f"No executor was set for this {self.__class__.__name__}.")
+            raise RuntimeError(
+                f"No executor was set for this {self.__class__.__name__}."
+            )
         return self._executor
 
     def build_executor(self, name: str):
@@ -136,7 +155,8 @@ class ComponentManager(Manager[ComponentType]):
 
     async def init_components(self):
         for path in filter(
-            lambda x: x.is_dir() and not x.name.startswith("_"), PROJECT_ROOT.joinpath("core/services").iterdir()
+            lambda x: x.is_dir() and not x.name.startswith("_"),
+            PROJECT_ROOT.joinpath("core/services").iterdir(),
         ):
             _load_module(path)
         components = ArkoWrapper(get_all_services()).filter(lambda x: x.is_component)
@@ -153,7 +173,12 @@ class ComponentManager(Manager[ComponentType]):
                     self._components[component] = instance
                     components = components.remove(component)
                 except Exception as e:  # pylint: disable=W0703
-                    logger.debug('组件 "%s" 初始化失败: [red]%s[/]', component.__name__, e, extra={"markup": True})
+                    logger.debug(
+                        '组件 "%s" 初始化失败: [red]%s[/]',
+                        component.__name__,
+                        e,
+                        extra={"markup": True},
+                    )
             end_len = len(list(components))
             if start_len == end_len:
                 retry_times += 1
@@ -177,7 +202,9 @@ class ServiceManager(Manager[BaseServiceType]):
     def services_map(self) -> Dict[Type[BaseServiceType], BaseServiceType]:
         return self._services
 
-    async def _initialize_service(self, target: Type[BaseServiceType]) -> BaseServiceType:
+    async def _initialize_service(
+        self, target: Type[BaseServiceType]
+    ) -> BaseServiceType:
         instance: BaseServiceType
         try:
             if hasattr(target, "from_config"):  # 如果有 from_config 方法
@@ -196,11 +223,14 @@ class ServiceManager(Manager[BaseServiceType]):
 
     async def start_services(self) -> None:
         for path in filter(
-            lambda x: x.is_dir() and not x.name.startswith("_"), PROJECT_ROOT.joinpath("core/services").iterdir()
+            lambda x: x.is_dir() and not x.name.startswith("_"),
+            PROJECT_ROOT.joinpath("core/services").iterdir(),
         ):
             _load_module(path)
 
-        for service in filter(lambda x: not x.is_component and not x.is_dependence, get_all_services()):  # 遍历所有服务类
+        for service in filter(
+            lambda x: not x.is_component and not x.is_dependence, get_all_services()
+        ):  # 遍历所有服务类
             instance = await self._initialize_service(service)
 
             self._lib[service] = instance
@@ -256,7 +286,11 @@ class PluginManager(Manager["PluginType"]):
             try:
                 instance: "PluginType" = await self.executor(plugin)
             except Exception as e:  # pylint: disable=W0703
-                logger.error('插件 "%s" 初始化失败', f"{plugin.__module__}.{plugin.__name__}", exc_info=e)
+                logger.error(
+                    '插件 "%s" 初始化失败',
+                    f"{plugin.__module__}.{plugin.__name__}",
+                    exc_info=e,
+                )
                 continue
 
             self._plugins[plugin] = instance
@@ -272,14 +306,18 @@ class PluginManager(Manager["PluginType"]):
             await instance.install()
             logger.success('插件 "%s" 安装成功', f"{plugin.__module__}.{plugin.__name__}")
         except Exception as e:  # pylint: disable=W0703
-            logger.error('插件 "%s" 安装失败', f"{plugin.__module__}.{plugin.__name__}", exc_info=e)
+            logger.error(
+                '插件 "%s" 安装失败', f"{plugin.__module__}.{plugin.__name__}", exc_info=e
+            )
 
     async def uninstall_plugins(self) -> None:
         for plugin in self._plugins.values():
             try:
                 await plugin.uninstall()
             except Exception as e:  # pylint: disable=W0703
-                logger.error('插件 "%s" 卸载失败', f"{plugin.__module__}.{plugin.__name__}", exc_info=e)
+                logger.error(
+                    '插件 "%s" 卸载失败', f"{plugin.__module__}.{plugin.__name__}", exc_info=e
+                )
 
 
 class Managers(DependenceManager, ComponentManager, ServiceManager, PluginManager):

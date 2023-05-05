@@ -8,8 +8,12 @@ __all__ = ("Gacha",)
 
 
 class Gacha:
-    GACHA_LIST_URL = "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/gacha/list.json"
-    GACHA_INFO_URL = "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/%s/zh-cn.json"
+    GACHA_LIST_URL = (
+        "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/gacha/list.json"
+    )
+    GACHA_INFO_URL = (
+        "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/%s/zh-cn.json"
+    )
 
     USER_AGENT = (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "

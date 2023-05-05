@@ -14,7 +14,11 @@ class LimiterHandler(TypeHandler[UT, CCT]):
     _lock = asyncio.Lock()
 
     def __init__(
-        self, max_rate: float = 5, time_period: float = 10, amount: float = 1, limit_time: Optional[float] = None
+        self,
+        max_rate: float = 5,
+        time_period: float = 10,
+        amount: float = 1,
+        limit_time: Optional[float] = None,
     ):
         """Limiter Handler 通过
         `Leaky bucket algorithm <https://en.wikipedia.org/wiki/Leaky_bucket>`_
@@ -35,7 +39,9 @@ class LimiterHandler(TypeHandler[UT, CCT]):
         self.limit_time = limit_time
         super().__init__(Update, self.limiter_callback)
 
-    async def limiter_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def limiter_callback(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ):
         if update.inline_query is not None:
             return
         loop = asyncio.get_running_loop()
@@ -64,7 +70,12 @@ class LimiterHandler(TypeHandler[UT, CCT]):
                         limit_time = 1 / self._rate_per_sec * self.amount
                     user_data["limit_time"] = time + limit_time
                     user = update.effective_user
-                    logger.warning("用户 %s[%s] 触发洪水限制 已被限制 %s 秒", user.full_name, user.id, limit_time)
+                    logger.warning(
+                        "用户 %s[%s] 触发洪水限制 已被限制 %s 秒",
+                        user.full_name,
+                        user.id,
+                        limit_time,
+                    )
                     raise ApplicationHandlerStop
             user_data["last_task_time"] = time
             task_level = user_data.get("task_level", 0)

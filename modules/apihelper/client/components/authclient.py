@@ -31,10 +31,18 @@ class AuthClient:
     TAKUMI_HOST = "api-takumi.mihoyo.com"
     QRCODE_GEN_API = f"https://{HK4E_SDK_HOST}/hk4e_cn/combo/panda/qrcode/fetch"
     QRCODE_GET_API = f"https://{HK4E_SDK_HOST}/hk4e_cn/combo/panda/qrcode/query"
-    GET_COOKIE_ACCOUNT_BY_GAME_TOKEN_API = f"https://{TAKUMI_HOST}/auth/api/getCookieAccountInfoByGameToken"
-    GET_TOKEN_BY_GAME_LTOKEN_API = f"https://{PASSPORT_HOST}/account/ma-cn-session/app/getTokenByGameToken"
-    GET_COOKIES_TOKEN_BY_STOKEN_API = f"https://{PASSPORT_HOST}/account/auth/api/getCookieAccountInfoBySToken"
-    GET_LTOKEN_BY_STOKEN_API = f"https://{PASSPORT_HOST}/account/auth/api/getLTokenBySToken"
+    GET_COOKIE_ACCOUNT_BY_GAME_TOKEN_API = (
+        f"https://{TAKUMI_HOST}/auth/api/getCookieAccountInfoByGameToken"
+    )
+    GET_TOKEN_BY_GAME_LTOKEN_API = (
+        f"https://{PASSPORT_HOST}/account/ma-cn-session/app/getTokenByGameToken"
+    )
+    GET_COOKIES_TOKEN_BY_STOKEN_API = (
+        f"https://{PASSPORT_HOST}/account/auth/api/getCookieAccountInfoBySToken"
+    )
+    GET_LTOKEN_BY_STOKEN_API = (
+        f"https://{PASSPORT_HOST}/account/auth/api/getLTokenBySToken"
+    )
     get_STOKEN_URL = f"https://{TAKUMI_HOST}/auth/api/getMultiTokenByLoginTicket"
 
     def __init__(
@@ -62,8 +70,14 @@ class AuthClient:
     async def get_stoken_by_login_ticket(self) -> bool:
         if self.cookies.login_ticket is None and self.user_id is None:
             return False
-        params = {"login_ticket": self.cookies.login_ticket, "uid": self.user_id, "token_types": 3}
-        data = await self.client.get(self.get_STOKEN_URL, params=params, headers={"User-Agent": self.USER_AGENT})
+        params = {
+            "login_ticket": self.cookies.login_ticket,
+            "uid": self.user_id,
+            "token_types": 3,
+        }
+        data = await self.client.get(
+            self.get_STOKEN_URL, params=params, headers={"User-Agent": self.USER_AGENT}
+        )
         res_json = data.json()
         res_data = res_json.get("data", {}).get("list", [])
         for i in res_data:
@@ -109,7 +123,9 @@ class AuthClient:
         return True
 
     async def create_qrcode_login(self) -> tuple[str, str]:
-        self.device_id = get_device_id("".join(random.choices((ascii_letters + digits), k=64)))
+        self.device_id = get_device_id(
+            "".join(random.choices((ascii_letters + digits), k=64))
+        )
         data = {"app_id": "8", "device": self.device_id}
         res = await self.client.post(self.QRCODE_GEN_API, json=data)
         res_json = res.json()
@@ -132,7 +148,9 @@ class AuthClient:
             return False
         uid = game_token["uid"]
         self.user_id = int(uid)
-        cookie_token_data = await self._get_cookie_token_data(game_token["token"], self.user_id)
+        cookie_token_data = await self._get_cookie_token_data(
+            game_token["token"], self.user_id
+        )
         await self.get_ltoken_by_game_token(game_token["token"])
         cookie_token = cookie_token_data["data"]["cookie_token"]
         self.cookies.cookie_token = cookie_token
@@ -147,7 +165,11 @@ class AuthClient:
             res_json = res.json()
             ret_code = res_json.get("retcode", 1)
             if ret_code != 0:
-                logger.debug("QRCODE_GET_API: [%s]%s", res_json.get("retcode"), res_json.get("message"))
+                logger.debug(
+                    "QRCODE_GET_API: [%s]%s",
+                    res_json.get("retcode"),
+                    res_json.get("message"),
+                )
                 return False
             logger.debug("QRCODE_GET_API: %s", res_json.get("data"))
             res_data = res_json.get("data", {})
@@ -218,10 +240,17 @@ class AuthClient:
 
     @staticmethod
     def generate_qrcode(url: str) -> bytes:
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
         qr.add_data(url)
         qr.make(fit=True)
-        img = qr.make_image(image_factory=PyPNGImage, fill_color="black", back_color="white")
+        img = qr.make_image(
+            image_factory=PyPNGImage, fill_color="black", back_color="white"
+        )
         bio = BytesIO()
         img.save(bio)
         return bio.getvalue()

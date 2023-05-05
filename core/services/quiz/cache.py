@@ -16,7 +16,10 @@ class QuizCache(BaseService.Component):
     async def get_all_question(self) -> List[Question]:
         temp_list = []
         qname = self.question_qname + "id_list"
-        data_list = [self.question_qname + f":{question_id}" for question_id in await self.client.lrange(qname, 0, -1)]
+        data_list = [
+            self.question_qname + f":{question_id}"
+            for question_id in await self.client.lrange(qname, 0, -1)
+        ]
         data = await self.client.mget(data_list)
         for i in data:
             temp_list.append(Question.parse_raw(i))
@@ -42,7 +45,9 @@ class QuizCache(BaseService.Component):
         if not question_list:
             return 0
         for question in question_list:
-            await self.client.set(f"{self.question_qname}:{question.question_id}", question.json())
+            await self.client.set(
+                f"{self.question_qname}:{question.question_id}", question.json()
+            )
         question_id_list = [question.question_id for question in question_list]
         await self.client.lpush(f"{self.question_qname}:id_list", *question_id_list)
         return await self.client.llen(f"{self.question_qname}:id_list")
@@ -63,7 +68,9 @@ class QuizCache(BaseService.Component):
         if not answer_list:
             return 0
         for answer in answer_list:
-            await self.client.set(f"{self.answer_qname}:{answer.answer_id}", answer.json())
+            await self.client.set(
+                f"{self.answer_qname}:{answer.answer_id}", answer.json()
+            )
         answer_id_list = [answer.answer_id for answer in answer_list]
         await self.client.lpush(f"{self.answer_qname}:id_list", *answer_id_list)
         return await self.client.llen(f"{self.answer_qname}:id_list")

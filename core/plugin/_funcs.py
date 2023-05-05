@@ -64,15 +64,28 @@ class PluginFuncs:
             # noinspection PyTypeChecker
             await context.bot.delete_message(chat_id=job.chat_id, message_id=message_id)
         except BadRequest as exc:
-            logger.warning("删除消息 %s message_id[%s] 失败 %s", chat_info, message_id, exc.message)
+            logger.warning(
+                "删除消息 %s message_id[%s] 失败 %s", chat_info, message_id, exc.message
+            )
         except Forbidden as exc:
-            logger.warning("删除消息 %s message_id[%s] 失败 %s", chat_info, message_id, exc.message)
+            logger.warning(
+                "删除消息 %s message_id[%s] 失败 %s", chat_info, message_id, exc.message
+            )
         except Exception as exc:
-            logger.error("删除消息 %s message_id[%s] 失败 %s", chat_info, message_id, exc_info=exc)
+            logger.error(
+                "删除消息 %s message_id[%s] 失败 %s", chat_info, message_id, exc_info=exc
+            )
 
-    async def get_chat(self, chat_id: Union[str, int], redis_db: Optional[RedisDB] = None, expire: int = 86400) -> Chat:
+    async def get_chat(
+        self,
+        chat_id: Union[str, int],
+        redis_db: Optional[RedisDB] = None,
+        expire: int = 86400,
+    ) -> Chat:
         application = self.application
-        redis_db: RedisDB = redis_db or self.application.managers.dependency_map.get(RedisDB, None)
+        redis_db: RedisDB = redis_db or self.application.managers.dependency_map.get(
+            RedisDB, None
+        )
 
         if not redis_db:
             return await application.bot.get_chat(chat_id)
@@ -115,9 +128,14 @@ class PluginFuncs:
             callback=self._delete_message,
             when=delay,
             data=message,
-            name=f"{chat}|{message}|{name}|delete_message" if name else f"{chat}|{message}|delete_message",
+            name=f"{chat}|{message}|{name}|delete_message"
+            if name
+            else f"{chat}|{message}|delete_message",
             chat_id=chat,
-            job_kwargs={"replace_existing": True, "id": f"{chat}|{message}|delete_message"},
+            job_kwargs={
+                "replace_existing": True,
+                "id": f"{chat}|{message}|delete_message",
+            },
         )
 
     @staticmethod
@@ -137,11 +155,17 @@ class PluginFuncs:
                     return ""
 
                 if response.is_error:
-                    logger.error("请求出现错误 url[%s] status_code[%s]", url, response.status_code)
+                    logger.error(
+                        "请求出现错误 url[%s] status_code[%s]", url, response.status_code
+                    )
                     raise UrlResourcesNotFoundError(url)
 
                 if response.status_code != 200:
-                    logger.error("download_resource 获取url[%s] 错误 status_code[%s]", url, response.status_code)
+                    logger.error(
+                        "download_resource 获取url[%s] 错误 status_code[%s]",
+                        url,
+                        response.status_code,
+                    )
                     raise UrlResourcesNotFoundError(url)
 
             async with aiofiles.open(file_path, mode="wb") as f:
@@ -174,5 +198,7 @@ class ConversationFuncs:
     @conversation.fallback
     @handler.command(command="cancel", block=False)
     async def cancel(self, update: Update, _) -> int:
-        await update.effective_message.reply_text("退出命令", reply_markup=ReplyKeyboardRemove())
+        await update.effective_message.reply_text(
+            "退出命令", reply_markup=ReplyKeyboardRemove()
+        )
         return ConversationHandler.END

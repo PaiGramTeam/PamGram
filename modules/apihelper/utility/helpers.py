@@ -29,7 +29,12 @@ def hex_digest(text):
     return _md5.hexdigest()
 
 
-def get_ds(ds_type: str = None, new_ds: bool = False, data: Any = None, params: Optional[Mapping[str, Any]] = None):
+def get_ds(
+    ds_type: str = None,
+    new_ds: bool = False,
+    data: Any = None,
+    params: Optional[Mapping[str, Any]] = None,
+):
     """DS 算法
 
     代码来自 https://github.com/y1ndan/genshinhelper

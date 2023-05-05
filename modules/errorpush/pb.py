@@ -12,7 +12,12 @@ class PbClientException(Exception):
 
 
 class PbClient:
-    def __init__(self, pb_url: Optional[str] = None, pb_sunset: Optional[int] = None, pb_max_lines: int = 1000):
+    def __init__(
+        self,
+        pb_url: Optional[str] = None,
+        pb_sunset: Optional[int] = None,
+        pb_max_lines: int = 1000,
+    ):
         """PbClient
         :param pb_url:
         :param pb_sunset: 自动销毁时间 单位为秒

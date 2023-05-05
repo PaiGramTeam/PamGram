@@ -11,10 +11,14 @@ class AnswerDB(SQLModel, table=True):
     __table_args__ = dict(mysql_charset="utf8mb4", mysql_collate="utf8mb4_general_ci")
 
     id: Optional[int] = Field(
-        default=None, primary_key=True, sa_column=Column(Integer, primary_key=True, autoincrement=True)
+        default=None,
+        primary_key=True,
+        sa_column=Column(Integer, primary_key=True, autoincrement=True),
     )
     question_id: Optional[int] = Field(
-        sa_column=Column(Integer, ForeignKey("question.id", ondelete="RESTRICT", onupdate="RESTRICT"))
+        sa_column=Column(
+            Integer, ForeignKey("question.id", ondelete="RESTRICT", onupdate="RESTRICT")
+        )
     )
     is_correct: Optional[bool] = Field()
     text: Optional[str] = Field()
@@ -25,7 +29,9 @@ class QuestionDB(SQLModel, table=True):
     __table_args__ = dict(mysql_charset="utf8mb4", mysql_collate="utf8mb4_general_ci")
 
     id: Optional[int] = Field(
-        default=None, primary_key=True, sa_column=Column(Integer, primary_key=True, autoincrement=True)
+        default=None,
+        primary_key=True,
+        sa_column=Column(Integer, primary_key=True, autoincrement=True),
     )
     text: Optional[str] = Field()
 
@@ -37,11 +43,21 @@ class Answer(BaseModel):
     text: str = ""
 
     def to_database_data(self) -> AnswerDB:
-        return AnswerDB(id=self.answer_id, question_id=self.question_id, text=self.text, is_correct=self.is_correct)
+        return AnswerDB(
+            id=self.answer_id,
+            question_id=self.question_id,
+            text=self.text,
+            is_correct=self.is_correct,
+        )
 
     @classmethod
     def de_database_data(cls, data: AnswerDB) -> Optional["Answer"]:
-        return cls(answer_id=data.id, question_id=data.question_id, text=data.text, is_correct=data.is_correct)
+        return cls(
+            answer_id=data.id,
+            question_id=data.question_id,
+            text=data.text,
+            is_correct=data.is_correct,
+        )
 
 
 class Question(BaseModel):

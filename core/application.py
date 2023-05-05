@@ -47,7 +47,12 @@ class Application(Singleton):
     _startup_funcs: List[Callable] = []
     _shutdown_funcs: List[Callable] = []
 
-    def __init__(self, managers: "Managers", telegram: "TelegramApplication", web_server: "Server") -> None:
+    def __init__(
+        self,
+        managers: "Managers",
+        telegram: "TelegramApplication",
+        web_server: "Server",
+    ) -> None:
         self._running = False
         self.managers = managers
         self.telegram = telegram
@@ -135,7 +140,9 @@ class Application(Singleton):
 
         def error_callback(exc: TelegramError) -> None:
             """错误信息回调"""
-            self.telegram.create_task(self.telegram.process_error(error=exc, update=None))
+            self.telegram.create_task(
+                self.telegram.process_error(error=exc, update=None)
+            )
 
         await self.telegram.initialize()
         logger.info("[blue]Telegram[/] 初始化成功", extra={"markup": True})
@@ -168,7 +175,9 @@ class Application(Singleton):
                 )
                 break
             except TimedOut:
-                logger.warning("连接至 [blue]telegram[/] 服务器失败，正在重试", extra={"markup": True})
+                logger.warning(
+                    "连接至 [blue]telegram[/] 服务器失败，正在重试", extra={"markup": True}
+                )
                 continue
             except NetworkError as e:
                 logger.exception()
@@ -189,7 +198,11 @@ class Application(Singleton):
 
     def stop_signal_handler(self, signum: int):
         """终止信号处理"""
-        signals = {k: v for v, k in signal.__dict__.items() if v.startswith("SIG") and not v.startswith("SIG_")}
+        signals = {
+            k: v
+            for v, k in signal.__dict__.items()
+            if v.startswith("SIG") and not v.startswith("SIG_")
+        }
         logger.debug("接收到了终止信号 %s 正在退出...", signals[signum])
         if self._web_server_task:
             self._web_server_task.cancel()

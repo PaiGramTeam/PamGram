@@ -65,7 +65,9 @@ class PublicCookiesCache(BaseService.Component):
         :return:
         """
         qname = self.get_public_cookies_queue_name(region)
-        scores = await self.client.zrange(qname, 0, self.end, withscores=True, score_cast_func=int)
+        scores = await self.client.zrange(
+            qname, 0, self.end, withscores=True, score_cast_func=int
+        )
         if len(scores) <= 0:
             raise CookiesCachePoolExhausted
         key = scores[0][0]

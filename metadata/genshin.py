@@ -3,7 +3,16 @@
 from __future__ import annotations
 
 import functools
-from typing import Any, Generic, ItemsView, Iterator, KeysView, Optional, TypeVar, ValuesView
+from typing import (
+    Any,
+    Generic,
+    ItemsView,
+    Iterator,
+    KeysView,
+    Optional,
+    TypeVar,
+    ValuesView,
+)
 
 import ujson as json
 
@@ -46,7 +55,8 @@ class Data(dict, Generic[K, V]):
             path = data_dir.joinpath(self._file_name).with_suffix(".json")
             if not path.exists():
                 logger.error(
-                    '暂未找到名为 "%s" 的 metadata , ' "请先使用 [yellow bold]/refresh_metadata[/] 命令下载",
+                    '暂未找到名为 "%s" 的 metadata , '
+                    "请先使用 [yellow bold]/refresh_metadata[/] 命令下载",
                     self._file_name,
                     extra={"markup": True},
                 )
@@ -97,27 +107,41 @@ HONEY_DATA: dict[str, dict[StrOrInt, list[str | int]]] = Data("honey")
 AVATAR_DATA: dict[str, dict[str, int | str | list[int]]] = Data("avatar")
 WEAPON_DATA: dict[str, dict[str, int | str]] = Data("weapon")
 MATERIAL_DATA: dict[str, dict[str, int | str]] = Data("material")
-ARTIFACT_DATA: dict[str, dict[str, int | str | list[int] | dict[str, str]]] = Data("reliquary")
+ARTIFACT_DATA: dict[str, dict[str, int | str | list[int] | dict[str, str]]] = Data(
+    "reliquary"
+)
 NAMECARD_DATA: dict[str, dict[str, int | str]] = Data("namecard")
 
 
 @functools.lru_cache()
 def honey_id_to_game_id(honey_id: str, item_type: str) -> str | None:
-    return next((key for key, value in HONEY_DATA[item_type].items() if value[0] == honey_id), None)
+    return next(
+        (key for key, value in HONEY_DATA[item_type].items() if value[0] == honey_id),
+        None,
+    )
 
 
 @functools.lru_cache
 def game_id_to_role_id(gid: str) -> int | None:
     return next(
-        (int(key.split("-")[0]) for key, value in AVATAR_DATA.items() if value["icon"].split("_")[-1] == gid), None
+        (
+            int(key.split("-")[0])
+            for key, value in AVATAR_DATA.items()
+            if value["icon"].split("_")[-1] == gid
+        ),
+        None,
     )
 
 
 @functools.lru_cache()
 def weapon_to_game_id(name: str) -> Optional[int]:
-    return next((int(key) for key, value in WEAPON_DATA.items() if value["name"] == name), None)
+    return next(
+        (int(key) for key, value in WEAPON_DATA.items() if value["name"] == name), None
+    )
 
 
 @functools.lru_cache()
 def avatar_to_game_id(name: str) -> Optional[int]:
-    return next((int(key) for key, value in AVATAR_DATA.items() if value["name"] == name), None)
+    return next(
+        (int(key) for key, value in AVATAR_DATA.items() if value["name"] == name), None
+    )

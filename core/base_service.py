@@ -6,7 +6,13 @@ from typing_extensions import Self
 
 from utils.helpers import isabstract
 
-__all__ = ("BaseService", "BaseServiceType", "DependenceType", "ComponentType", "get_all_services")
+__all__ = (
+    "BaseService",
+    "BaseServiceType",
+    "DependenceType",
+    "ComponentType",
+    "get_all_services",
+)
 
 
 class _BaseService:
@@ -56,5 +62,9 @@ ComponentType = TypeVar("ComponentType", bound=_Component)
 def get_all_services() -> Iterable[Type[_BaseService]]:
     return filter(
         lambda x: x.__name__[0] != "_" and x.load and not isabstract(x),
-        chain(BaseService.__subclasses__(), _Dependence.__subclasses__(), _Component.__subclasses__()),
+        chain(
+            BaseService.__subclasses__(),
+            _Dependence.__subclasses__(),
+            _Component.__subclasses__(),
+        ),
     )

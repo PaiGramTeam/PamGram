@@ -259,8 +259,12 @@ class _Conversation(_Plugin, ConversationFuncs, ABC):
                                 )
                             )
 
-                        if conversation_data := getattr(func, _CONVERSATION_HANDLER_ATTR_NAME, None):
-                            if (_type := conversation_data.type) is ConversationDataType.Entry:
+                        if conversation_data := getattr(
+                            func, _CONVERSATION_HANDLER_ATTR_NAME, None
+                        ):
+                            if (
+                                _type := conversation_data.type
+                            ) is ConversationDataType.Entry:
                                 entry_points.extend(handlers)
                             elif _type is ConversationDataType.State:
                                 if conversation_data.state in states:
@@ -276,12 +280,23 @@ class _Conversation(_Plugin, ConversationFuncs, ABC):
                 if entry_points and states and fallbacks:
                     kwargs = self._conversation_kwargs
                     kwargs.update(self.Config().dict())
-                    self._handlers.append(ConversationHandler(entry_points, states, fallbacks, **kwargs))
+                    self._handlers.append(
+                        ConversationHandler(entry_points, states, fallbacks, **kwargs)
+                    )
                 else:
-                    temp_dict = {"entry_points": entry_points, "states": states, "fallbacks": fallbacks}
-                    reason = map(lambda x: f"'{x[0]}'", filter(lambda x: not x[1], temp_dict.items()))
+                    temp_dict = {
+                        "entry_points": entry_points,
+                        "states": states,
+                        "fallbacks": fallbacks,
+                    }
+                    reason = map(
+                        lambda x: f"'{x[0]}'",
+                        filter(lambda x: not x[1], temp_dict.items()),
+                    )
                     logger.warning(
-                        "'%s' 因缺少 '%s' 而生成无法生成 ConversationHandler", self.__class__.__name__, ", ".join(reason)
+                        "'%s' 因缺少 '%s' 而生成无法生成 ConversationHandler",
+                        self.__class__.__name__,
+                        ", ".join(reason),
                     )
         return self._handlers
 

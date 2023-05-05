@@ -36,7 +36,12 @@ class CookiesModel(BaseModel):
 
     @property
     def is_v2(self) -> bool:
-        if self.account_mid_v2 or self.cookie_token_v2 or self.ltoken_v2 or self.ltmid_v2:
+        if (
+            self.account_mid_v2
+            or self.cookie_token_v2
+            or self.ltoken_v2
+            or self.ltmid_v2
+        ):
             return True
         return False
 

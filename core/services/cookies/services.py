@@ -37,7 +37,11 @@ class CookiesService(BaseService):
 
 
 class PublicCookiesService(BaseService):
-    def __init__(self, cookies_repository: CookiesRepository, public_cookies_cache: PublicCookiesCache):
+    def __init__(
+        self,
+        cookies_repository: CookiesRepository,
+        public_cookies_cache: PublicCookiesCache,
+    ):
         self._cache = public_cookies_cache
         self._repository: CookiesRepository = cookies_repository
         self.count: int = 0
@@ -53,20 +57,32 @@ class PublicCookiesService(BaseService):
         :return:
         """
         user_list: List[int] = []
-        cookies_list = await self._repository.get_all_by_region(RegionEnum.HYPERION)  # 从数据库获取2
+        cookies_list = await self._repository.get_all_by_region(
+            RegionEnum.HYPERION
+        )  # 从数据库获取2
         for cookies in cookies_list:
-            if cookies.status is None or cookies.status == CookiesStatusEnum.STATUS_SUCCESS:
+            if (
+                cookies.status is None
+                or cookies.status == CookiesStatusEnum.STATUS_SUCCESS
+            ):
                 user_list.append(cookies.user_id)
         if len(user_list) > 0:
-            add, count = await self._cache.add_public_cookies(user_list, RegionEnum.HYPERION)
+            add, count = await self._cache.add_public_cookies(
+                user_list, RegionEnum.HYPERION
+            )
             logger.info("国服公共Cookies池已经添加[%s]个 当前成员数为[%s]", add, count)
         user_list.clear()
         cookies_list = await self._repository.get_all_by_region(RegionEnum.HOYOLAB)
         for cookies in cookies_list:
-            if cookies.status is None or cookies.status == CookiesStatusEnum.STATUS_SUCCESS:
+            if (
+                cookies.status is None
+                or cookies.status == CookiesStatusEnum.STATUS_SUCCESS
+            ):
                 user_list.append(cookies.user_id)
         if len(user_list) > 0:
-            add, count = await self._cache.add_public_cookies(user_list, RegionEnum.HOYOLAB)
+            add, count = await self._cache.add_public_cookies(
+                user_list, RegionEnum.HOYOLAB
+            )
             logger.info("国际服公共Cookies池已经添加[%s]个 当前成员数为[%s]", add, count)
 
     async def get_cookies(self, user_id: int, region: RegionEnum = RegionEnum.NULL):
@@ -86,10 +102,17 @@ class PublicCookiesService(BaseService):
                 await self._cache.delete_public_cookies(public_id, region)
                 continue
             if region == RegionEnum.HYPERION:
-                client = genshin.Client(cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.CHINESE)
+                client = genshin.Client(
+                    cookies=cookies.data,
+                    game=types.Game.GENSHIN,
+                    region=types.Region.CHINESE,
+                )
             elif region == RegionEnum.HOYOLAB:
                 client = genshin.Client(
-                    cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.OVERSEAS, lang="zh-cn"
+                    cookies=cookies.data,
+                    game=types.Game.GENSHIN,
+                    region=types.Region.OVERSEAS,
+                    lang="zh-cn",
                 )
             else:
                 raise CookieServiceError
@@ -145,15 +168,30 @@ class PublicCookiesService(BaseService):
             except Exception as exc:
                 await self._cache.delete_public_cookies(cookies.user_id, region)
                 raise exc
-            logger.info("用户 user_id[%s] 请求用户 user_id[%s] 的公共Cookies 该Cookies使用次数为%s次 ", user_id, public_id, count)
+            logger.info(
+                "用户 user_id[%s] 请求用户 user_id[%s] 的公共Cookies 该Cookies使用次数为%s次 ",
+                user_id,
+                public_id,
+                count,
+            )
             return cookies
 
-    async def undo(self, user_id: int, cookies: Optional[Cookies] = None, status: Optional[CookiesStatusEnum] = None):
+    async def undo(
+        self,
+        user_id: int,
+        cookies: Optional[Cookies] = None,
+        status: Optional[CookiesStatusEnum] = None,
+    ):
         await self._cache.incr_by_user_times(user_id, -1)
         if cookies is not None and status is not None:
             cookies.status = status
             await self._repository.update(cookies)
             await self._cache.delete_public_cookies(cookies.user_id, cookies.region)
-            logger.info("用户 user_id[%s] 反馈用户 user_id[%s] 的Cookies状态为 %s", user_id, cookies.user_id, status.name)
+            logger.info(
+                "用户 user_id[%s] 反馈用户 user_id[%s] 的Cookies状态为 %s",
+                user_id,
+                cookies.user_id,
+                status.name,
+            )
         else:
             logger.info("用户 user_id[%s] 撤销一次公共Cookies计数", user_id)

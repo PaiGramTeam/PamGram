@@ -44,7 +44,9 @@ class HtmlToFileIdCache(BaseService.Component):
         if data:
             return data.decode()
 
-    async def set_data(self, html: str, file_type: str, file_id: str, ttl: int = 24 * 60 * 60):
+    async def set_data(
+        self, html: str, file_type: str, file_id: str, ttl: int = 24 * 60 * 60
+    ):
         ck = self.cache_key(html, file_type)
         await self.client.set(ck, file_id)
         if ttl != -1:

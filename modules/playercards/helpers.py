@@ -15,7 +15,9 @@ class ArtifactStatsTheory:
     def __init__(self, character_name: str):
         self.character_name = character_name
         fight_prop_rule_list = fight_prop_rule_data.get(self.character_name, [])
-        self.main_prop = [FightProp(fight_prop_rule) for fight_prop_rule in fight_prop_rule_list]
+        self.main_prop = [
+            FightProp(fight_prop_rule) for fight_prop_rule in fight_prop_rule_list
+        ]
         if not self.main_prop:
             self.main_prop = [
                 FightProp.FIGHT_PROP_CRITICAL,
@@ -23,9 +25,15 @@ class ArtifactStatsTheory:
                 FightProp.FIGHT_PROP_ATTACK_PERCENT,
             ]
         # 修正要评分的数值词条
-        if FightProp.FIGHT_PROP_ATTACK_PERCENT in self.main_prop and FightProp.FIGHT_PROP_ATTACK not in self.main_prop:
+        if (
+            FightProp.FIGHT_PROP_ATTACK_PERCENT in self.main_prop
+            and FightProp.FIGHT_PROP_ATTACK not in self.main_prop
+        ):
             self.main_prop.append(FightProp.FIGHT_PROP_ATTACK)
-        if FightProp.FIGHT_PROP_HP_PERCENT in self.main_prop and FightProp.FIGHT_PROP_HP not in self.main_prop:
+        if (
+            FightProp.FIGHT_PROP_HP_PERCENT in self.main_prop
+            and FightProp.FIGHT_PROP_HP not in self.main_prop
+        ):
             self.main_prop.append(FightProp.FIGHT_PROP_HP)
         if (
             FightProp.FIGHT_PROP_DEFENSE_PERCENT in self.main_prop

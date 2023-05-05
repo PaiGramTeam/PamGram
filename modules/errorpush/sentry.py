@@ -59,5 +59,7 @@ class SentryClient:
                 user_id = update.effective_chat.id
             if update.effective_message and update.effective_message.text:
                 message = update.effective_message.text
-        sentry_sdk.set_context("Target", {"ChatID": str(chat_id), "UserID": str(user_id), "Msg": message})
+        sentry_sdk.set_context(
+            "Target", {"ChatID": str(chat_id), "UserID": str(user_id), "Msg": message}
+        )
         sentry_sdk.capture_exception(exc_info)

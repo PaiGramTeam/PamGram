@@ -12,7 +12,9 @@ class StartPlugin(Plugin):
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] 发出start命令", user.full_name, user.id)
-        await message.reply_markdown_v2(f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是彦卿 ！')}")
+        await message.reply_markdown_v2(
+            f"你好 {user.mention_markdown_v2()} {escape_markdown('！我是彦卿 ！')}"
+        )
 
     @staticmethod
     async def unknown_command(update: Update, _: CallbackContext) -> None:

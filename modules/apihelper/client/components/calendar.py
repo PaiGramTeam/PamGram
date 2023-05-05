@@ -7,7 +7,14 @@ from httpx import AsyncClient
 from metadata.genshin import AVATAR_DATA
 from metadata.shortname import roleToId
 from modules.apihelper.client.components.remote import Remote
-from modules.apihelper.models.genshin.calendar import Date, FinalAct, ActEnum, ActDetail, ActTime, BirthChar
+from modules.apihelper.models.genshin.calendar import (
+    Date,
+    FinalAct,
+    ActEnum,
+    ActDetail,
+    ActTime,
+    BirthChar,
+)
 from modules.wiki.character import Character
 
 
@@ -18,8 +25,12 @@ if TYPE_CHECKING:
 class Calendar:
     """原神活动日历"""
 
-    ANNOUNCEMENT_LIST = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnList"
-    ANNOUNCEMENT_CONTENT = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnContent"
+    ANNOUNCEMENT_LIST = (
+        "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnList"
+    )
+    ANNOUNCEMENT_CONTENT = (
+        "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnContent"
+    )
     ANNOUNCEMENT_PARAMS = {
         "game": "hk4e",
         "game_biz": "hk4e_cn",
@@ -39,7 +50,9 @@ class Calendar:
         762,  # 《原神》公平运营声明
         762,  # 《原神》公平运营声明
     ]
-    IGNORE_RE = re.compile(r"(内容专题页|版本更新说明|调研|防沉迷|米游社|专项意见|更新修复与优化|问卷调查|版本更新通知|更新时间说明|预下载功能|周边限时|周边上新|角色演示)")
+    IGNORE_RE = re.compile(
+        r"(内容专题页|版本更新说明|调研|防沉迷|米游社|专项意见|更新修复与优化|问卷调查|版本更新通知|更新时间说明|预下载功能|周边限时|周边上新|角色演示)"
+    )
     FULL_TIME_RE = re.compile(r"(魔神任务)")
 
     def __init__(self):
@@ -73,7 +86,9 @@ class Calendar:
     async def parse_official_content_date(self) -> Dict[str, ActTime]:
         """解析官方内容时间"""
         time_map = {}
-        req = await self.client.get(self.ANNOUNCEMENT_CONTENT, params=self.ANNOUNCEMENT_PARAMS)
+        req = await self.client.get(
+            self.ANNOUNCEMENT_CONTENT, params=self.ANNOUNCEMENT_PARAMS
+        )
         if req.status_code != 200:
             return time_map
         detail_data = req.json()
@@ -85,8 +100,12 @@ class Calendar:
                 continue
             content = re.sub(r'(<|&lt;)[\w "%:;=\-\\/\\(\\),\\.]+(>|&gt;)', "", content)
             try:
-                if reg_ret := re.search(r"(?:活动时间|祈愿介绍|任务开放时间|冒险....包|折扣时间)\s*〓([^〓]+)(〓|$)", content):
-                    if time_ret := re.search(r"(?:活动时间)?(?:〓|\s)*([0-9\\/\\: ~]{6,})", reg_ret[1]):
+                if reg_ret := re.search(
+                    r"(?:活动时间|祈愿介绍|任务开放时间|冒险....包|折扣时间)\s*〓([^〓]+)(〓|$)", content
+                ):
+                    if time_ret := re.search(
+                        r"(?:活动时间)?(?:〓|\s)*([0-9\\/\\: ~]{6,})", reg_ret[1]
+                    ):
                         start_time, end_time = time_ret[1].split("~")
                         start_time = start_time.replace("/", "-").strip()
                         end_time = end_time.replace("/", "-").strip()
@@ -101,7 +120,9 @@ class Calendar:
 
     async def req_cal_data(self) -> Tuple[List[List[ActDetail]], Dict[str, ActTime]]:
         """请求日历数据"""
-        list_data = await self.client.get(self.ANNOUNCEMENT_LIST, params=self.ANNOUNCEMENT_PARAMS)
+        list_data = await self.client.get(
+            self.ANNOUNCEMENT_LIST, params=self.ANNOUNCEMENT_PARAMS
+        )
         list_data = list_data.json()
 
         new_list_data = [[], []]
@@ -113,10 +134,20 @@ class Calendar:
         req = await self.client.get(self.MIAO_API)
         if req.status_code == 200:
             miao_data = req.json()
-            time_map.update({key: ActTime(**value) for key, value in miao_data.get("data", {}).items()})
+            time_map.update(
+                {
+                    key: ActTime(**value)
+                    for key, value in miao_data.get("data", {}).items()
+                }
+            )
         remote_data = await Remote.get_remote_calendar()
         if remote_data:
-            time_map.update({key: ActTime(**value) for key, value in remote_data.get("data", {}).items()})
+            time_map.update(
+                {
+                    key: ActTime(**value)
+                    for key, value in remote_data.get("data", {}).items()
+                }
+            )
         return new_list_data, time_map
 
     @staticmethod
@@ -125,7 +156,9 @@ class Calendar:
         time = ["一", "二", "三", "四", "五", "六", "日"]
         return time[date_.weekday()]
 
-    async def get_date_list(self) -> Tuple[List[Date], datetime, datetime, timedelta, float]:
+    async def get_date_list(
+        self,
+    ) -> Tuple[List[Date], datetime, datetime, timedelta, float]:
         """获取日历数据"""
         data_list: List[Date] = []
         today = self.get_now_hour()
@@ -140,14 +173,18 @@ class Calendar:
                 start_date = temp
                 month = m
             if month != m and len(date) > 0:
-                data_list.append(Date(month=month, date=date, week=week, is_today=is_today))
+                data_list.append(
+                    Date(month=month, date=date, week=week, is_today=is_today)
+                )
                 date, week, is_today = [], [], []
                 month = m
             date.append(d)
             week.append(w)
             is_today.append(temp == today)
             if i == 12:
-                data_list.append(Date(month=month, date=date, week=week, is_today=is_today))
+                data_list.append(
+                    Date(month=month, date=date, week=week, is_today=is_today)
+                )
                 end_date = temp
         start_time = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         end_time = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
@@ -206,20 +243,32 @@ class Calendar:
         act.end = e_date.strftime("%m-%d %H:%M")
         return s_date, e_date
 
-    def parse_label(self, act: FinalAct, is_act: bool, s_date: datetime, e_date: datetime) -> None:
+    def parse_label(
+        self, act: FinalAct, is_act: bool, s_date: datetime, e_date: datetime
+    ) -> None:
         """解析活动标签"""
         now = self.get_now_hour()
         label = ""
-        if self.FULL_TIME_RE.findall(act.title) or e_date - s_date > timedelta(days=365):
-            label = f"{s_date.strftime('%m-%d %H:%M')} 后永久有效" if s_date < now else "永久有效"
+        if self.FULL_TIME_RE.findall(act.title) or e_date - s_date > timedelta(
+            days=365
+        ):
+            label = (
+                f"{s_date.strftime('%m-%d %H:%M')} 后永久有效" if s_date < now else "永久有效"
+            )
         elif s_date < now < e_date:
-            label = f'{e_date.strftime("%m-%d %H:%M")} ({self.human_read(e_date - now)}后结束)'
+            label = (
+                f'{e_date.strftime("%m-%d %H:%M")} ({self.human_read(e_date - now)}后结束)'
+            )
             if act.width > (38 if is_act else 55):
                 label = f"{s_date.strftime('%m-%d %H:%M')} ~ {label}"
         elif s_date > now:
-            label = f'{s_date.strftime("%m-%d %H:%M")} ({self.human_read(s_date - now)}后开始)'
+            label = (
+                f'{s_date.strftime("%m-%d %H:%M")} ({self.human_read(s_date - now)}后开始)'
+            )
         elif is_act:
-            label = f"{s_date.strftime('%m-%d %H:%M')} ~ {e_date.strftime('%m-%d %H:%M')}"
+            label = (
+                f"{s_date.strftime('%m-%d %H:%M')} ~ {e_date.strftime('%m-%d %H:%M')}"
+            )
         act.label = label
 
     @staticmethod
@@ -263,10 +312,16 @@ class Calendar:
         )
         detail: Optional[ActTime] = time_map.get(str(act.id))
 
-        if act.id in self.IGNORE_IDS or self.IGNORE_RE.findall(act.title) or (detail and not detail.display):
+        if (
+            act.id in self.IGNORE_IDS
+            or self.IGNORE_RE.findall(act.title)
+            or (detail and not detail.display)
+        ):
             return None
         await self.parse_type(act, assets)
-        s_date, e_date = self.count_width(act, detail, ds, start_time, end_time, total_range)
+        s_date, e_date = self.count_width(
+            act, detail, ds, start_time, end_time, total_range
+        )
         self.parse_label(act, is_act, s_date, e_date)
 
         if s_date <= end_time and e_date >= start_time:
@@ -274,7 +329,9 @@ class Calendar:
             return act
 
     @staticmethod
-    def get_abyss_cal(start_time: datetime, end_time: datetime) -> List[List[Union[datetime, str]]]:
+    def get_abyss_cal(
+        start_time: datetime, end_time: datetime
+    ) -> List[List[Union[datetime, str]]]:
         """获取深渊日历"""
         last = datetime.now().replace(day=1) - timedelta(days=2)
         last_month = last.month
@@ -284,10 +341,14 @@ class Calendar:
         next_month = next_date.month
 
         def start(date: datetime, up: bool = False):
-            return date.replace(day=1 if up else 16, hour=4, minute=0, second=0, microsecond=0)
+            return date.replace(
+                day=1 if up else 16, hour=4, minute=0, second=0, microsecond=0
+            )
 
         def end(date: datetime, up: bool = False):
-            return date.replace(day=1 if up else 16, hour=3, minute=59, second=59, microsecond=999999)
+            return date.replace(
+                day=1 if up else 16, hour=3, minute=59, second=59, microsecond=999999
+            )
 
         check = [
             [start(last, False), end(last, True), f"{last_month}月下半"],
@@ -331,11 +392,17 @@ class Calendar:
     def get_merge_next(target: List[FinalAct], li: FinalAct) -> Optional[FinalAct]:
         """获取下一个可以合并的活动"""
         return next(
-            (li2 for li2 in target if (li2.mergeStatus == 1) and (li.left + li.width <= li2.left)),
+            (
+                li2
+                for li2 in target
+                if (li2.mergeStatus == 1) and (li.left + li.width <= li2.left)
+            ),
             None,
         )
 
-    def merge_list(self, target: List[FinalAct]) -> Tuple[List[List[FinalAct]], int, int]:
+    def merge_list(
+        self, target: List[FinalAct]
+    ) -> Tuple[List[List[FinalAct]], int, int]:
         """将两个活动合并为一行"""
         char_count = 0
         char_old = 0
@@ -367,15 +434,21 @@ class Calendar:
             total_range,
             now_left,
         ) = await self.get_date_list()
-        birthday_char_line, birthday_chars = await self.get_birthday_char(date_list, assets)
+        birthday_char_line, birthday_chars = await self.get_birthday_char(
+            date_list, assets
+        )
         target: List[FinalAct] = []
         abyss: List[FinalAct] = []
 
         for ds in list_data[1]:
-            if act := await self.get_list(ds, start_time, end_time, total_range, time_map, True, assets):
+            if act := await self.get_list(
+                ds, start_time, end_time, total_range, time_map, True, assets
+            ):
                 target.append(act)
         for ds in list_data[0]:
-            if act := await self.get_list(ds, start_time, end_time, total_range, time_map, False, assets):
+            if act := await self.get_list(
+                ds, start_time, end_time, total_range, time_map, False, assets
+            ):
                 target.append(act)
         abyss_cal = self.get_abyss_cal(start_time, end_time)
         for t in abyss_cal:
@@ -384,7 +457,9 @@ class Calendar:
                 start_time=t[0].strftime("%Y-%m-%d %H:%M:%S"),
                 end_time=t[1].strftime("%Y-%m-%d %H:%M:%S"),
             )
-            if act := await self.get_list(ds, start_time, end_time, total_range, {}, True, assets):
+            if act := await self.get_list(
+                ds, start_time, end_time, total_range, {}, True, assets
+            ):
                 abyss.append(act)
         target.sort(key=lambda x: (x.sort, x.start, x.duration))
         target, char_count, char_old = self.merge_list(target)

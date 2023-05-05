@@ -39,7 +39,8 @@ class Log(Plugin):
             pb_url = await self.send_to_pb(error_log)
             await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT)
             await message.reply_document(
-                open(error_log, mode="rb+"), caption=f"Error Log\n{pb_url}/text" if pb_url else "Error Log"
+                open(error_log, mode="rb+"),
+                caption=f"Error Log\n{pb_url}/text" if pb_url else "Error Log",
             )
         else:
             await message.reply_text("错误日记未找到")
@@ -47,7 +48,8 @@ class Log(Plugin):
             pb_url = await self.send_to_pb(debug_log)
             await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT)
             await message.reply_document(
-                open(debug_log, mode="rb+"), caption=f"Debug Log\n{pb_url}/text" if pb_url else "Debug Log"
+                open(debug_log, mode="rb+"),
+                caption=f"Debug Log\n{pb_url}/text" if pb_url else "Debug Log",
             )
         else:
             await message.reply_text("调试日记未找到")
