@@ -39,6 +39,11 @@
             {% else %}
                 {% set row_bg = 'rgb(229 171 229/70%)' %}
             {% endif %}
+            {% if equipment != none %}
+                {% set equip_star = equipment.rarity %}
+            {% else %}
+                {% set equip_star = '' %}
+            {% endif %}
             <div
                     {% if loop.index is even %}
                         class="row second-row"
@@ -66,7 +71,7 @@
                     <div class="number">{{ constellation }}</div>
                 </div>
 
-                <div class="weapon" style="flex: 8">
+                <div class="weapon weapon-{{ equip_star }}-star" style="flex: 8">
                     {% if equipment != none %}
                         <div>
                             {% if equipment.level < 10 %}

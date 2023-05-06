@@ -13,6 +13,8 @@ from core.plugin import Plugin, handler
 from core.services.cookies import CookiesService
 from core.services.template.models import FileType
 from core.services.template.services import TemplateService
+from core.services.wiki.services import WikiService
+from modules.wiki.models.enums import Quality
 from plugins.tools.genshin import CookiesNotFoundError, GenshinHelper, PlayerNotFoundError
 from utils.log import logger
 
@@ -26,6 +28,7 @@ class EquipmentData(BaseModel):
     name: str
     level: int
     eidolon: int
+    rarity: int
     icon: str
 
 
@@ -47,11 +50,13 @@ class AvatarListPlugin(Plugin):
         cookies_service: CookiesService = None,
         assets_service: AssetsService = None,
         template_service: TemplateService = None,
+        wiki_service: WikiService = None,
         helper: GenshinHelper = None,
     ) -> None:
         self.cookies_service = cookies_service
         self.assets_service = assets_service
         self.template_service = template_service
+        self.wiki_service = wiki_service
         self.helper = helper
 
     async def get_user_client(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> Optional[Client]:
@@ -99,6 +104,17 @@ class AvatarListPlugin(Plugin):
             reverse=True,
         )
 
+    def get_light_cone_star(self, name: str) -> int:
+        light_cone = self.wiki_service.light_cone.get_by_name(name)
+        star_int_map = {
+            Quality.Five: 5,
+            Quality.Four: 4,
+            Quality.Three: 3,
+            Quality.Two: 2,
+            Quality.One: 1,
+        }
+        return star_int_map[light_cone.quality] if light_cone else 3
+
     async def get_final_data(self, characters: List[StarRailDetailCharacter]) -> List[AvatarData]:
         data = []
         for character in characters:
@@ -109,6 +125,7 @@ class AvatarListPlugin(Plugin):
                         name=character.equip.name,
                         level=character.equip.level,
                         eidolon=character.equip.rank,
+                        rarity=self.get_light_cone_star(character.equip.name),
                         icon=self.assets_service.light_cone.icon(character.equip.id, character.equip.name).as_uri(),
                     )
                     if character.equip
