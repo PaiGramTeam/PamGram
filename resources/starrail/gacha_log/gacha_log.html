@@ -1,88 +1,80 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
-    <link rel="shortcut icon" href="#"/>
-    <link rel="stylesheet" type="text/css" href="gacha_log.css"/>
-    <link rel="preload" href="./../../fonts/tttgbnumber.ttf" as="font">
-    <link rel="preload" href="./img/提纳里.png" as="image">
-    <link rel="preload" href="./../../genshin/abyss/background/roleStarBg5.png" as="image">
-    <link rel="preload" href="./../../genshin/abyss/background/roleStarBg4.png" as="image">
-    <style>
-        .head_box {
-            background-position: right center;
-            background: #fff url(./img/提纳里.png) no-repeat;
-            background-size: cover;
-        }
-    </style>
-    <title></title>
-</head>
-<body id="container" class="body_box">
-<div class="container">
-    <div class="info_box">
-
-        <div class="head_box">
-            <div class="id_text">
-                ID: {{ uid }}
-            </div>
-            <h2 class="day_text">
-                {{ allNum }}抽
-                <span class="label label_{{type}}">{{ typeName }}</span>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="gacha_log.css" />
+    <link type="text/css" href="../../styles/public.css" rel="stylesheet" />
+    <link rel="preload" href="./img/starrail.png" as="image" />
+    <script src="../../js/tailwindcss-3.1.8.js"></script>
+    <title>Title</title>
+  </head>
+  <body id="container" class="body_box">
+    <div class="container">
+      <div class="info_box">
+        <div class="header p-2 rounded-xl bg-contain mb-6">
+          <div class="frame p-4 flex-col rounded-lg border-solid border-2">
+            <h2 class="font-bold italic">ID: {{ uid }}</h2>
+            <h2 class="italic">
+              {{ allNum }}抽
+              <span class="label text-neutral-600 label_{{type}}"
+                >{{ typeName }}</span
+              >
             </h2>
-            <img class="starrail_logo" src="./../../bot/help/background/starrail.png" alt=""/>
+          </div>
         </div>
 
         <div class="data_box">
-            <div class="tab_lable">数据总览</div>
-            {% for val in line %}
-            <div class="data_line">
-                {% for item in val %}
-                <div class="data_line_item">
-                    <div class="num">{{item.num}}<span class="unit">{{item.unit}}</span></div>
-                    <div class="lable">{{item.lable}}</div>
-                </div>
-                {% endfor %}
+          <div class="tab_lable">数据总览</div>
+          {% for val in line %}
+          <div class="data_line">
+            {% for item in val %}
+            <div class="data_line_item">
+              <div class="num">
+                {{item.num}}<span class="unit">{{item.unit}}</span>
+              </div>
+              <div class="lable">{{item.lable}}</div>
             </div>
             {% endfor %}
+          </div>
+          {% endfor %}
 
-            <div class="line_box">
-                <span class="line"></span>
-                <span class="text">五星历史 {{firstTime}} ~ {{lastTime}}</span>
-                <span class="line"></span>
+          <div class="line_box">
+            <span class="line"></span>
+            <span class="text">五星历史 {{firstTime}} ~ {{lastTime}}</span>
+            <span class="line"></span>
+          </div>
+
+          <div class="card_list">
+            {% for val in fiveLog %}
+            <div class="item star5">
+              {% if val.isUp %}
+              <span class="minimum">UP</span>
+              {% endif %}
+              <img class="role" src="{{ val.icon }}" alt="" />
+              <!-- <div class="num">{{val.num}}</div>-->
+              <div class="num_name">{{ val.count }}</div>
             </div>
+            {% endfor %}
+          </div>
 
+          <div class="line_box">
+            <span class="line"></span>
+            <span class="text">四星最近历史</span>
+            <span class="line"></span>
+          </div>
 
-            <div class="card_list">
-                {% for val in fiveLog %}
-                <div class="item star5">
-                    {% if val.isUp %}
-                    <span class="minimum">UP</span>
-                    {% endif %}
-                    <img class="role" src="{{ val.icon }}" alt=""/>
-                    <!-- <div class="num">{{val.num}}</div>-->
-                    <div class="num_name">{{ val.count }}</div>
-                </div>
-                {% endfor %}
+          <div class="card_list">
+            {% for val in fourLog %}
+            <div class="item star4">
+              <img class="role" src="{{ val.icon }}" alt="" />
+              <!-- <div class="num">{{val.num}}</div>-->
+              <div class="num_name">{{ val.count }}</div>
             </div>
-
-            <div class="line_box">
-                <span class="line"></span>
-                <span class="text">四星最近历史</span>
-                <span class="line"></span>
-            </div>
-
-            <div class="card_list">
-                {% for val in fourLog %}
-                <div class="item star4">
-                    <img class="role" src="{{ val.icon }}" alt=""/>
-                    <!-- <div class="num">{{val.num}}</div>-->
-                    <div class="num_name">{{ val.count }}</div>
-                </div>
-                {% endfor %}
-            </div>
+            {% endfor %}
+          </div>
         </div>
-        <div class="logo"> Template By Yunzai-Bot</div>
+        <div class="logo">Template By Yunzai-Bot</div>
+      </div>
     </div>
-</div>
-</body>
+  </body>
 </html>

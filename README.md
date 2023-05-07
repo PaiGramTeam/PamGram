@@ -13,7 +13,6 @@
 
 基于 [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) 的 PaiGram
 
-
 ![Alt](https://repobeats.axiom.co/api/embed/f73c1121006cb86196f83da2170242b7a97f8be0.svg "Repobeats analytics image")
 
 ## 环境需求
@@ -35,6 +34,10 @@ pip install --upgrade poetry
 ```bash
 poetry install
 poetry run playwright install chromium
+```
+
+```bash
+pip install git+https://github.com/PaiGramTeam/genshin.py@sr
 ```
 
 #### 可选依赖项
