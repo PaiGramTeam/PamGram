@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>floor</title>
+    <link type="text/css" href="./style.css" rel="stylesheet"/>
+    <link type="text/css" href="../../styles/public.css" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+
+        .floors, .floor {
+            border-radius: unset;
+            margin: 0;
+        }
+
+        .floor-num > div:last-child {
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+            align-content: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="floors">
+        <div
+                class="floor"
+                style="
+                        background-image: url('./background/floor{{ floor_num }}.png');
+                        background-color: {{ floor_colors[floor_num] }};"
+        >
+            <div class="head">
+                <div class="floor-name">
+                    <div class="floor-num"></div>
+                    <div>
+                        <div>UID: {{ uid }}</div>
+                        <div>{{ floor.name }}</div>
+                    </div>
+                </div>
+                <div class="star">
+                    <span>{{ floor.star_num }}</span>
+                </div>
+            </div>
+            <div class="hr"></div>
+            <div class="chamber">
+                <div class="chamber-info">
+                    <div>
+                        使用轮：{{ floor.round_num }}
+                        <span style="color: #A3A3A3">{{ floor_time }}</span>
+                    </div>
+                    <div class="stars">
+                        {% for n in range(floor.star_num) %}
+                            <div class="star"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="battles">
+                    {% for node in floor_nodes %}
+                    <div class="battle">
+                        {% for character in node.avatars %}
+                            <div class="character">
+                                {% if avatar_data[character.id] > 0 %}
+                                    {% set constellation = avatar_data[character.id] %}
+                                    {% set bg = ['blue', 'blue', 'green', 'green', 'red', 'red'][constellation - 1] %}
+                                    <div style="background-color: var(--{{ bg }})">
+                                        {{ constellation }} 命
+                                    </div>
+                                {% endif %}
+                                <div class="element" style="background-image: url('../../img/element/{{ character.element }}.png')"></div>
+                                <div class="icon"
+                                     style="background-image: url('../../background/rarity/half/{{ character.rarity }}.png')">
+                                    <img src="{{ character.icon }}" alt=""/>
+                                </div>
+                                <div class="caption">Lv.{{ character.level }}</div>
+                            </div>
+                        {% endfor %}
+                        {% if loop.length > 1 %}
+                            <div class="battle-info">{{ ['上', '下'][loop.index - 1] }}半</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

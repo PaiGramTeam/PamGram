@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-ch">
+<head>
+    <meta charset="UTF-8">
+    <title>overview</title>
+    <link type="text/css" href="./style.css" rel="stylesheet"/>
+    <link type="text/css" href="../../styles/public.css" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .overview {
+            border-radius: unset;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="overview">
+        <div class="title">混沌回忆挑战回顾</div>
+        <div class="summarize">
+            <div>
+                <div>UID: {{ uid }}</div>
+                <div class="star">
+                    <span>{{ stars }}</span>
+                </div>
+            </div>
+            <div>
+                <div>时间: {{ time }}</div>
+                <div>最深抵达: {{ max_floor }}</div>
+            </div>
+            <div>
+                <div>战斗次数: {{ total_battles }}</div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
