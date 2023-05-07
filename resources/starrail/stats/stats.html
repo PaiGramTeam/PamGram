@@ -13,18 +13,25 @@
   </head>
   <body class="text-neutral-600">
     <div class="mx-auto max-w-[600px] py-8">
-      <div class="header p-6 flex mb-8 rounded-xl bg-cover justify-between">
-        <div class="flex flex-col items-center justify-center">
-          <h1 class="text-4xl italic name mb-2 px-2">
-            {{ info.nickname }}
-            <span class="text-lg">lv.{{ info.level }}</span>
-          </h1>
-          <h1 class="italic uid px-10">UID - {{ uid }}</h1>
+      <div class="header p-2 rounded-xl bg-cover mb-6">
+        <div
+          class="frame-pic p-4 flex justify-between rounded-lg border-solid border-2"
+        >
+          <div class="flex flex-col items-center justify-center">
+            <h1 class="name text-4xl italic mb-2 px-2 text-shadow">
+              {{ info.nickname }}
+              <span class="text-lg">lv.{{ info.level }}</span>
+            </h1>
+            <h1 class="italic uid px-10">UID - {{ uid }}</h1>
+          </div>
         </div>
       </div>
-      <div class="box pt-4 rounded-xl overflow-hidden">
-        <div>
-          <h2 class="box-title text-center text-xl ring text-neutral-100 p-1">
+      <div class="box p-2 rounded-xl overflow-hidden">
+        <div class="frame rounded-lg border-solid border-2">
+          <h2
+            class="title font-semibold pt-4 text-center text-xl text-neutral-700 p-1"
+          >
+            <img src="./items/star.png" class="inline-block w-4" />
             数据总览
           </h2>
           <div class="p-6 grid grid-cols-4 gap-4 text-center">
@@ -35,10 +42,10 @@
             </div>
             {% endfor %}
           </div>
-        </div>
 
-        <div class="about text-center leading-8 text-xs opacity-50">
-          所有数据会有一小时延迟 以游戏内为准 此处仅供参考
+          <div class="about text-center leading-8 text-xs opacity-50">
+            所有数据会有一小时延迟 以游戏内为准 此处仅供参考
+          </div>
         </div>
       </div>
     </div>
