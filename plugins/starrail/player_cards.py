@@ -522,6 +522,7 @@ class RenderTemplate:
                 "main_sub": self.client.get_affix(e, True, False)[0],
                 "sub": self.client.get_affix(e, False, True),
             }
+
         relic_list = self.character.RelicList or []
         return [
             Artifact(
