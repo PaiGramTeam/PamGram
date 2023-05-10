@@ -63,8 +63,7 @@ class PlayerCardsFile:
         async with self._lock:
             old_data = await self.load_history_info(uid)
             if old_data is None:
-                await self.save_json(self.get_file_path(uid), data)
-                return data
+                old_data = {}
             avatars = []
             avatar_ids = []
             assist_avatar = data.get("AssistAvatar", None)
