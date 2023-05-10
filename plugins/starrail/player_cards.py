@@ -454,8 +454,10 @@ class RenderTemplate:
             if artifact_total_score / 5 >= r[1]:
                 artifact_total_score_label = r[0]
 
+        weapon = None
         weapon_detail = None
-        if self.character.EquipmentID:
+        if self.character.EquipmentID and self.character.EquipmentID.ID:
+            weapon = self.character.EquipmentID
             weapon_detail = self.wiki_service.light_cone.get_by_id(self.character.EquipmentID.ID)
         skills = [0, 0, 0, 0, 0]
         for index in range(5):
@@ -464,7 +466,7 @@ class RenderTemplate:
             "uid": self.uid,
             "character": self.character,
             "character_detail": self.wiki_service.character.get_by_id(self.character.AvatarID),
-            "weapon": self.character.EquipmentID,
+            "weapon": weapon,
             "weapon_detail": weapon_detail,
             # 圣遗物评分
             "artifact_total_score": artifact_total_score,
@@ -495,7 +497,7 @@ class RenderTemplate:
             "constellations": [i.as_uri() for i in self.assets_service.avatar.eidolons(cid)],
             "equipment": "",
         }
-        if c.EquipmentID:
+        if c.EquipmentID and c.EquipmentID.ID:
             data["equipment"] = self.assets_service.light_cone.icon(c.EquipmentID.ID).as_uri()
         return data
 
@@ -528,4 +530,5 @@ class RenderTemplate:
                 substat_scores=[substat_score(s) for s in self.client.get_affix(e)],
             )
             for e in self.character.RelicList
+            if self.character.RelicList
         ]

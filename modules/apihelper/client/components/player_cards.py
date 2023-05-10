@@ -17,8 +17,8 @@ class Behavior(BaseModel):
 
 
 class Equipment(BaseModel):
-    ID: int
-    Level: int
+    ID: Optional[int] = 0
+    Level: Optional[int] = 0
     Promotion: Optional[int] = 3
     """星级"""
     Rank: Optional[int] = 0
@@ -43,9 +43,9 @@ class Avatar(BaseModel):
     BehaviorList: List[Behavior]
     EquipmentID: Optional[Equipment]
     Level: int
-    Promotion: int
+    Promotion: Optional[int] = 4
     Rank: Optional[int] = 0
-    RelicList: List[Relic]
+    RelicList: Optional[List[Relic]]
 
 
 class ChallengeData(BaseModel):
