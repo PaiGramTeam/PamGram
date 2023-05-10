@@ -3,7 +3,7 @@ from typing import Optional, Dict
 
 from pydantic import BaseModel, root_validator
 
-from .enums import RelicAffix
+from .enums import RelicAffix, RelicPosition
 
 
 class SingleRelicAffix(BaseModel):
@@ -17,13 +17,17 @@ class SingleRelicAffix(BaseModel):
 
     def get_value(self, level_or_step: int) -> float:
         add_value = Decimal(self.level_value if self.is_main else self.base_value)
-        return float(Decimal(self.base_value) + (add_value * Decimal(level_or_step)))
+        return float(Decimal(self.base_value) + add_value * Decimal(level_or_step))
 
 
 class RelicAffixAll(BaseModel):
     id: int
     set_id: int
     """ 套装ID """
+    type: RelicPosition
+    """ 遗器类型 """
+    rarity: int
+    """ 星级 """
     main_affix_group: int
     sub_affix_group: int
     max_level: int
@@ -32,11 +36,6 @@ class RelicAffixAll(BaseModel):
     """ 主词条 """
     sub_affix: Dict[str, SingleRelicAffix]
     """ 副词条 """
-
-    @property
-    def rarity(self) -> int:
-        rarity_map = {9: 3, 12: 4, 16: 5}
-        return rarity_map.get(self.max_level, 2)
 
     @root_validator(pre=True)
     def transform_dicts(cls, values):

@@ -55,8 +55,9 @@ relic_affix_score_map = {
 
 # noinspection PyPep8Naming
 @functools.lru_cache()
-def FightProp(prop: RelicAffix) -> str:
-    return relic_affix_map.get(prop)
+def FightProp(prop: RelicAffix, percent: bool = True) -> str:
+    name = relic_affix_map.get(prop)
+    return name if percent else name.replace("百分比", "")
 
 
 # noinspection PyPep8Naming
@@ -77,7 +78,7 @@ class EquipmentsStats(BaseModel):
 
     @property
     def name(self) -> str:
-        return FightProp(self.prop_id)
+        return FightProp(self.prop_id, False)
 
     @property
     def value(self) -> str:

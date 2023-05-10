@@ -482,7 +482,7 @@ class RenderTemplate:
         return await self.template_service.render(
             "starrail/player_card/player_card.html",
             data,
-            {"width": 1100, "height": 1250},
+            {"width": 1000, "height": 1200},
             full_page=True,
             query_selector=".text-neutral-200",
             ttl=7 * 24 * 60 * 60,
@@ -493,7 +493,7 @@ class RenderTemplate:
         cid = c.AvatarID
         data = {
             "banner_url": self.assets_service.avatar.gacha(cid).as_uri(),
-            "skills": [i.as_uri() for i in self.assets_service.avatar.skills(cid)],
+            "skills": [i.as_uri() for i in self.assets_service.avatar.skills(cid)][:-1],
             "constellations": [i.as_uri() for i in self.assets_service.avatar.eidolons(cid)],
             "equipment": "",
         }
@@ -513,10 +513,14 @@ class RenderTemplate:
             rid = e.ID
             affix = self.client.get_affix_by_id(rid)
             relic_set = self.wiki_service.relic.get_by_id(affix.set_id)
+            try:
+                icon = relic_set.image_list[affix.type.num]
+            except IndexError:
+                icon = relic_set.icon
             return {
                 "id": rid,
                 "name": relic_set.name,
-                "icon": relic_set.icon,
+                "icon": icon,
                 "level": e.Level,
                 "rank": affix.rarity,
                 "main_sub": self.client.get_affix(e, True, False)[0],
