@@ -522,13 +522,12 @@ class RenderTemplate:
                 "main_sub": self.client.get_affix(e, True, False)[0],
                 "sub": self.client.get_affix(e, False, True),
             }
-
+        relic_list = self.character.RelicList or []
         return [
             Artifact(
                 equipment=fix_equipment(e),
                 # 圣遗物单行属性评分
                 substat_scores=[substat_score(s) for s in self.client.get_affix(e)],
             )
-            for e in self.character.RelicList
-            if self.character.RelicList
+            for e in relic_list
         ]
