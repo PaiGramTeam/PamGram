@@ -193,7 +193,7 @@ def upgrade() -> None:
     )
 
     try:
-        statement = "SELECT * FROM admin;"
+        statement = "SELECT * FROM `admin`;"
         old_user_table_data = connection.execute(text(statement))
     except NoSuchTableError:
         logger.warning("Table 'admin' doesn't exist")
