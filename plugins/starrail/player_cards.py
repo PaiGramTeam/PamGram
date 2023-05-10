@@ -9,7 +9,7 @@ from telegram.helpers import create_deep_linked_url
 
 from core.basemodel import RegionEnum
 from core.config import config
-from core.dependence.assets import AssetsService
+from core.dependence.assets import AssetsService, AssetsCouldNotFound
 from core.dependence.redisdb import RedisDB
 from core.plugin import Plugin, handler
 from core.services.players import PlayersService
@@ -341,13 +341,17 @@ class PlayerCards(Plugin):
         """
         characters_data = []
         for idx, character in enumerate(data.AvatarList):
-            characters_data.append(
-                {
-                    "level": character.Level,
-                    "constellation": character.Rank,
-                    "icon": self.assets_service.avatar.square(character.AvatarID).as_uri(),
-                }
-            )
+            cid = 8004 if character.AvatarID in {8001, 8002, 8003, 8004} else character.AvatarID
+            try:
+                characters_data.append(
+                    {
+                        "level": character.Level,
+                        "constellation": character.Rank,
+                        "icon": self.assets_service.avatar.square(cid).as_uri(),
+                    }
+                )
+            except AssetsCouldNotFound:
+                logger.warning("角色 %s 的头像资源获取失败", cid)
             if idx > 6:
                 break
         return {
