@@ -19,7 +19,7 @@ class Behavior(BaseModel):
 class Equipment(BaseModel):
     ID: int
     Level: int
-    Promotion: int
+    Promotion: Optional[int] = 3
     """星级"""
     Rank: Optional[int] = 0
     """叠影"""
