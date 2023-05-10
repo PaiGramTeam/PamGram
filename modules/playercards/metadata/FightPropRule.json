@@ -1,9 +1,9 @@
 {
   "丹恒": [
-    "AttackAddedRatio",
-    "CriticalChanceBase",
-    "CriticalDamageBase",
-    "SPRatioBase",
-    "WindAddedRatio"
+    "攻击力百分比",
+    "暴击率百分比",
+    "暴击伤害百分比",
+    "能量恢复效率百分比",
+    "风属性伤害提高百分比"
   ]
 }

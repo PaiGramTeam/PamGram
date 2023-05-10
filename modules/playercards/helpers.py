@@ -2,7 +2,7 @@ import os
 
 import ujson as json
 
-from modules.playercards.fight_prop import FightPropScore, EquipmentsStats
+from modules.playercards.fight_prop import FightPropScore, EquipmentsStats, nameToFightProp
 from modules.wiki.models.enums import RelicAffix
 
 _project_path = os.path.dirname(__file__)
@@ -15,7 +15,7 @@ class ArtifactStatsTheory:
     def __init__(self, character_name: str):
         self.character_name = character_name
         fight_prop_rule_list = fight_prop_rule_data.get(self.character_name, [])
-        self.main_prop = [RelicAffix(fight_prop_rule) for fight_prop_rule in fight_prop_rule_list]
+        self.main_prop = [nameToFightProp(fight_prop_rule) for fight_prop_rule in fight_prop_rule_list]
         if not self.main_prop:
             self.main_prop = [
                 RelicAffix.CriticalChanceBase,
