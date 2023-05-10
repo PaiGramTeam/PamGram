@@ -69,4 +69,6 @@ class EquipmentsStats(BaseModel):
 
     @property
     def value(self) -> str:
-        return str(round(self.prop_value, 1)) if self.prop_value > 1 else str(str(round(self.prop_value * 100.0, 1)) + "%")
+        return (
+            str(round(self.prop_value, 1)) if self.prop_value > 1 else str(str(round(self.prop_value * 100.0, 1)) + "%")
+        )

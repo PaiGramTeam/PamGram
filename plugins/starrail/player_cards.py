@@ -148,7 +148,12 @@ class PlayerCards(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await RenderTemplate(
-            player_info.player_id, characters, self.template_service, self.assets_service, self.wiki_service, self.client
+            player_info.player_id,
+            characters,
+            self.template_service,
+            self.assets_service,
+            self.wiki_service,
+            self.client,
         ).render()  # pylint: disable=W0631
         await render_result.reply_photo(
             message,

@@ -97,7 +97,7 @@ class _AvatarAssets(_AssetsService):
             eidolons_paths = [(base_path / f"eidolon_{eidolon_id}.webp") for eidolon_id in range(1, 7)]
             skills_paths = []
             for i in skills_s_data:
-                temp_end = "_".join(i.split('_')[1:])
+                temp_end = "_".join(i.split("_")[1:])
                 skills_paths.append(base_path / f"skill_{temp_end}")
             if not gacha_path.exists():
                 tasks.append(self._download(icon.gacha, gacha_path))
