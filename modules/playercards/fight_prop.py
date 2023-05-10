@@ -1,68 +1,72 @@
-import enum
+from pydantic import BaseModel
+
+from modules.wiki.models.enums import RelicAffix
 
 
-class FightProp(enum.Enum):
-    BASE_HP = "基础血量"
-    FIGHT_PROP_BASE_ATTACK = "基础攻击力"
-    FIGHT_PROP_BASE_DEFENSE = "基础防御力"
-    FIGHT_PROP_BASE_HP = "基础血量"
-    FIGHT_PROP_ATTACK = "攻击力"
-    FIGHT_PROP_ATTACK_PERCENT = "攻击力百分比"
-    FIGHT_PROP_HP = "生命值"
-    FIGHT_PROP_HP_PERCENT = "生命值百分比"
-    FIGHT_PROP_DEFENSE = "防御力"
-    FIGHT_PROP_DEFENSE_PERCENT = "防御力百分比"
-    FIGHT_PROP_ELEMENT_MASTERY = "元素精通"
-    FIGHT_PROP_CRITICAL = "暴击率"
-    FIGHT_PROP_CRITICAL_HURT = "暴击伤害"
-    FIGHT_PROP_CHARGE_EFFICIENCY = "元素充能效率"
-    FIGHT_PROP_FIRE_SUB_HURT = "火元素抗性"
-    FIGHT_PROP_ELEC_SUB_HURT = "雷元素抗性"
-    FIGHT_PROP_ICE_SUB_HURT = "冰元素抗性"
-    FIGHT_PROP_WATER_SUB_HURT = "水元素抗性"
-    FIGHT_PROP_WIND_SUB_HURT = "风元素抗性"
-    FIGHT_PROP_ROCK_SUB_HURT = "岩元素抗性"
-    FIGHT_PROP_GRASS_SUB_HURT = "草元素抗性"
-    FIGHT_PROP_FIRE_ADD_HURT = "火元素伤害加成"
-    FIGHT_PROP_ELEC_ADD_HURT = "雷元素伤害加成"
-    FIGHT_PROP_ICE_ADD_HURT = "冰元素伤害加成"
-    FIGHT_PROP_WATER_ADD_HURT = "水元素伤害加成"
-    FIGHT_PROP_WIND_ADD_HURT = "风元素伤害加成"
-    FIGHT_PROP_ROCK_ADD_HURT = "岩元素伤害加成"
-    FIGHT_PROP_GRASS_ADD_HURT = "草元素伤害加成"
-    FIGHT_PROP_PHYSICAL_ADD_HURT = "物理伤害加成"
-    FIGHT_PROP_HEAL_ADD = "治疗加成"
+# noinspection PyPep8Naming
+def FightProp(prop: RelicAffix) -> str:
+    data = {
+        RelicAffix.AttackAddedRatio: "攻击力百分比",
+        RelicAffix.AttackDelta: "攻击力",
+        RelicAffix.BreakDamageAddedRatioBase: "击破特攻",
+        RelicAffix.CriticalChanceBase: "暴击率百分比",
+        RelicAffix.CriticalDamageBase: "暴击伤害百分比",
+        RelicAffix.DefenceAddedRatio: "防御力百分比",
+        RelicAffix.DefenceDelta: "防御力",
+        RelicAffix.FireAddedRatio: "火属性伤害提高百分比",
+        RelicAffix.HPAddedRatio: "生命值百分比",
+        RelicAffix.HPDelta: "生命值",
+        RelicAffix.HealRatioBase: "治疗量加成百分比",
+        RelicAffix.IceAddedRatio: "冰属性伤害提高百分比",
+        RelicAffix.ImaginaryAddedRatio: "虚数属性伤害提高百分比",
+        RelicAffix.PhysicalAddedRatio: "物理属性伤害提高百分比",
+        RelicAffix.QuantumAddedRatio: "量子属性伤害提高百分比",
+        RelicAffix.SpeedDelta: "速度",
+        RelicAffix.SPRatioBase: "能量恢复效率百分比",
+        RelicAffix.StatusProbabilityBase: "效果命中百分比",
+        RelicAffix.StatusResistanceBase: "效果抵抗百分比",
+        RelicAffix.ThunderAddedRatio: "雷属性伤害提高百分比",
+        RelicAffix.WindAddedRatio: "风属性伤害提高百分比",
+    }
+    return data.get(prop)
 
 
-class FightPropScore(enum.Enum):
-    _value_: float
-    value: float
-    FIGHT_PROP_BASE_ATTACK = 1
-    FIGHT_PROP_BASE_DEFENSE = 1
-    FIGHT_PROP_BASE_HP = 1
-    FIGHT_PROP_ATTACK = 662 / 3110  # 攻击力
-    FIGHT_PROP_ATTACK_PERCENT = 4 / 3  # 攻击力百分比
-    FIGHT_PROP_HP = 662 / 47800  # 生命
-    FIGHT_PROP_HP_PERCENT = 4 / 3  # 生命百分比
-    FIGHT_PROP_DEFENSE = 662 / 3890  # 防御力
-    FIGHT_PROP_DEFENSE_PERCENT = 662 / 583  # 防御力百分比
-    FIGHT_PROP_ELEMENT_MASTERY = 1 / 3  # 元素精通
-    FIGHT_PROP_CRITICAL = 2  # 暴击率
-    FIGHT_PROP_CRITICAL_HURT = 1  # 暴击伤害
-    FIGHT_PROP_CHARGE_EFFICIENCY = 662 / 518  # 元素充能效率
-    FIGHT_PROP_FIRE_SUB_HURT = 1
-    FIGHT_PROP_ELEC_SUB_HURT = 1
-    FIGHT_PROP_ICE_SUB_HURT = 1
-    FIGHT_PROP_WATER_SUB_HURT = 1
-    FIGHT_PROP_WIND_SUB_HURT = 1
-    FIGHT_PROP_ROCK_SUB_HURT = 1
-    FIGHT_PROP_GRASS_SUB_HURT = 1
-    FIGHT_PROP_FIRE_ADD_HURT = 1
-    FIGHT_PROP_ELEC_ADD_HURT = 1
-    FIGHT_PROP_ICE_ADD_HURT = 1
-    FIGHT_PROP_WATER_ADD_HURT = 1
-    FIGHT_PROP_WIND_ADD_HURT = 1
-    FIGHT_PROP_ROCK_ADD_HURT = 1
-    FIGHT_PROP_GRASS_ADD_HURT = 1
-    FIGHT_PROP_PHYSICAL_ADD_HURT = 1
-    FIGHT_PROP_HEAL_ADD = 1
+# noinspection PyPep8Naming
+def FightPropScore(prop) -> float:
+    data = {
+        RelicAffix.AttackAddedRatio: 1.0,
+        RelicAffix.AttackDelta: 1.0,
+        RelicAffix.BreakDamageAddedRatioBase: 1.0,
+        RelicAffix.CriticalChanceBase: 1.0,
+        RelicAffix.CriticalDamageBase: 1.0,
+        RelicAffix.DefenceAddedRatio: 1.0,
+        RelicAffix.DefenceDelta: 1.0,
+        RelicAffix.FireAddedRatio: 1.0,
+        RelicAffix.HPAddedRatio: 1.0,
+        RelicAffix.HPDelta: 1.0,
+        RelicAffix.HealRatioBase: 1.0,
+        RelicAffix.IceAddedRatio: 1.0,
+        RelicAffix.ImaginaryAddedRatio: 1.0,
+        RelicAffix.PhysicalAddedRatio: 1.0,
+        RelicAffix.QuantumAddedRatio: 1.0,
+        RelicAffix.SpeedDelta: 1.0,
+        RelicAffix.SPRatioBase: 1.0,
+        RelicAffix.StatusProbabilityBase: 1.0,
+        RelicAffix.StatusResistanceBase: 1.0,
+        RelicAffix.ThunderAddedRatio: 1.0,
+        RelicAffix.WindAddedRatio: 1.0,
+    }
+    return data.get(prop)
+
+
+class EquipmentsStats(BaseModel):
+    prop_id: RelicAffix
+    prop_value: float
+
+    @property
+    def name(self) -> str:
+        return FightProp(self.prop_id)
+
+    @property
+    def value(self) -> str:
+        return str(round(self.prop_value, 1)) if self.prop_value > 1 else str(str(round(self.prop_value * 100.0, 1)) + "%")

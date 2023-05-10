@@ -3,12 +3,14 @@ from __future__ import annotations
 import functools
 from typing import List
 
-from metadata.genshin import WEAPON_DATA
-
-__all__ = ["roles", "light_cones", "roleToId", "roleToName", "lightConeToName", "lightConeToId", "not_real_roles", "roleToTag"]
+__all__ = ["roles", "light_cones", "roleToId", "roleToName", "idToRole", "lightConeToName", "lightConeToId", "not_real_roles", "roleToTag"]
 
 # noinspection SpellCheckingInspection
 roles = {
+    8001: ['开拓者'],
+    8002: ['开拓者'],
+    8003: ['开拓者'],
+    8004: ['开拓者'],
     1001: ['三月七'],
     1002: ['丹恒'],
     1003: ['姬子'],
@@ -34,7 +36,6 @@ roles = {
     1206: ['素裳'],
     1209: ['彦卿'],
     1211: ['白露'],
-    8004: ['开拓者'],
 }
 not_real_roles = []
 light_cones = {
@@ -123,6 +124,13 @@ def roleToId(name: str) -> int | None:
     """获取角色ID"""
     name = str.casefold(name)
     return next((key for key, value in roles.items() for n in value if n == name), None)
+
+
+# noinspection PyPep8Naming
+@functools.lru_cache()
+def idToRole(aid: int) -> str | None:
+    """获取角色名"""
+    return roles.get(aid, [None])[0]
 
 
 # noinspection PyPep8Naming

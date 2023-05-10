@@ -19,6 +19,8 @@ ASSETS_PATH.mkdir(exist_ok=True, parents=True)
 DATA_MAP = {
     "avatar": WikiModel.BASE_URL + "avatar_icons.json",
     "light_cone": WikiModel.BASE_URL + "light_cone_icons.json",
+    "avatar_eidolon": WikiModel.BASE_URL + "avatar_eidolon_icons.json",
+    "avatar_skill": WikiModel.BASE_URL + "skill/info.json",
 }
 
 
@@ -75,17 +77,28 @@ class _AvatarAssets(_AssetsService):
     async def initialize(self):
         logger.info("正在初始化角色素材图标")
         html = await self.client.get(DATA_MAP["avatar"])
+        eidolons = await self.client.get(DATA_MAP["avatar_eidolon"])
+        eidolons_data = eidolons.json()
+        skills = await self.client.get(DATA_MAP["avatar_skill"])
+        skills_data = skills.json()
         self.data = [AvatarIcon(**data) for data in html.json()]
         self.name_map = {icon.name: icon for icon in self.data}
         self.id_map = {icon.id: icon for icon in self.data}
         tasks = []
         for icon in self.data:
+            eidolons_s_data = eidolons_data.get(str(icon.id), [])
+            skills_s_data = [f"{i}.png" for i in skills_data if i.startswith(str(icon.id) + "_")]
             base_path = self.path / f"{icon.id}"
             base_path.mkdir(exist_ok=True, parents=True)
             gacha_path = base_path / "gacha.webp"
             icon_path = base_path / "icon.webp"
             normal_path = base_path / "normal.webp"
             square_path = base_path / "square.png"
+            eidolons_paths = [(base_path / f"eidolon_{eidolon_id}.webp") for eidolon_id in range(1, 7)]
+            skills_paths = []
+            for i in skills_s_data:
+                temp_end = "_".join(i.split('_')[1:])
+                skills_paths.append(base_path / f"skill_{temp_end}")
             if not gacha_path.exists():
                 tasks.append(self._download(icon.gacha, gacha_path))
             if not icon_path.exists():
@@ -94,6 +107,12 @@ class _AvatarAssets(_AssetsService):
                 tasks.append(self._download(icon.normal, normal_path))
             if not square_path.exists() and icon.square:
                 tasks.append(self._download(icon.square, square_path))
+            for index, eidolon in enumerate(eidolons_paths):
+                if not eidolon.exists():
+                    tasks.append(self._download(eidolons_s_data[index], eidolon))
+            for index, skill in enumerate(skills_paths):
+                if not skill.exists():
+                    tasks.append(self._download(WikiModel.BASE_URL + "skill/" + skills_s_data[index], skill))
             if len(tasks) >= 100:
                 await asyncio.gather(*tasks)
                 tasks = []
@@ -144,6 +163,46 @@ class _AvatarAssets(_AssetsService):
                 return self.get_path(icon, "icon")
             raise AssetsCouldNotFound("角色素材图标不存在", target)
         return path
+
+    def eidolons(self, target: StrOrInt, second_target: StrOrInt = None) -> List[Path]:
+        """星魂"""
+        icon = self.get_target(target, second_target)
+        return [self.get_path(icon, f"eidolon_{i}") for i in range(1, 7)]
+
+    def skill_basic_atk(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        """普攻 001"""
+        icon = self.get_target(target, second_target)
+        return self.get_path(icon, "skill_basic_atk", "png")
+
+    def skill_skill(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        """战技 002"""
+        icon = self.get_target(target, second_target)
+        return self.get_path(icon, "skill_skill", "png")
+
+    def skill_ultimate(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        """终结技 003"""
+        icon = self.get_target(target, second_target)
+        return self.get_path(icon, "skill_ultimate", "png")
+
+    def skill_talent(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        """天赋 004"""
+        icon = self.get_target(target, second_target)
+        return self.get_path(icon, "skill_talent", "png")
+
+    def skill_technique(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        """秘技 007"""
+        icon = self.get_target(target, second_target)
+        return self.get_path(icon, "skill_technique", "png")
+
+    def skills(self, target: StrOrInt, second_target: StrOrInt = None) -> List[Path]:
+        icon = self.get_target(target, second_target)
+        return [
+            self.get_path(icon, "skill_basic_atk", "png"),
+            self.get_path(icon, "skill_skill", "png"),
+            self.get_path(icon, "skill_ultimate", "png"),
+            self.get_path(icon, "skill_talent", "png"),
+            self.get_path(icon, "skill_technique", "png"),
+        ]
 
 
 class _LightConeAssets(_AssetsService):
