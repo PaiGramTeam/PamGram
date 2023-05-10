@@ -34,7 +34,7 @@ class Relic(BaseModel):
     ID: int
     Level: Optional[int] = 0
     MainAffixID: int
-    RelicSubAffix: List[SubAffix]
+    RelicSubAffix: Optional[List[SubAffix]]
     Type: int
 
 
@@ -149,12 +149,13 @@ class PlayerCards:
         )
         if not sub:
             return datas
-        for sub in relic.RelicSubAffix:
-            sub_affix = affix.sub_affix[str(sub.SubAffixID)]
-            datas.append(
-                EquipmentsStats(
-                    prop_id=sub_affix.property,
-                    prop_value=sub_affix.get_value(sub.Cnt),
+        if relic.RelicSubAffix:
+            for sub in relic.RelicSubAffix:
+                sub_affix = affix.sub_affix[str(sub.SubAffixID)]
+                datas.append(
+                    EquipmentsStats(
+                        prop_id=sub_affix.property,
+                        prop_value=sub_affix.get_value(sub.Cnt),
+                    )
                 )
-            )
         return datas
