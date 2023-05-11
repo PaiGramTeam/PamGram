@@ -32,12 +32,15 @@
             <div>星魂</div>
             <div style="flex: 8">光锥</div>
         </div>
+        <!-- 
+            rgb(240 226 179)
+            rgb(229 171 229/70%) -->
         {% for avatar_data in avatar_datas %}
             {% set equipment = avatar_data.equipment %}
             {% if avatar_data.rarity == 5 %}
-                {% set row_bg = 'rgb(240 226 179)' %}
+                {% set row_bg = 'gold' %}
             {% else %}
-                {% set row_bg = 'rgb(229 171 229/70%)' %}
+                {% set row_bg = 'nongold' %}
             {% endif %}
             {% if equipment != none %}
                 {% set equip_star = equipment.rarity %}
@@ -51,9 +54,11 @@
                         class="row"
                     {% endif %}
             >
-                <div style="background-color: {{ row_bg }}">{{ loop.index }}</div>
+                <!-- <div style="background-color: {{ row_bg }}">{{ loop.index }}</div> -->
+                <div class="{{row_bg}}">{{ loop.index }}</div>
 
-                <div class="role" style="flex: 4;background-color: {{ row_bg }}">
+                <!-- <div class="role" style="flex: 4;background-color: {{ row_bg }}"> -->
+                <div class="role {{row_bg}}" style="flex: 4;">
                     <div class="role-icon" style="flex: 1.5;">
                         <img src="{{ avatar_data.icon }}" alt="side icon"/>
                     </div>
