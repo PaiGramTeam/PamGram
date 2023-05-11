@@ -83,7 +83,7 @@ class PlayerCardsError(Exception):
 
 
 class PlayerCards:
-    url = "http://127.0.0.1:8080/"
+    url = "https://mhy.fuckmys.tk/sr_info/"
     prop_url = f"{WikiModel.BASE_URL}relic_config.json"
 
     def __init__(self, redis):
