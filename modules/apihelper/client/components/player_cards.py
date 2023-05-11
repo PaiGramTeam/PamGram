@@ -26,7 +26,8 @@ class Equipment(BaseModel):
 
 
 class SubAffix(BaseModel):
-    Cnt: Optional[int] = 0
+    Cnt: Optional[int] = 1
+    Step: Optional[int] = 0
     SubAffixID: int
 
 
@@ -155,7 +156,7 @@ class PlayerCards:
                 datas.append(
                     EquipmentsStats(
                         prop_id=sub_affix.property,
-                        prop_value=sub_affix.get_value(sub.Cnt),
+                        prop_value=sub_affix.get_value(sub.Step, sub.Cnt),
                     )
                 )
         return datas

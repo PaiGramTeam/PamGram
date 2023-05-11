@@ -19,6 +19,7 @@ from metadata.shortname import roleToName, idToRole
 from modules.apihelper.client.components.player_cards import PlayerCards as PlayerCardsClient, PlayerInfo, Avatar, Relic
 from modules.playercards.fight_prop import EquipmentsStats
 from modules.playercards.helpers import ArtifactStatsTheory
+from modules.wiki.models.enums import Quality
 from utils.log import logger
 
 if TYPE_CHECKING:
@@ -468,6 +469,7 @@ class RenderTemplate:
             "character_detail": self.wiki_service.character.get_by_id(self.character.AvatarID),
             "weapon": weapon,
             "weapon_detail": weapon_detail,
+            "weapon_rarity": weapon_detail.rarity if weapon_detail else 0,
             # 圣遗物评分
             "artifact_total_score": artifact_total_score,
             # 圣遗物评级
@@ -532,7 +534,7 @@ class RenderTemplate:
             Artifact(
                 equipment=fix_equipment(e),
                 # 圣遗物单行属性评分
-                substat_scores=[substat_score(s) for s in self.client.get_affix(e)],
+                substat_scores=[substat_score(s) for s in self.client.get_affix(e, False)],
             )
             for e in relic_list
         ]

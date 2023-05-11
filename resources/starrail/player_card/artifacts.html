@@ -25,7 +25,7 @@
   </div>
   <div>
     {% for stat in item.equipment.sub %}
-    <div class="px-4 py-1 odd:bg-white odd:bg-opacity-10 flex space-x-4 {% if item.substat_scores[loop.index] == 0 %} text-neutral-400 {% endif %}">
+    <div class="px-4 py-1 odd:bg-white odd:bg-opacity-10 flex space-x-4 {% if item.substat_scores[loop.index0] == 0 %} text-neutral-400 {% endif %}">
       <div class="flex-1 truncate">
         {{ stat.name }}
       </div>
@@ -33,7 +33,7 @@
         +{{ stat.value }}
     </div>
       <div class="min-w-30 text-right">
-        <span class="italic">{{ item.substat_scores[loop.index] }}</span>
+        <span class="italic">{{ item.substat_scores[loop.index0] }}</span>
         <span class="text-sm">分</span>
       </div>
     </div>
