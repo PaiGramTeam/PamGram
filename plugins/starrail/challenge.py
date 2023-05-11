@@ -128,9 +128,7 @@ class ChallengePlugin(Plugin):
             return
 
         async def reply_message_func(content: str) -> None:
-            _reply_msg = await message.reply_text(
-                f"开拓者 (<code>{uid}</code>) {content}", parse_mode=ParseMode.HTML
-            )
+            _reply_msg = await message.reply_text(f"开拓者 (<code>{uid}</code>) {content}", parse_mode=ParseMode.HTML)
 
         reply_text: Optional[Message] = None
 
@@ -180,7 +178,7 @@ class ChallengePlugin(Plugin):
             "floor": floor_data,
             "floor_time": floor_data.node_1.challenge_time.datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "floor_nodes": [floor_data.node_1, floor_data.node_2],
-            "floor_num": floor
+            "floor_num": floor,
         }
         return render_data
 
@@ -244,7 +242,7 @@ class ChallengePlugin(Plugin):
                 8: "#1D2A5D",
                 9: "#292B58",
                 10: "#382024",
-            }
+            },
         }
         if total:
 

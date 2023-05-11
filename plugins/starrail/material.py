@@ -36,8 +36,7 @@ class MaterialPlugin(Plugin):
             character_name = args[0]
         else:
             reply_message = await message.reply_text(
-                "请回复你要查询的角色培养素材图鉴的角色名",
-                reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
+                "请回复你要查询的角色培养素材图鉴的角色名", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
             )
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)

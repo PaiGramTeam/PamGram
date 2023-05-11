@@ -35,10 +35,7 @@ class LightConePlugin(Plugin):
         if len(args) >= 1:
             light_cone_name = args[0]
         else:
-            reply_message = await message.reply_text(
-                "请回复你要查询的光锥名称",
-                reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
-            )
+            reply_message = await message.reply_text("请回复你要查询的光锥名称", reply_markup=InlineKeyboardMarkup(self.KEYBOARD))
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
