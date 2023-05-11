@@ -205,7 +205,6 @@ class GachaLog:
         except GachaLogMixedProvider as e:
             raise GachaLogMixedProvider from e
         except Exception as exc:
-            breakpoint()
             raise GachaLogException from exc
 
     async def get_gacha_log_data(self, user_id: int, client: Client, authkey: str) -> int:

@@ -63,12 +63,25 @@ class PlayerCardsFile:
         async with self._lock:
             old_data = await self.load_history_info(uid)
             if old_data is None:
-                await self.save_json(self.get_file_path(uid), data)
-                return data
-            data["avatarInfoList"] = data.get("avatarInfoList", [])
-            characters = [i.get("avatarId", 0) for i in data["avatarInfoList"]]
-            for i in old_data.get("avatarInfoList", []):
-                if i.get("avatarId", 0) not in characters:
-                    data["avatarInfoList"].append(i)
+                old_data = {}
+            avatars = []
+            avatar_ids = []
+            assist_avatar = data.get("AssistAvatar", None)
+            if assist_avatar:
+                avatars.append(assist_avatar)
+                avatar_ids.append(assist_avatar.get("AvatarID", 0))
+            for avatar in data.get("DisplayAvatarList", []):
+                if avatar.get("AvatarID", 0) in avatar_ids:
+                    continue
+                avatars.append(avatar)
+                avatar_ids.append(avatar.get("AvatarID", 0))
+            data["AvatarList"] = avatars
+            if "AssistAvatar" in data:
+                del data["AssistAvatar"]
+            if "DisplayAvatarList" in data:
+                del data["DisplayAvatarList"]
+            for i in old_data.get("AvatarList", []):
+                if i.get("AvatarID", 0) not in avatar_ids:
+                    data["AvatarList"].append(i)
             await self.save_json(self.get_file_path(uid), data)
             return data

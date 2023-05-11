@@ -37,10 +37,10 @@ class LightCone(WikiModel):
             self.all_light_cones_name[m.name] = m
 
     def get_by_id(self, cid: int) -> Optional[LightConeModel]:
-        return self.all_light_cones_map.get(cid, None)
+        return self.all_light_cones_map.get(cid)
 
     def get_by_name(self, name: str) -> Optional[LightConeModel]:
-        return self.all_light_cones_name.get(name, None)
+        return self.all_light_cones_name.get(name)
 
     def get_name_list(self) -> List[str]:
         return list(self.all_light_cones_name.keys())

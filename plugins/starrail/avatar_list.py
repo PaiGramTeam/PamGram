@@ -14,7 +14,6 @@ from core.services.cookies import CookiesService
 from core.services.template.models import FileType
 from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
-from modules.wiki.models.enums import Quality
 from plugins.tools.genshin import CookiesNotFoundError, GenshinHelper, PlayerNotFoundError
 from utils.log import logger
 
@@ -106,14 +105,7 @@ class AvatarListPlugin(Plugin):
 
     def get_light_cone_star(self, name: str) -> int:
         light_cone = self.wiki_service.light_cone.get_by_name(name)
-        star_int_map = {
-            Quality.Five: 5,
-            Quality.Four: 4,
-            Quality.Three: 3,
-            Quality.Two: 2,
-            Quality.One: 1,
-        }
-        return star_int_map[light_cone.quality] if light_cone else 3
+        return light_cone.rarity if light_cone else 3
 
     async def get_final_data(self, characters: List[StarRailDetailCharacter]) -> List[AvatarData]:
         data = []

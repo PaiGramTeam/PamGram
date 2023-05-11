@@ -97,7 +97,7 @@ class LedgerPlugin(Plugin):
             last_month = last_month.replace(day=1) - timedelta(days=1)
             allow_month_year[last_month.month] = last_month.year
 
-            if (month not in allow_month_year.keys()) or (not isinstance(month, int)):
+            if (month not in allow_month_year) or (not isinstance(month, int)):
                 raise IndexError
             year = allow_month_year[month]
         except IndexError:

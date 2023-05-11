@@ -3,8 +3,6 @@ from datetime import datetime, timedelta
 from typing import List, Tuple, Optional, Dict, Union, TYPE_CHECKING
 
 from httpx import AsyncClient
-
-from metadata.genshin import AVATAR_DATA
 from metadata.shortname import roleToId
 from modules.apihelper.client.components.remote import Remote
 from modules.apihelper.models.genshin.calendar import Date, FinalAct, ActEnum, ActDetail, ActTime, BirthChar

@@ -37,10 +37,10 @@ class Character(WikiModel):
             self.all_avatars_name[m.name] = m
 
     def get_by_id(self, cid: int) -> Optional[Avatar]:
-        return self.all_avatars_map.get(cid, None)
+        return self.all_avatars_map.get(cid)
 
     def get_by_name(self, name: str) -> Optional[Avatar]:
-        return self.all_avatars_name.get(name, None)
+        return self.all_avatars_name.get(name)
 
     def get_name_list(self) -> List[str]:
         return list(self.all_avatars_name.keys())
