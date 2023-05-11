@@ -151,12 +151,12 @@ class PlayerCards:
         if not sub:
             return datas
         if relic.RelicSubAffix:
-            for sub in relic.RelicSubAffix:
-                sub_affix = affix.sub_affix[str(sub.SubAffixID)]
+            for sub_a in relic.RelicSubAffix:
+                sub_affix = affix.sub_affix[str(sub_a.SubAffixID)]
                 datas.append(
                     EquipmentsStats(
                         prop_id=sub_affix.property,
-                        prop_value=sub_affix.get_value(sub.Step, sub.Cnt),
+                        prop_value=sub_affix.get_value(sub_a.Step, sub_a.Cnt),
                     )
                 )
         return datas
