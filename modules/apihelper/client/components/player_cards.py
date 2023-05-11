@@ -56,11 +56,11 @@ class ChallengeData(BaseModel):
 
 
 class PlayerSpaceInfo(BaseModel):
-    AchievementCount: int
-    AvatarCount: int
+    AchievementCount: Optional[int] = 0
+    AvatarCount: Optional[int] = 0
     ChallengeData: ChallengeData
-    LightConeCount: int
-    PassAreaProgress: int
+    LightConeCount: Optional[int] = 0
+    PassAreaProgress: Optional[int] = 0
 
 
 class PlayerInfo(BaseModel):
