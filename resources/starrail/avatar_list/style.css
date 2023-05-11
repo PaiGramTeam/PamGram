@@ -1,7 +1,10 @@
 :root {
     --white: rgb(246 248 249);
-    --bg-color: rgb(233 229 220);
-    --h-color: rgb(203 189 162);
+    /* --bg-color: rgb(233 229 220);
+    --h-color: rgb(203 189 162); */
+    --bg-color: rgb(222,221,221);
+    --h-color: rgb(153, 153, 153);
+
     --red: rgb(255 86 33/ 80%);
     --pink: rgb(215 57 203/80%);
     --purple: rgb(159 68 211/80%);
@@ -10,11 +13,12 @@
     --green: rgb(67 185 124/ 80%);
     --grey: rgb(189 191 190);
 }
-
 .color::before {
     content: '';
-    width: calc(1em + 3px);
-    height: calc(1em + 12px);
+    width: calc(1em + 8px);
+    height: calc(1em + 8px);
+    /* width: calc(1em + 3px);
+    height: calc(1em + 12px); */
     position: absolute;
     top: 50%;
     left: 50%;
@@ -56,7 +60,7 @@ body {
 }
 
 .container {
-    width: 1000px;
+    width: 800px;
     display: flex;
     flex-flow: column;
     justify-content: center;
@@ -72,7 +76,8 @@ body {
     width: 100%;
     height: 150px;
     margin-bottom: 40px;
-    background-color: rgb(236, 229, 216);
+    /* background-color: var(--bg-color); */
+    background-image: linear-gradient( 135deg, #FFF5C3 10%, #9452A5 100%);
     background-repeat: no-repeat;
     background-size: auto calc(100% + 2px);
     background-position: 0 -1px;
@@ -187,8 +192,7 @@ body {
     position: relative;
     z-index: 0;
 }
-
-.second-row::before {
+/* .second-row::before {
     content: '';
     width: 100%;
     height: 100%;
@@ -207,20 +211,24 @@ body {
     left: 0;
     z-index: -1;
     background-color: rgb(200 200 200 /30%);
-}
+} */
 
 .content > .row:first-child {
-    background-color: rgb(204, 204, 204);
+    /* background-color: rgb(204, 204, 204); */
+    background-color: #8EC5FC;
+    background-image: linear-gradient( 135deg, #9452A5 10%, #FFF5C3 100%);
     font-weight: bold;
 }
-
+.notice{
+    background-image: linear-gradient( 135deg, #9452A5 10%, #FFF5C3 100%);}
 .row > div {
     padding: 10px 0;
     height: calc(1em + 4px);
     flex: 1;
     text-align: center;
     border-style: solid;
-    border-width: 0 1px 1px 0;
+    border-width: 1px 0;
+    /* border-width: 0 1px 1px 0; */
     border-color: rgb(208, 208, 208);
     position: relative;
     z-index: 1;
@@ -239,6 +247,7 @@ body {
 .number {
     position: relative;
     z-index: 2;
+    text-align: center;
     color: rgb(102, 102, 102);
 }
 
@@ -287,6 +296,7 @@ body {
 
 .weapon > div:first-child {
     width: 80px;
+    margin-right: 8px;
     text-align: right;
 }
 
@@ -305,30 +315,41 @@ body {
 }
 
 .weapon-1-star {
-    background-color: rgb(250 250 250);
-    box-shadow: inset 0 0 10px 2px rgb(220 220 220);
+    /* background-color: rgb(250 250 250);
+    box-shadow: inset 0 0 10px 2px rgb(220 220 220); */
+    background-image: linear-gradient(19deg, #FAACA8 0%, #DDD6F3 100%);
 }
 
 .weapon-2-star {
-    background-color: rgb(250 250 250);
-    box-shadow: inset 0 0 10px 2px rgb(195, 237, 183);
+    /* background-color: rgb(250 250 250);
+    box-shadow: inset 0 0 10px 2px rgb(195, 237, 183); */
+    background-image: linear-gradient(19deg, #FAACA8 0%, #DDD6F3 100%);
 }
 
 .weapon-3-star {
-    background-color: rgb(228, 237, 252);
-    box-shadow: inset 0 0 10px 2px rgb(183, 190, 237);
+    /* background-color: rgb(228, 237, 252);
+    box-shadow: inset 0 0 10px 2px rgb(183, 190, 237); */
+    background-image: linear-gradient(90deg, #74EBD5 0%, #9FACE6 100%);
 }
 
 .weapon-4-star {
-    background-color: rgb(250, 228, 241);
-    box-shadow: inset 0 0 10px 2px rgb(233, 182, 221);
+    /* background-color: rgb(250, 228, 241);
+    box-shadow: inset 0 0 10px 2px rgb(233, 182, 221); */
+    background-image: linear-gradient(43deg, #aa72ca 0%, #c776c1 46%, #db3ca6 100%);
+
 }
 
 .weapon-5-star {
-    background-color: rgb(255, 246, 221);
-    box-shadow: inset 0 0 10px 2px rgb(239, 215, 153);
+    /* background-color: rgb(255, 246, 221);
+    box-shadow: inset 0 0 10px 2px rgb(239, 215, 153); */
+    background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%) ;
 }
-
+.gold{
+    background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%) ;
+}
+.nongold{
+    background-image: linear-gradient(43deg, #aa72ca 0%, #c776c1 46%, #db3ca6 100%);
+}
 .full-friendship {
     color: var(--white);
     background-size: 85%;
