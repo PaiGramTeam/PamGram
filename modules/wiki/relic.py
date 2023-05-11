@@ -37,10 +37,10 @@ class Relic(WikiModel):
             self.all_relics_name[m.name] = m
 
     def get_by_id(self, cid: int) -> Optional[RelicModel]:
-        return self.all_relics_map.get(cid, None)
+        return self.all_relics_map.get(cid)
 
     def get_by_name(self, name: str) -> Optional[RelicModel]:
-        return self.all_relics_name.get(name, None)
+        return self.all_relics_name.get(name)
 
     def get_name_list(self) -> List[str]:
         return list(self.all_relics_name.keys())

@@ -37,10 +37,10 @@ class Monster(WikiModel):
             self.all_monsters_name[m.name] = m
 
     def get_by_id(self, cid: int) -> Optional[MonsterModel]:
-        return self.all_monsters_map.get(cid, None)
+        return self.all_monsters_map.get(cid)
 
     def get_by_name(self, name: str) -> Optional[MonsterModel]:
-        return self.all_monsters_name.get(name, None)
+        return self.all_monsters_name.get(name)
 
     def get_name_list(self) -> List[str]:
         return list(self.all_monsters_name.keys())

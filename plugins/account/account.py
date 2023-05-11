@@ -87,7 +87,6 @@ class BindAccountPlugin(Plugin.Conversation):
         elif message.text == "HoYoLab":
             await message.reply_text("很抱歉，暂不支持HoYoLab服务器", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
-            bind_account_plugin_data.region = RegionEnum.HOYOLAB
         else:
             await message.reply_text("选择错误，请重新选择")
             return CHECK_SERVER

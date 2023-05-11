@@ -126,7 +126,7 @@ class PlayerCards:
         return error
 
     def get_affix_by_id(self, cid: int) -> RelicAffixAll:
-        return self.relic_datas_map.get(cid, None)
+        return self.relic_datas_map.get(cid)
 
     def get_set_by_id(self, cid: int) -> int:
         if affix := self.get_affix_by_id(cid):

@@ -14,7 +14,6 @@ from core.services.cookies import CookiesService
 from core.services.template.models import FileType
 from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
-from modules.wiki.models.enums import Quality
 from plugins.tools.genshin import CookiesNotFoundError, GenshinHelper, PlayerNotFoundError
 from utils.log import logger
 
