@@ -2,12 +2,11 @@ import math
 from typing import List, Tuple, Union, Optional, TYPE_CHECKING, Dict
 
 from pydantic import BaseModel
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.constants import ChatAction
 from telegram.ext import filters
 from telegram.helpers import create_deep_linked_url
 
-from core.basemodel import RegionEnum
 from core.config import config
 from core.dependence.assets import AssetsService, AssetsCouldNotFound
 from core.dependence.redisdb import RedisDB
@@ -19,7 +18,6 @@ from metadata.shortname import roleToName, idToRole
 from modules.apihelper.client.components.player_cards import PlayerCards as PlayerCardsClient, PlayerInfo, Avatar, Relic
 from modules.playercards.fight_prop import EquipmentsStats
 from modules.playercards.helpers import ArtifactStatsTheory
-from modules.wiki.models.enums import Quality
 from utils.log import logger
 
 if TYPE_CHECKING:
@@ -58,6 +56,33 @@ class PlayerCards(Plugin):
             return None
         return PlayerInfo.parse_obj(data)
 
+    async def get_uid_and_ch(
+        self, user_id: int, args: List[str], reply: Optional[Message]
+    ) -> Tuple[Optional[int], Optional[str]]:
+        """通过消息获取 uid，优先级：args > reply > self"""
+        uid, ch_name, user_id_ = None, None, user_id
+        if args:
+            for i in args:
+                if i is not None:
+                    if i.isdigit() and len(i) == 9:
+                        uid = int(i)
+                    else:
+                        ch_name = roleToName(i)
+        if reply:
+            try:
+                user_id_ = reply.from_user.id
+            except AttributeError:
+                pass
+        if not uid:
+            player_info = await self.player_service.get_player(user_id_)
+            if player_info is not None:
+                uid = player_info.player_id
+            if (not uid) and (user_id_ != user_id):
+                player_info = await self.player_service.get_player(user_id)
+                if player_info is not None:
+                    uid = player_info.player_id
+        return uid, ch_name
+
     @handler.command(command="player_card", block=False)
     @handler.message(filters=filters.Regex("^角色卡片查询(.*)"), block=False)
     async def player_cards(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
@@ -65,8 +90,8 @@ class PlayerCards(Plugin):
         message = update.effective_message
         args = self.get_args(context)
         await message.reply_chat_action(ChatAction.TYPING)
-        player_info = await self.player_service.get_player(user.id)
-        if player_info is None:
+        uid, ch_name = await self.get_uid_and_ch(user.id, args, message.reply_to_message)
+        if uid is None:
             buttons = [
                 [
                     InlineKeyboardButton(
@@ -87,10 +112,10 @@ class PlayerCards(Plugin):
                 await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
             return
         # 暂时只支持国服
-        if player_info.region != RegionEnum.HYPERION:
+        if not (100000000 < uid < 200000000):
             await message.reply_text("此功能暂时只支持国服")
             return
-        data = await self._load_history(player_info.player_id)
+        data = await self._load_history(uid)
         if data is None or len(data.AvatarList) == 0:
             if isinstance(self.kitsune, str):
                 photo = self.kitsune
@@ -100,56 +125,55 @@ class PlayerCards(Plugin):
                 [
                     InlineKeyboardButton(
                         "更新面板",
-                        callback_data=f"update_player_card|{user.id}|{player_info.player_id}",
+                        callback_data=f"update_player_card|{user.id}|{uid}",
                     )
                 ]
             ]
             reply_message = await message.reply_photo(
                 photo=photo,
-                caption="角色列表未找到，请尝试点击下方按钮更新角色列表",
+                caption=f"角色列表未找到，请尝试点击下方按钮更新角色列表 - UID {uid}",
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
             if reply_message.photo:
                 self.kitsune = reply_message.photo[-1].file_id
             return
-        if len(args) == 1:
-            character_name = roleToName(args[0])
+        if ch_name is not None:
             logger.info(
                 "用户 %s[%s] 角色卡片查询命令请求 || character_name[%s] uid[%s]",
                 user.full_name,
                 user.id,
-                character_name,
-                player_info.player_id,
+                ch_name,
+                uid,
             )
         else:
             logger.info("用户 %s[%s] 角色卡片查询命令请求", user.full_name, user.id)
-            ttl = await self.cache.ttl(player_info.player_id)
+            ttl = await self.cache.ttl(uid)
 
-            buttons = self.gen_button(data, user.id, player_info.player_id, update_button=ttl < 0)
+            buttons = self.gen_button(data, user.id, uid, update_button=ttl < 0)
             if isinstance(self.kitsune, str):
                 photo = self.kitsune
             else:
                 photo = open("resources/img/aaa.jpg", "rb")
             reply_message = await message.reply_photo(
                 photo=photo,
-                caption="请选择你要查询的角色",
+                caption=f"请选择你要查询的角色 - UID {uid}",
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
             if reply_message.photo:
                 self.kitsune = reply_message.photo[-1].file_id
             return
         for characters in data.AvatarList:
-            if idToRole(characters.AvatarID) == character_name:
+            if idToRole(characters.AvatarID) == ch_name:
                 break
         else:
-            await message.reply_text(f"角色展柜中未找到 {character_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试")
+            await message.reply_text(f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试")
             return
         if characters.AvatarID in {8001, 8002, 8003, 8004}:
-            await message.reply_text(f"暂不支持查询 {character_name} 的角色卡片")
+            await message.reply_text(f"暂不支持查询 {ch_name} 的角色卡片")
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await RenderTemplate(
-            player_info.player_id,
+            uid,
             characters,
             self.template_service,
             self.assets_service,
@@ -158,7 +182,7 @@ class PlayerCards(Plugin):
         ).render()  # pylint: disable=W0631
         await render_result.reply_photo(
             message,
-            filename=f"player_card_{player_info.player_id}_{character_name}.png",
+            filename=f"player_card_{uid}_{ch_name}.png",
         )
 
     @handler.callback_query(pattern=r"^update_player_card\|", block=False)
@@ -198,11 +222,11 @@ class PlayerCards(Plugin):
         buttons = self.gen_button(data, user.id, uid, update_button=False)
         render_data = await self.parse_holder_data(data)
         holder = await self.template_service.render(
-            "genshin/player_card/holder.html",
+            "starrail/player_card/holder.html",
             render_data,
             viewport={"width": 750, "height": 380},
             ttl=60 * 10,
-            caption="更新角色列表成功，请选择你要查询的角色",
+            caption=f"更新角色列表成功，请选择你要查询的角色 - UID {uid}",
         )
         await holder.edit_media(message, reply_markup=InlineKeyboardMarkup(buttons))
 
@@ -283,8 +307,8 @@ class PlayerCards(Plugin):
         render_result.filename = f"player_card_{uid}_{result}.png"
         await render_result.edit_media(message)
 
+    @staticmethod
     def gen_button(
-        self,
         data: PlayerInfo,
         user_id: Union[str, int],
         uid: int,
@@ -469,7 +493,6 @@ class RenderTemplate:
             "character_detail": self.wiki_service.character.get_by_id(self.character.AvatarID),
             "weapon": weapon,
             "weapon_detail": weapon_detail,
-            "weapon_rarity": weapon_detail.rarity if weapon_detail else 0,
             # 圣遗物评分
             "artifact_total_score": artifact_total_score,
             # 圣遗物评级
