@@ -1,107 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Avatar List</title>
-    <link type="text/css" href="./style.css" rel="stylesheet"/>
-    <link type="text/css" href="../../styles/public.css" rel="stylesheet"/>
-    <style>
-        .avatar > div::after {
-            background-position: center center;
-            background-size: cover;
-            background-image: url("../../background/rarity/half/{{ rarity }}.png");
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Avatar List</title>
+  <link type="text/css" href="./style.css" rel="stylesheet"/>
+  <link type="text/css" href="../../styles/public.css" rel="stylesheet"/>
+  <script src="../../js/tailwindcss-3.1.8.js"></script>
 </head>
 <body>
 <div class="container">
-    <div class="head">
-        <div class="player">
-            <div>
-                <div class="nickname">{{ nickname }}</div>
-                <div class="uid">UID: {{ uid }}</div>
-            </div>
-        </div>
-        <div class="logo"></div>
+  <div class="header rounded-xl p-2 mb-6">
+    <div class="frame rounded-lg border-solid border-2 bg-contain p-4">
+      <div>
+        <div class="nickname text-4xl italic mb-2 px-2 font-bold text-shadow">{{ nickname }}</div>
+        <div class="uid text-xl italic px-2">UID: {{ uid }}</div>
+      </div>
     </div>
-    <div class="content">
-        <div class="row">
-            <div>#</div>
-            <div style="flex: 4">角色</div>
-            <div>等级</div>
-            <div>星魂</div>
-            <div style="flex: 8">光锥</div>
-        </div>
-        <!-- 
-            rgb(240 226 179)
-            rgb(229 171 229/70%) -->
+  </div>
+  <div class="content rounded-xl overflow-hidden">
+    <table class="table text-center border-collapse">
+      <thead>
+        <tr>
+          <th class="text-right">#</th>
+          <th colspan="2">角色</th>
+          <th>等级</th>
+          <th>星魂</th>
+          <th colspan="4">光锥</th>
+        </tr>
+      </thead>
+      <tbody>
         {% for avatar_data in avatar_datas %}
-            {% set equipment = avatar_data.equipment %}
-            {% if avatar_data.rarity == 5 %}
-                {% set row_bg = 'gold' %}
-            {% else %}
-                {% set row_bg = 'nongold' %}
-            {% endif %}
-            {% if equipment != none %}
-                {% set equip_star = equipment.rarity %}
-            {% else %}
-                {% set equip_star = '' %}
-            {% endif %}
-            <div
-                    {% if loop.index is even %}
-                        class="row second-row"
-                    {% else %}
-                        class="row"
-                    {% endif %}
+          {% set equipment = avatar_data.equipment %}
+          {% if avatar_data.rarity == 5 %}
+            {% set row_bg = 'gold' %}
+          {% else %}
+            {% set row_bg = 'nongold' %}
+          {% endif %}
+          {% if equipment != none %}
+            {% set equip_star = equipment.rarity %}
+          {% else %}
+            {% set equip_star = '' %}
+          {% endif %}
+          <tr class="h-8 border border-b">
+            <td class="text-right {{row_bg}}">{{ loop.index }}</td>
+            <td class="role {{row_bg}}">
+              <img class="h-8 pl-1 img-drop-shadow" src="{{ avatar_data.icon }}"/>
+            </td>
+            <td class="role text-left {{row_bg}}">{{ avatar_data.name }}</td>
+            <td>{{ avatar_data.level }}</td>
+            <td
+                {% set constellation = avatar_data.eidolon %}
+                {% if constellation != 0 %}
+                  class="color {{ ['green', 'cyan', 'blue', 'purple', 'pink', 'red'][constellation - 1] }}"
+                {% endif %}
             >
-                <!-- <div style="background-color: {{ row_bg }}">{{ loop.index }}</div> -->
-                <div class="{{row_bg}}">{{ loop.index }}</div>
-
-                <!-- <div class="role" style="flex: 4;background-color: {{ row_bg }}"> -->
-                <div class="role {{row_bg}}" style="flex: 4;">
-                    <div class="role-icon" style="flex: 1.5;">
-                        <img src="{{ avatar_data.icon }}" alt="side icon"/>
-                    </div>
-                    <div class="role-name">
-                        {{ avatar_data.name }}
-                    </div>
-                </div>
-                <div>{{ avatar_data.level }}</div>
-                <div
-                        {% set constellation = avatar_data.eidolon %}
-                        {% if constellation != 0 %}
-                            class="color {{ ['green', 'cyan', 'blue', 'purple', 'pink', 'red'][constellation - 1] }}"
-                        {% endif %}
-                >
-                    <div class="number">{{ constellation }}</div>
-                </div>
-
-                <div class="weapon weapon-{{ equip_star }}-star" style="flex: 8">
-                    {% if equipment != none %}
-                        <div>
-                            {% if equipment.level < 10 %}
-                                Lv.{{ equipment.level }}&nbsp;&nbsp;
-                            {% else %}
-                                Lv.{{ equipment.level }}
-                            {% endif %}
-                        </div>
-                        <div class="color {{ ['green', 'cyan', 'blue', 'purple', 'red'][equipment.eidolon - 1] }}">
-                            <div class="number">{{ equipment.eidolon }}</div>
-                        </div>
-                        <div><img src="{{ equipment.icon }}" alt="weapon"></div>
-                        <div>{{ equipment.name }}</div>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
-        <div class="notice">
-            {% if has_more %}
-                <div>
-                    *想查看完整数据请在指令中加上<code>all</code>或者<code>全部</code>: <code>/avatars all</code>、<code>全部练度统计</code>
-                </div>
+              <span class="number role inline-block">{{ constellation }}</s>
+            </td>
+            {% if equipment != none %}
+              <td class="weapon-{{ equip_star }}-star text-left pl-2">
+                {% if equipment.level < 10 %}
+                  Lv.{{ equipment.level }}
+                {% else %}
+                  Lv.{{ equipment.level }}
+                {% endif %}
+              </td>
+              <td class="weapon-{{ equip_star }}-star color {{ ['green', 'cyan', 'blue', 'purple', 'red'][equipment.eidolon - 1] }}">
+                <div class="weapon number italic">{{ equipment.eidolon }}</div>
+              </td>
+              <td class="weapon weapon-{{ equip_star }}-star">
+                <img class="h-8 pl-1" src="{{ equipment.icon }}" alt="weapon">
+              </td>
+              <td class="weapon-{{ equip_star }}-star text-left">{{ equipment.name }}</td>
+            {% else %}
+              <td colspan="4"></td>
             {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="notice">
+      {% if has_more %}
+        <div>
+          *想查看完整数据请在指令中加上<code>all</code>或者<code>全部</code>: <code>/avatars all</code>、<code>全部练度统计</code>
         </div>
+      {% endif %}
     </div>
+  </div>
 </div>
 </body>
 </html>
