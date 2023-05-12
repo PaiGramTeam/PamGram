@@ -86,10 +86,10 @@ class PublicCookiesService(BaseService):
                 await self._cache.delete_public_cookies(public_id, region)
                 continue
             if region == RegionEnum.HYPERION:
-                client = genshin.Client(cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.CHINESE)
+                client = genshin.Client(cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.CHINESE)
             elif region == RegionEnum.HOYOLAB:
                 client = genshin.Client(
-                    cookies=cookies.data, game=types.Game.GENSHIN, region=types.Region.OVERSEAS, lang="zh-cn"
+                    cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.OVERSEAS, lang="zh-cn"
                 )
             else:
                 raise CookieServiceError
@@ -98,14 +98,14 @@ class PublicCookiesService(BaseService):
                     raise RuntimeError("account_id not found")
                 record_cards = await client.get_record_cards()
                 for record_card in record_cards:
-                    if record_card.game == Game.GENSHIN:
-                        await client.get_partial_genshin_user(record_card.uid)
+                    if record_card.game == Game.STARRAIL:
+                        await client.get_starrail_user(record_card.uid)
                         break
                 else:
                     accounts = await client.get_game_accounts()
                     for account in accounts:
-                        if account.game == Game.GENSHIN:
-                            await client.get_partial_genshin_user(account.uid)
+                        if account.game == Game.STARRAIL:
+                            await client.get_starrail_user(account.uid)
                             break
             except InvalidCookies as exc:
                 if exc.retcode in (10001, -100):
