@@ -1,59 +1,58 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
-    <link rel="shortcut icon" href="#"/>
-    <link rel="stylesheet" type="text/css" href="./daily_note.css"/>
-</head>
-<body>
-<div class="container" id="container">
-    <div class="title">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link rel="shortcut icon" href="#" />
+    <link rel="stylesheet" type="text/css" href="./daily_note.css" />
+    <link type="text/css" href="../../styles/public.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container" id="container">
+      <div class="title">
         <div class="id">
-            <span>ID：{{ uid }}</span>
+          <span>ID：{{ uid }}</span>
         </div>
         <div class="day">
-            <span>{{ day }}</span>
+          <span>{{ day }}</span>
         </div>
-    </div>
-    <div class="item">
+      </div>
+      <div class="item">
         <div class="main">
-            <div class="bg"></div>
-            <img class="icon" src="./items/开拓力.webp" alt=""/>
-            <div class="info">
-                <div class="name">开拓力</div>
-                <div class="time">
-                    {% if resin_recovery_time %}
-                        将于{{ resin_recovery_time }} 全部恢复
-                    {% else %}
-                        开拓力已完全恢复
-                    {% endif %}
-                </div>
+          <div class="bg"></div>
+          <img class="icon" src="./items/开拓力.webp" alt="" />
+          <div class="info">
+            <div class="name">开拓力</div>
+            <div class="time">
+              {% if resin_recovery_time %} 将于{{ resin_recovery_time }}
+              全部恢复 {% else %} 开拓力已完全恢复 {% endif %}
             </div>
+          </div>
         </div>
         <div class="right">
-          <span class="{% if current_resin/(max_resin or 1) > 0.9 %}red{% endif %}">
+          <span
+            class="{% if current_resin/(max_resin or 1) > 0.9 %}red{% endif %}"
+          >
             {{ current_resin }}/{{ max_resin }}
           </span>
         </div>
-    </div>
-    <div class="item">
+      </div>
+      <div class="item">
         <div class="main">
-            <div class="bg"></div>
-            <img class="icon" src="./items/委托.webp" alt=""/>
-            <div class="info">
-                <div class="name">委托执行</div>
-                <div class="time">
-                    {% if not expeditions %}尚未进行委托
-                    {% elif remained_time %}将于{{ remained_time }}完成
-                    {% else %}委托已完成{% endif %}
-                </div>
+          <div class="bg"></div>
+          <img class="icon" src="./items/委托.webp" alt="" />
+          <div class="info">
+            <div class="name">委托执行</div>
+            <div class="time">
+              {% if not expeditions %}尚未进行委托 {% elif remained_time
+              %}将于{{ remained_time }}完成 {% else %}委托已完成{% endif %}
             </div>
+          </div>
         </div>
         <div class="right">
-            <span>{{ current_expeditions }}/{{ max_expeditions }}</span>
+          <span>{{ current_expeditions }}/{{ max_expeditions }}</span>
         </div>
+      </div>
     </div>
-</div>
-</body>
-<script type="text/javascript"></script>
+  </body>
+  <script type="text/javascript"></script>
 </html>
