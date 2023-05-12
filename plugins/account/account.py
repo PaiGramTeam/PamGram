@@ -104,9 +104,9 @@ class BindAccountPlugin(Plugin.Conversation):
             await message.reply_text("退出任务", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         if message.text == "通过玩家ID":
-            await message.reply_text("请输入你的玩家ID（非通行证ID）", reply_markup=ReplyKeyboardRemove())
+            await message.reply_text("请输入你的游戏ID（非通行证ID）", reply_markup=ReplyKeyboardRemove())
             return CHECK_PLAYER_ID
-        if message.text == "用过账号ID":
+        if message.text == "通过账号ID":
             await message.reply_text("请输入你的通行证ID（非玩家ID）", reply_markup=ReplyKeyboardRemove())
             return CHECK_ACCOUNT_ID
         await message.reply_text("选择错误，请重新选择")
@@ -210,7 +210,7 @@ class BindAccountPlugin(Plugin.Conversation):
         else:
             return ConversationHandler.END
         try:
-            player_stats = await client.get_genshin_user(player_id)
+            player_stats = await client.get_starrail_user(player_id)
         except AccountNotFound:
             await message.reply_text("找不到用户，uid可能无效", reply_markup=ReplyKeyboardRemove())
             logger.warning("获取账号信息发生错误 %s 找不到用户 uid可能无效", player_id)
