@@ -1,9 +1,7 @@
+/* 上半 */
 .container {
-  width: 640px !important;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-  padding: 20px;
+  width: 680px !important;
+  max-width: 680px !important;
 }
 
 .header {
@@ -24,94 +22,91 @@
 .content {
   box-shadow: 0 0 8px #72a2ae79;
   font-size: 21px;
-  display: flex;
-  flex-flow: column;
-  justify-items: center;
 }
 
+.table thead {
+  background-color: #e0dad3;
+}
 .table tr {
   border-color: #00000021;
 }
-
 .table tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-/* 角色背景 */
-.gold {
-  background-color: #f7e2ad;
+.role img {
+  transform: scale(1.05);
 }
-.nongold {
-  background-color: #c4b9eb;
+.weapon img {
+  transform: scale(1.1);
 }
 
 /* 计数+菱形图案 */
-.number {
+.weapon img,
+.color {
   position: relative;
   z-index: 0;
 }
-
-.number::after {
-  content: "";
+.role.bg,
+.weapon.bg {
   position: absolute;
   z-index: -1;
 }
-.number.role::after {
-  top: 6px;
-  left: -4px;
-  width: 21px;
-  height: 21px;
+.role.bg {
+  top: 5px;
+  left: 17px;
+  width: 22px;
+  height: 22px;
   transform: rotateZ(45deg);
 }
-.weapon img {
-  position: relative;
-  z-index: 0;
+.weapon.bg {
+  top: 0;
+  left: -8px;
+  transform: skewX(-11deg);
 }
-.number.weapon::after {
-  top: -1px;
-  left: -6px;
-  width: 66px;
-  height: 33px;
-  transform: skewX(-22deg);
+.frame-border {
+  border-color: #f7e2ad2b;
+  width: 62px;
+  height: 27px;
 }
 
 .color .number {
   color: white;
 }
-.green .number::after {
+.green .bg {
   background-color: #3c7d7f;
 }
-.cyan .number::after {
+.cyan .bg {
   background-color: #4898c7;
 }
-.blue .number::after {
+.blue .bg {
   background-color: #4576b4;
 }
-.purple .number::after {
+.purple .bg {
   background-color: #955ec9;
 }
-.pink .number::after {
+.pink .bg {
   background-color: #c24e9a;
 }
-.red .number::after {
+.red .bg {
   background-color: #c24e4e;
 }
 
-/* 武器背景 */
+/* 武器、角色背景 */
 .weapon-1-star {
   background-color: #cfcfcf;
 }
 .weapon-2-star {
-  background-color: #b5dfe0;
+  background-color: #c0edee;
 }
 .weapon-3-star {
-  background-color: #9fc9fd;
+  background-color: #bedcff;
 }
-.weapon-4-star {
-  background-color: #c4b9eb;
+.weapon-4-star, .nongold {
+  background-color: #d3c8fa;
 }
-.weapon-5-star {
-  background-color: #f7e2ad;
+.weapon-5-star, .gold {
+  background-color: #f9e7bb;
 }
 
 .notice {

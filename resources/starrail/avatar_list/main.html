@@ -8,7 +8,7 @@
   <script src="../../js/tailwindcss-3.1.8.js"></script>
 </head>
 <body>
-<div class="container">
+<div class="container flex flex-col justify-center p-6">
   <div class="header rounded-xl p-2 mb-6">
     <div class="frame rounded-lg border-solid border-2 bg-contain p-4">
       <div>
@@ -17,7 +17,7 @@
       </div>
     </div>
   </div>
-  <div class="content rounded-xl overflow-hidden">
+  <div class="content rounded-xl overflow-hidden flex flex-col justify-center">
     <table class="table text-center border-collapse">
       <thead>
         <tr>
@@ -44,7 +44,7 @@
           <tr class="h-8 border border-b">
             <td class="text-right {{row_bg}}">{{ loop.index }}</td>
             <td class="role {{row_bg}}">
-              <img class="h-8 pl-1 img-drop-shadow" src="{{ avatar_data.icon }}"/>
+              <img class="h-8 pl-2 img-drop-shadow" src="{{ avatar_data.icon }}"/>
             </td>
             <td class="role text-left {{row_bg}}">{{ avatar_data.name }}</td>
             <td>{{ avatar_data.level }}</td>
@@ -54,18 +54,22 @@
                   class="color {{ ['green', 'cyan', 'blue', 'purple', 'pink', 'red'][constellation - 1] }}"
                 {% endif %}
             >
-              <span class="number role inline-block">{{ constellation }}</s>
+              <span class="number role inline-block">{{ constellation }}</span>
+              <div class="role bg"></div>
             </td>
             {% if equipment != none %}
-              <td class="weapon-{{ equip_star }}-star text-left pl-2">
+              <td class="weapon-{{ equip_star }}-star text-left pl-3">
                 {% if equipment.level < 10 %}
                   Lv.{{ equipment.level }}
                 {% else %}
                   Lv.{{ equipment.level }}
                 {% endif %}
               </td>
-              <td class="weapon-{{ equip_star }}-star color {{ ['green', 'cyan', 'blue', 'purple', 'red'][equipment.eidolon - 1] }}">
-                <div class="weapon number italic">{{ equipment.eidolon }}</div>
+              <td class="weapon-{{ equip_star }}-star color border-none {{ ['green', 'cyan', 'blue', 'purple', 'red'][equipment.eidolon - 1] }}">
+                <span class="weapon number">{{ equipment.eidolon }}</span>
+                <div class="weapon bg p-1">
+                  <div class="frame-border border-solid border"></div>
+                </div>
               </td>
               <td class="weapon weapon-{{ equip_star }}-star">
                 <img class="h-8 pl-1" src="{{ equipment.icon }}" alt="weapon">
