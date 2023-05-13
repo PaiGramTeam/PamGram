@@ -102,7 +102,7 @@ class PlayerCards(Plugin):
             ]
             if filters.ChatType.GROUPS.filter(message):
                 reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊派蒙绑定账号",
+                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号",
                     reply_markup=InlineKeyboardMarkup(buttons),
                 )
                 self.add_delete_message_job(reply_message, delay=30)
