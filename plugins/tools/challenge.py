@@ -55,13 +55,13 @@ class ChallengeSystem(Plugin):
             raise ChallengeSystemException("非法用户")
         if need_verify:
             try:
-                await client.get_genshin_notes()
+                await client.get_starrail_notes()
             except GenshinException as exc:
                 if exc.retcode != 1034:
                     raise exc
             else:
                 raise ChallengeSystemException("账户正常，无需验证")
-        verify = Verify(cookies=client.cookie_manager.cookies)
+        verify = Verify(account_id=client.hoyolab_id, cookies=client.cookie_manager.cookies)
         try:
             data = await verify.create()
             challenge = data["challenge"]
@@ -91,7 +91,7 @@ class ChallengeSystem(Plugin):
             _, challenge = await self.get_challenge(client.uid)
         if challenge is None:
             raise ChallengeSystemException("验证失效 请求已经过期")
-        verify = Verify(cookies=client.cookie_manager.cookies)
+        verify = Verify(account_id=client.hoyolab_id, cookies=client.cookie_manager.cookies)
         try:
             await verify.verify(challenge=challenge, validate=validate)
         except ResponseException as exc:
