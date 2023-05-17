@@ -4,6 +4,7 @@ import ujson
 from httpx import AsyncClient, TimeoutException
 from pydantic import BaseModel
 
+from core.config import config
 from modules.playercards.fight_prop import EquipmentsStats
 from modules.wiki.base import WikiModel
 from modules.wiki.models.relic_affix import RelicAffixAll
@@ -83,11 +84,12 @@ class PlayerCardsError(Exception):
 
 
 class PlayerCards:
-    url = "https://mhy.fuckmys.tk/sr_info/"
+    url = "https://api.mihomo.me/sr_info/"
     prop_url = f"{WikiModel.BASE_URL}relic_config.json"
 
     def __init__(self, redis):
         self.cache = RedisCache(redis.client, key="plugin:player_cards:fake_enka_network", ex=60)
+        self.headers = {"User-Agent": config.enka_network_api_agent}
         self.client = AsyncClient()
         self.player_cards_file = PlayerCardsFile()
         self.init = False
@@ -108,7 +110,7 @@ class PlayerCards:
             data = await self.cache.get(uid)
             if data is not None:
                 return PlayerInfo.parse_obj(data)
-            user = await self.client.get(self.url + uid, timeout=15)
+            user = await self.client.get(self.url + uid, timeout=15, headers=self.headers)
             if user.status_code != 200:
                 raise PlayerCardsError(f"请求异常，错误代码 {user.status_code}")
             data = ujson.loads(user.text)
