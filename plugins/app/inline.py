@@ -36,6 +36,7 @@ class Inline(Plugin):
         self.characters_list: List[Dict[str, str]] = []
         self.characters_material_list: List[Dict[str, str]] = []
         self.light_cone_list: List[Dict[str, str]] = []
+        self.relics_list: List[Dict[str, str]] = []
         self.refresh_task: List[Awaitable] = []
         self.search_service = search_service
 
@@ -52,6 +53,18 @@ class Inline(Plugin):
                 else:
                     logger.warning(f"未找到光锥 {light_cone} 的图标，inline 不显示此光锥")
             logger.success("Inline 模块获取光锥列表完成")
+
+        async def task_relics():
+            logger.info("Inline 模块正在获取遗器列表")
+            relics_datas: Dict[str, str] = {}
+            for relics in self.wiki_service.relic.all_relics:
+                relics_datas[relics.name] = relics.icon
+            for relics in self.wiki_service.raider.all_relic_raiders:
+                if relics in relics_datas:
+                    self.relics_list.append({"name": relics, "icon": relics_datas[relics]})
+                else:
+                    logger.warning(f"未找到遗器 {relics} 的图标，inline 不显示此遗器")
+            logger.success("Inline 模块获取遗器列表完成")
 
         async def task_characters():
             logger.info("Inline 模块正在获取角色列表")
@@ -80,6 +93,7 @@ class Inline(Plugin):
 
         self.refresh_task.append(asyncio.create_task(task_characters()))
         self.refresh_task.append(asyncio.create_task(task_light_cone()))
+        self.refresh_task.append(asyncio.create_task(task_relics()))
 
     @handler.inline_query(block=False)
     async def inline_query(self, update: Update, _: CallbackContext) -> None:
@@ -91,7 +105,11 @@ class Inline(Plugin):
         results_list = []
         args = query.split(" ")
         if args[0] == "":
-            temp_data = [("光锥图鉴查询", "输入光锥名称即可查询光锥图鉴"), ("角色攻略查询", "输入角色名即可查询角色攻略图鉴")]
+            temp_data = [
+                ("光锥图鉴查询", "输入光锥名称即可查询光锥图鉴"),
+                ("角色攻略查询", "输入角色名即可查询角色攻略图鉴"),
+                ("遗器套装查询", "输入遗器套装名称即可查询遗器套装图鉴"),
+            ]
             for i in temp_data:
                 results_list.append(
                     InlineQueryResultArticle(
@@ -102,11 +120,12 @@ class Inline(Plugin):
                     )
                 )
         else:
-            if args[0] in ["查看角色攻略列表并查询", "查看角色培养素材列表并查询", "查看光锥列表并查询"]:
+            if args[0] in ["查看角色攻略列表并查询", "查看角色培养素材列表并查询", "查看光锥列表并查询", "查看遗器套装列表并查询"]:
                 temp_data = {
                     "查看角色攻略列表并查询": (self.characters_list, "角色攻略查询"),
                     "查看角色培养素材列表并查询": (self.characters_material_list, "角色培养素材查询"),
                     "查看光锥列表并查询": (self.light_cone_list, "光锥查询"),
+                    "查看遗器套装列表并查询": (self.relics_list, "遗器套装查询"),
                 }[args[0]]
                 for character in temp_data[0]:
                     name = character["name"]

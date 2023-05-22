@@ -127,7 +127,7 @@ class PlayerCards:
         try:
             user = await self.client.get(self.url2 + uid, timeout=30, headers=self.headers)
             if user.status_code != 200:
-                raise PlayerCardsError("请求异常，错误代码 %s" % user.status_code)
+                raise PlayerCardsError("请求异常")
             data = ujson.loads(user.text)
             characters = data.get("characters", [])
             for character in characters:

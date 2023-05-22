@@ -111,10 +111,6 @@ class PlayerCards(Plugin):
             else:
                 await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
             return
-        # 暂时只支持国服
-        if not (100000000 < uid < 200000000):
-            await message.reply_text("此功能暂时只支持国服")
-            return
         data = await self._load_history(uid)
         if data is None or len(data.AvatarList) == 0:
             if isinstance(self.kitsune, str):
@@ -382,7 +378,7 @@ class PlayerCards(Plugin):
                 )
             except AssetsCouldNotFound:
                 logger.warning("角色 %s 的头像资源获取失败", cid)
-            if idx > 6:
+            if idx > 3:
                 break
         return {
             "uid": data.UID,

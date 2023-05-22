@@ -13,6 +13,7 @@ __all__ = [
     "lightConeToId",
     "not_real_roles",
     "roleToTag",
+    "lightConeToTag",
 ]
 
 # noinspection SpellCheckingInspection

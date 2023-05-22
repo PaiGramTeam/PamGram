@@ -1,5 +1,10 @@
 from core.base_service import BaseService
-from core.services.game.cache import GameCacheForStrategy, GameCacheForMaterial, GameCacheForLightCone
+from core.services.game.cache import (
+    GameCacheForStrategy,
+    GameCacheForMaterial,
+    GameCacheForLightCone,
+    GameCacheForRelics,
+)
 
 __all__ = "GameCacheService"
 
@@ -10,10 +15,12 @@ class GameCacheService(BaseService):
         strategy_cache: GameCacheForStrategy,
         material_cache: GameCacheForMaterial,
         light_cone_cache: GameCacheForLightCone,
+        relics_cache: GameCacheForRelics,
     ):
         self.strategy_cache = strategy_cache
         self.material_cache = material_cache
         self.light_cone_cache = light_cone_cache
+        self.relics_cache = relics_cache
 
     async def get_strategy_cache(self, character_name: str) -> str:
         cache = await self.strategy_cache.get_file(character_name)
@@ -38,3 +45,11 @@ class GameCacheService(BaseService):
 
     async def set_light_cone_cache(self, light_cone_name: str, file: str) -> None:
         await self.light_cone_cache.set_file(light_cone_name, file)
+
+    async def get_relics_cache(self, relics_name: str) -> str:
+        cache = await self.relics_cache.get_file(relics_name)
+        if cache is not None:
+            return cache.decode("utf-8")
+
+    async def set_relics_cache(self, relics_name: str, file: str) -> None:
+        await self.relics_cache.set_file(relics_name, file)
