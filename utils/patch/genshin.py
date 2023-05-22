@@ -191,7 +191,6 @@ class BaseClient:
         headers = dict(headers or {})
         headers.setdefault("User-Agent", self.USER_AGENT)
         update_device_headers(self.hoyolab_id, headers)
-        logger.debug("Account ID: %s  Header: %s" % (self.hoyolab_id, headers))
 
         if method is None:
             method = "POST" if data else "GET"
