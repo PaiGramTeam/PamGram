@@ -1,5 +1,10 @@
 from core.base_service import BaseService
-from core.services.game.cache import GameCacheForStrategy, GameCacheForMaterial, GameCacheForLightCone, GameCacheForRelics
+from core.services.game.cache import (
+    GameCacheForStrategy,
+    GameCacheForMaterial,
+    GameCacheForLightCone,
+    GameCacheForRelics,
+)
 
 __all__ = "GameCacheService"
 
