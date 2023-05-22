@@ -59,6 +59,7 @@ class PlayerCardsFile:
         self,
         uid: Union[str, int],
         data: Dict,
+        props: Dict,
     ) -> Dict:
         async with self._lock:
             old_data = await self.load_history_info(uid)
@@ -83,5 +84,7 @@ class PlayerCardsFile:
             for i in old_data.get("AvatarList", []):
                 if i.get("AvatarID", 0) not in avatar_ids:
                     data["AvatarList"].append(i)
+            for i in data["AvatarList"]:
+                i["property"] = props.get(i.get("AvatarID", 0), [])
             await self.save_json(self.get_file_path(uid), data)
             return data
