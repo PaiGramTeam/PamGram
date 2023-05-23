@@ -51,7 +51,7 @@ class Property(BaseModel):
             return self.base
         percent = "%" in self.base
         real_base = float(self.base.replace("%", "")) if percent else int(self.base)
-        real_addition = float(self.base.replace("%", "")) if percent else int(self.base)
+        real_addition = float(self.addition.replace("%", "")) if percent else int(self.addition)
         return f"{real_base + real_addition}{'%' if percent else ''}"
 
 
