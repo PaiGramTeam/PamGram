@@ -1,6 +1,6 @@
 from genshin.models import StarRailBannerType
 
-UIWF_VERSION = "v1.0"
+SRGF_VERSION = "v1.0"
 
 
 GACHA_TYPE_LIST = {

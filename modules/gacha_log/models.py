@@ -5,12 +5,12 @@ from typing import Any, Dict, List, Union
 from pydantic import BaseModel, validator
 
 from metadata.shortname import not_real_roles, roleToId, lightConeToId
-from modules.gacha_log.const import UIWF_VERSION
+from modules.gacha_log.const import SRGF_VERSION
 
 
 class ImportType(Enum):
     PaiGram = "PaiGram"
-    UIWF = "UIWF"
+    SRGF = "SRGF"
     UNKNOWN = "UNKNOWN"
 
 
@@ -35,7 +35,9 @@ class FourStarItem(BaseModel):
 class GachaItem(BaseModel):
     id: str
     name: str
+    gacha_id: str = ""
     gacha_type: str
+    item_id: str = ""
     item_type: str
     rank_type: str
     time: datetime.datetime
@@ -132,33 +134,34 @@ class ItemType(Enum):
     LIGHTCONE = "光锥"
 
 
-class UIWFGachaType(Enum):
+class SRGFGachaType(Enum):
     BEGINNER = "2"
     STANDARD = "1"
     CHARACTER = "11"
     LIGHTCONE = "12"
 
 
-class UIWFItem(BaseModel):
+class SRGFItem(BaseModel):
     id: str
     name: str
     count: str = "1"
-    gacha_type: UIWFGachaType
+    gacha_id: str = ""
+    gacha_type: SRGFGachaType
     item_id: str = ""
     item_type: ItemType
     rank_type: str
     time: str
-    uigf_gacha_type: UIWFGachaType
 
 
-class UIWFInfo(BaseModel):
+class SRGFInfo(BaseModel):
     uid: str = "0"
     lang: str = "zh-cn"
+    region_time_zone: int = 8
     export_time: str = ""
     export_timestamp: int = 0
     export_app: str = ""
     export_app_version: str = ""
-    uigf_version: str = UIWF_VERSION
+    srgf_version: str = SRGF_VERSION
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -167,6 +170,6 @@ class UIWFInfo(BaseModel):
             self.export_timestamp = int(datetime.datetime.now().timestamp())
 
 
-class UIWFModel(BaseModel):
-    info: UIWFInfo
-    list: List[UIWFItem]
+class SRGFModel(BaseModel):
+    info: SRGFInfo
+    list: List[SRGFItem]

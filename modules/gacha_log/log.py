@@ -29,9 +29,9 @@ from modules.gacha_log.models import (
     GachaLogInfo,
     ImportType,
     Pool,
-    UIWFInfo,
-    UIWFItem,
-    UIWFModel,
+    SRGFInfo,
+    SRGFItem,
+    SRGFModel,
 )
 from utils.const import PROJECT_ROOT
 
@@ -112,28 +112,29 @@ class GachaLog:
         # 写入数据
         await self.save_json(save_path, info.json())
 
-    async def gacha_log_to_uiwf(self, user_id: str, uid: str) -> Optional[Path]:
-        """跃迁日记转换为 UIWF 格式
+    async def gacha_log_to_srgf(self, user_id: str, uid: str) -> Optional[Path]:
+        """跃迁日记转换为 SRGF 格式
         :param user_id: 用户ID
         :param uid: 游戏UID
-        :return: 转换是否成功、转换信息、UIWF文件目录
+        :return: 转换是否成功、转换信息、SRGF 文件目录
         """
         data, state = await self.load_history_info(user_id, uid)
         if not state:
             raise GachaLogNotFound
-        save_path = self.gacha_log_path / f"{user_id}-{uid}-uiwf.json"
-        info = UIWFModel(info=UIWFInfo(uid=uid, export_app=ImportType.PaiGram.value, export_app_version="v3"), list=[])
+        save_path = self.gacha_log_path / f"{user_id}-{uid}-srgf.json"
+        info = SRGFModel(info=SRGFInfo(uid=uid, export_app=ImportType.PaiGram.value, export_app_version="v3"), list=[])
         for items in data.item_list.values():
             for item in items:
                 info.list.append(
-                    UIWFItem(
+                    SRGFItem(
                         id=item.id,
                         name=item.name,
+                        gacha_id=item.gacha_id,
                         gacha_type=item.gacha_type,
+                        item_id=item.item_id,
                         item_type=item.item_type,
                         rank_type=item.rank_type,
                         time=item.time.strftime("%Y-%m-%d %H:%M:%S"),
-                        uigf_gacha_type=item.gacha_type,
                     )
                 )
         await self.save_json(save_path, json.loads(info.json()))
@@ -217,14 +218,16 @@ class GachaLog:
         new_num = 0
         gacha_log, _ = await self.load_history_info(str(user_id), str(client.uid))
         # 将唯一 id 放入临时数据中，加快查找速度
-        temp_id_data = {pool_name: [i.id for i in pool_data] for pool_name, pool_data in gacha_log.item_list.items()}
+        temp_id_data = {pool_name: {i.id: i for i in pool_data} for pool_name, pool_data in gacha_log.item_list.items()}
         try:
             for pool_id, pool_name in GACHA_TYPE_LIST.items():
                 async for data in client.wish_history(pool_id, authkey=authkey):
                     item = GachaItem(
                         id=str(data.id),
                         name=data.name,
+                        gacha_id=str(data.banner_id),
                         gacha_type=str(data.banner_type.value),
+                        item_id=str(data.item_id),
                         item_type=data.type,
                         rank_type=str(data.rarity),
                         time=datetime.datetime(
@@ -237,10 +240,14 @@ class GachaLog:
                         ),
                     )
 
-                    if item.id not in temp_id_data[pool_name]:
+                    if item.id not in temp_id_data[pool_name].keys():
                         gacha_log.item_list[pool_name].append(item)
-                        temp_id_data[pool_name].append(item.id)
+                        temp_id_data[pool_name][item.id] = item
                         new_num += 1
+                    else:
+                        old_item: GachaItem = temp_id_data[pool_name][item.id]
+                        old_item.gacha_id = item.gacha_id
+                        old_item.item_id = item.item_id
         except AuthkeyTimeout as exc:
             raise GachaLogAuthkeyTimeout from exc
         except InvalidAuthkey as exc:
@@ -248,7 +255,7 @@ class GachaLog:
         for i in gacha_log.item_list.values():
             i.sort(key=lambda x: (x.time, x.id))
         gacha_log.update_time = datetime.datetime.now()
-        gacha_log.import_type = ImportType.UIWF.value
+        gacha_log.import_type = ImportType.PaiGram.value
         await self.save_gacha_log_info(str(user_id), str(client.uid), gacha_log)
         return new_num
 

@@ -93,7 +93,7 @@ class WishLogPlugin(Plugin.Conversation):
         if document.file_name.endswith(".json"):
             file_type = "json"
         else:
-            await message.reply_text("文件格式错误，请发送符合 UIWF 标准的跃迁记录文件")
+            await message.reply_text("文件格式错误，请发送符合 SRGF 标准的跃迁记录文件")
             return
         if document.file_size > 5 * 1024 * 1024:
             await message.reply_text("文件过大，请发送小于 5 MB 的文件")
@@ -108,14 +108,14 @@ class WishLogPlugin(Plugin.Conversation):
                 await message.reply_text("文件解析失败，请检查文件")
                 return
         except GachaLogFileError:
-            await message.reply_text("文件解析失败，请检查文件是否符合 UIWF 标准")
+            await message.reply_text("文件解析失败，请检查文件是否符合 SRGF 标准")
             return
         except (KeyError, IndexError, ValueError):
-            await message.reply_text("文件解析失败，请检查文件编码是否正确或符合 UIWF 标准")
+            await message.reply_text("文件解析失败，请检查文件编码是否正确或符合 SRGF 标准")
             return
         except Exception as exc:
             logger.error("文件解析失败 %s", repr(exc))
-            await message.reply_text("文件解析失败，请检查文件是否符合 UIWF 标准")
+            await message.reply_text("文件解析失败，请检查文件是否符合 SRGF 标准")
             return
         await message.reply_chat_action(ChatAction.TYPING)
         reply = await message.reply_text("文件解析成功，正在导入数据")
@@ -124,7 +124,7 @@ class WishLogPlugin(Plugin.Conversation):
             text = await self._refresh_user_data(user, data=data, verify_uid=file_type == "json")
         except Exception as exc:  # pylint: disable=W0703
             logger.error("文件解析失败 %s", repr(exc))
-            text = "文件解析失败，请检查文件是否符合 UIWF 标准"
+            text = "文件解析失败，请检查文件是否符合 SRGF 标准"
         await reply.edit_text(text)
 
     @conversation.entry_point
@@ -157,7 +157,7 @@ class WishLogPlugin(Plugin.Conversation):
             await message.reply_text(
                 "<b>开始导入跃迁历史记录：请通过 https://starrailstation.com/cn/warp#import 获取跃迁记录链接后发送给我"
                 "（非 starrailstation.com 导出的文件数据）</b>\n\n"
-                "> 你还可以向彦卿发送从其他工具导出的 UIWF 标准的记录文件\n"
+                "> 你还可以向彦卿发送从其他工具导出的 SRGF 标准的记录文件\n"
                 # "> 在绑定 Cookie 时添加 stoken 可能有特殊效果哦（仅限国服）\n"
                 "<b>注意：导入的数据将会与旧数据进行合并。</b>",
                 parse_mode="html",
@@ -257,9 +257,9 @@ class WishLogPlugin(Plugin.Conversation):
         try:
             client = await self.helper.get_genshin_client(user.id, need_cookie=False)
             await message.reply_chat_action(ChatAction.TYPING)
-            path = await self.gacha_log.gacha_log_to_uiwf(str(user.id), str(client.uid))
+            path = await self.gacha_log.gacha_log_to_srgf(str(user.id), str(client.uid))
             await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT)
-            await message.reply_document(document=open(path, "rb+"), caption="跃迁记录导出文件 - UIWF V1.0")
+            await message.reply_document(document=open(path, "rb+"), caption="跃迁记录导出文件 - SRGF V1.0")
         except GachaLogNotFound:
             logger.info("未找到用户 %s[%s] 的跃迁记录", user.full_name, user.id)
             buttons = [
