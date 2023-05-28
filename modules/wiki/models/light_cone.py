@@ -1,4 +1,6 @@
 # 光锥
+from typing import List
+
 from pydantic import BaseModel
 
 from .enums import Quality, Destiny
@@ -22,7 +24,7 @@ class LightConePromote(BaseModel):
 
     coin: int = 0
     """信用点"""
-    items: list[LightConeItem]
+    items: List[LightConeItem]
     """突破所需材料"""
 
 
@@ -41,7 +43,7 @@ class LightCone(BaseModel):
     """稀有度"""
     destiny: Destiny
     """命途"""
-    promote: list[LightConePromote]
+    promote: List[LightConePromote]
     """晋阶信息"""
 
     @property
