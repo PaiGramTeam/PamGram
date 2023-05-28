@@ -164,9 +164,6 @@ class PlayerCards(Plugin):
         else:
             await message.reply_text(f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试")
             return
-        if characters.AvatarID in {8001, 8002, 8003, 8004}:
-            await message.reply_text(f"暂不支持查询 {ch_name} 的角色卡片")
-            return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await RenderTemplate(
             uid,
@@ -292,9 +289,6 @@ class PlayerCards(Plugin):
             await message.delete()
             await callback_query.answer(f"角色展柜中未找到 {result} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试", show_alert=True)
             return
-        if characters.AvatarID in {8001, 8002, 8003, 8004}:
-            await callback_query.answer(f"暂不支持查询 {result} 的角色卡片")
-            return
         await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await RenderTemplate(
@@ -367,7 +361,7 @@ class PlayerCards(Plugin):
         """
         characters_data = []
         for idx, character in enumerate(data.AvatarList):
-            cid = 8004 if character.AvatarID in {8001, 8002, 8003, 8004} else character.AvatarID
+            cid = character.AvatarID
             try:
                 characters_data.append(
                     {
