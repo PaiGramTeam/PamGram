@@ -108,6 +108,8 @@ class _AvatarAssets(_AssetsService):
             if not square_path.exists() and icon.square:
                 tasks.append(self._download(icon.square, square_path))
             for index, eidolon in enumerate(eidolons_paths):
+                if not eidolons_s_data:
+                    break
                 if not eidolon.exists():
                     tasks.append(self._download(eidolons_s_data[index], eidolon))
             for index, skill in enumerate(skills_paths):
