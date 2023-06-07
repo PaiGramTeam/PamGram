@@ -112,7 +112,7 @@ class PlayerCards(Plugin):
                 await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
             return
         data = await self._load_history(uid)
-        if data is None or len(data.AvatarList) == 0:
+        if data is None or len(data.avatarList) == 0:
             if isinstance(self.kitsune, str):
                 photo = self.kitsune
             else:
@@ -158,8 +158,8 @@ class PlayerCards(Plugin):
             if reply_message.photo:
                 self.kitsune = reply_message.photo[-1].file_id
             return
-        for characters in data.AvatarList:
-            if idToRole(characters.AvatarID) == ch_name:
+        for characters in data.avatarList:
+            if idToRole(characters.avatarId) == ch_name:
                 break
         else:
             await message.reply_text(f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试")
@@ -208,7 +208,7 @@ class PlayerCards(Plugin):
         if isinstance(data, str):
             await callback_query.answer(text=data, show_alert=True)
             return
-        if data.AvatarList is None:
+        if data.avatarList is None:
             await message.delete()
             await callback_query.answer("请先将角色加入到角色展柜并允许查看角色详情后再使用此功能，如果已经添加了角色，请等待角色数据更新后重试", show_alert=True)
             return
@@ -273,7 +273,7 @@ class PlayerCards(Plugin):
         if isinstance(data, str):
             await message.reply_text(data)
             return
-        if data.AvatarList is None:
+        if data.avatarList is None:
             await message.delete()
             await callback_query.answer("请先将角色加入到角色展柜并允许查看角色详情后再使用此功能，如果已经添加了角色，请等待角色数据更新后重试", show_alert=True)
             return
@@ -282,8 +282,8 @@ class PlayerCards(Plugin):
             await message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
             await callback_query.answer(f"已切换到第 {page} 页", show_alert=False)
             return
-        for characters in data.AvatarList:
-            if idToRole(characters.AvatarID) == result:
+        for characters in data.avatarList:
+            if idToRole(characters.avatarId) == result:
                 break
         else:
             await message.delete()
@@ -308,14 +308,14 @@ class PlayerCards(Plugin):
         """生成按钮"""
         buttons = []
 
-        if data.AvatarList:
+        if data.avatarList:
             buttons = [
                 InlineKeyboardButton(
-                    idToRole(value.AvatarID),
-                    callback_data=f"get_player_card|{user_id}|{uid}|{idToRole(value.AvatarID)}",
+                    idToRole(value.avatarId),
+                    callback_data=f"get_player_card|{user_id}|{uid}|{idToRole(value.avatarId)}",
                 )
-                for value in data.AvatarList
-                if value.AvatarID
+                for value in data.avatarList
+                if value.avatarId
             ]
         all_buttons = [buttons[i : i + 4] for i in range(0, len(buttons), 4)]
         send_buttons = all_buttons[(page - 1) * 3 : page * 3]
@@ -360,13 +360,13 @@ class PlayerCards(Plugin):
         生成渲染所需数据
         """
         characters_data = []
-        for idx, character in enumerate(data.AvatarList):
-            cid = character.AvatarID
+        for idx, character in enumerate(data.avatarList):
+            cid = character.avatarId
             try:
                 characters_data.append(
                     {
-                        "level": character.Level,
-                        "constellation": character.Rank,
+                        "level": character.level,
+                        "constellation": character.rank,
                         "icon": self.assets_service.avatar.square(cid).as_uri(),
                     }
                 )
@@ -375,9 +375,9 @@ class PlayerCards(Plugin):
             if idx > 3:
                 break
         return {
-            "uid": data.UID,
-            "level": data.Level or 0,
-            "signature": data.Signature or "",
+            "uid": data.uid,
+            "level": data.level or 0,
+            "signature": data.signature or "",
             "characters": characters_data,
         }
 
@@ -471,16 +471,16 @@ class RenderTemplate:
 
         weapon = None
         weapon_detail = None
-        if self.character.EquipmentID and self.character.EquipmentID.ID:
-            weapon = self.character.EquipmentID
-            weapon_detail = self.wiki_service.light_cone.get_by_id(self.character.EquipmentID.ID)
+        if self.character.equipment and self.character.equipment.tid:
+            weapon = self.character.equipment
+            weapon_detail = self.wiki_service.light_cone.get_by_id(self.character.equipment.tid)
         skills = [0, 0, 0, 0, 0]
         for index in range(5):
-            skills[index] = self.character.BehaviorList[index].Level
+            skills[index] = self.character.skillTreeList[index].level
         data = {
             "uid": self.uid,
             "character": self.character,
-            "character_detail": self.wiki_service.character.get_by_id(self.character.AvatarID),
+            "character_detail": self.wiki_service.character.get_by_id(self.character.avatarId),
             "weapon": weapon,
             "weapon_detail": weapon_detail,
             # 圣遗物评分
@@ -505,27 +505,27 @@ class RenderTemplate:
 
     async def cache_images(self):
         c = self.character
-        cid = c.AvatarID
+        cid = c.avatarId
         data = {
             "banner_url": self.assets_service.avatar.gacha(cid).as_uri(),
             "skills": [i.as_uri() for i in self.assets_service.avatar.skills(cid)][:-1],
             "constellations": [i.as_uri() for i in self.assets_service.avatar.eidolons(cid)],
             "equipment": "",
         }
-        if c.EquipmentID and c.EquipmentID.ID:
-            data["equipment"] = self.assets_service.light_cone.icon(c.EquipmentID.ID).as_uri()
+        if c.equipment and c.equipment.tid:
+            data["equipment"] = self.assets_service.light_cone.icon(c.equipment.tid).as_uri()
         return data
 
     def find_artifacts(self) -> List[Artifact]:
         """在 equipments 数组中找到圣遗物，并转换成带有分数的 model。equipments 数组包含圣遗物和武器"""
 
-        stats = ArtifactStatsTheory(idToRole(self.character.AvatarID))
+        stats = ArtifactStatsTheory(idToRole(self.character.avatarId))
 
         def substat_score(s: EquipmentsStats) -> float:
             return stats.theory(s)
 
         def fix_equipment(e: Relic) -> Dict:
-            rid = e.ID
+            rid = e.tid
             affix = self.client.get_affix_by_id(rid)
             relic_set = self.wiki_service.relic.get_by_id(affix.set_id)
             try:
@@ -536,13 +536,13 @@ class RenderTemplate:
                 "id": rid,
                 "name": relic_set.name,
                 "icon": icon,
-                "level": e.Level,
+                "level": e.level,
                 "rank": affix.rarity,
                 "main_sub": self.client.get_affix(e, True, False)[0],
                 "sub": self.client.get_affix(e, False, True),
             }
 
-        relic_list = self.character.RelicList or []
+        relic_list = self.character.relicList or []
         return [
             Artifact(
                 equipment=fix_equipment(e),

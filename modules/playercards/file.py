@@ -61,30 +61,34 @@ class PlayerCardsFile:
         data: Dict,
         props: Dict,
     ) -> Dict:
+        assistAvatarDetail = "assistAvatarDetail"
+        avatarId = "avatarId"
+        avatarDetailList = "avatarDetailList"
+        avatarList = "avatarList"
         async with self._lock:
             old_data = await self.load_history_info(uid)
             if old_data is None:
                 old_data = {}
             avatars = []
             avatar_ids = []
-            assist_avatar = data.get("AssistAvatar", None)
+            assist_avatar = data.get(assistAvatarDetail, None)
             if assist_avatar:
                 avatars.append(assist_avatar)
-                avatar_ids.append(assist_avatar.get("AvatarID", 0))
-            for avatar in data.get("DisplayAvatarList", []):
-                if avatar.get("AvatarID", 0) in avatar_ids:
+                avatar_ids.append(assist_avatar.get(avatarId, 0))
+            for avatar in data.get(avatarDetailList, []):
+                if avatar.get(avatarId, 0) in avatar_ids:
                     continue
                 avatars.append(avatar)
-                avatar_ids.append(avatar.get("AvatarID", 0))
-            data["AvatarList"] = avatars
-            if "AssistAvatar" in data:
-                del data["AssistAvatar"]
-            if "DisplayAvatarList" in data:
-                del data["DisplayAvatarList"]
-            for i in old_data.get("AvatarList", []):
-                if i.get("AvatarID", 0) not in avatar_ids:
-                    data["AvatarList"].append(i)
-            for i in data["AvatarList"]:
-                i["property"] = props.get(i.get("AvatarID", 0), [])
+                avatar_ids.append(avatar.get(avatarId, 0))
+            data[avatarList] = avatars
+            if assistAvatarDetail in data:
+                del data[assistAvatarDetail]
+            if avatarDetailList in data:
+                del data[avatarDetailList]
+            for i in old_data.get(avatarList, []):
+                if i.get(avatarId, 0) not in avatar_ids:
+                    data[avatarList].append(i)
+            for i in data[avatarList]:
+                i["property"] = props.get(i.get(avatarId, 0), [])
             await self.save_json(self.get_file_path(uid), data)
             return data

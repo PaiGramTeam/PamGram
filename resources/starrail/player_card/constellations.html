@@ -3,7 +3,7 @@
     {% for item in images.constellations %}
     <div
       class="w-16 h-16 flex items-center justify-center bg-contain bg-no-repeat bg-center
-      {%- if loop.index > character.Rank %} grayscale opacity-75 {% endif %}"
+      {%- if loop.index > character.rank %} grayscale opacity-75 {% endif %}"
       style="background-image: url('img/talent-{{ character_detail.element.name | lower }}.png')"
     >
       <img src="{{ item }}" alt="" class="w-8 h-8" />

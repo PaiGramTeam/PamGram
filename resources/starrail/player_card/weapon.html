@@ -6,11 +6,11 @@
     <div class="text-2xl">{{ weapon_detail.name }}</div>
     <div class="star star-{{ weapon_detail.rarity }}"></div>
     <div class="flex space-x-3 items-center">
-      <div class="italic">Lv.{{ weapon.Level }}</div>
+      <div class="italic">Lv.{{ weapon.level }}</div>
       <div
-        class="rounded px-2 text-base {% if weapon.Rank == 5 %} bg-red-600 {% else %} bg-gray-600 {% endif %}"
+        class="rounded px-2 text-base {% if weapon.rank == 5 %} bg-red-600 {% else %} bg-gray-600 {% endif %}"
       >
-        精{{ weapon.Rank }}
+        精{{ weapon.rank }}
       </div>
     </div>
   </div>

@@ -12,32 +12,32 @@ from utils.enkanetwork import RedisCache
 from modules.playercards.file import PlayerCardsFile
 
 
-class Behavior(BaseModel):
-    BehaviorID: int
-    Level: int
+class SkillTreePoint(BaseModel):
+    pointId: int
+    level: int
 
 
 class Equipment(BaseModel):
-    ID: Optional[int] = 0
-    Level: Optional[int] = 0
-    Promotion: Optional[int] = 3
+    tid: Optional[int] = 0
+    level: Optional[int] = 0
+    promotion: Optional[int] = 3
     """星级"""
-    Rank: Optional[int] = 0
+    rank: Optional[int] = 0
     """叠影"""
 
 
 class SubAffix(BaseModel):
-    Cnt: Optional[int] = 1
-    Step: Optional[int] = 0
-    SubAffixID: int
+    cnt: Optional[int] = 1
+    step: Optional[int] = 0
+    affixId: int
 
 
 class Relic(BaseModel):
-    ID: int
-    Level: Optional[int] = 0
-    MainAffixID: int
-    RelicSubAffix: Optional[List[SubAffix]]
-    Type: int
+    tid: int
+    level: Optional[int] = 0
+    mainAffixId: int
+    subAffixList: Optional[List[SubAffix]]
+    type: int
 
 
 class Property(BaseModel):
@@ -56,42 +56,42 @@ class Property(BaseModel):
 
 
 class Avatar(BaseModel):
-    AvatarID: int
-    BehaviorList: List[Behavior]
-    EquipmentID: Optional[Equipment]
-    Level: int
-    Promotion: Optional[int] = 4
-    Rank: Optional[int] = 0
-    RelicList: Optional[List[Relic]]
+    avatarId: int
+    skillTreeList: List[SkillTreePoint]
+    equipment: Optional[Equipment]
+    level: int
+    promotion: Optional[int] = 4
+    rank: Optional[int] = 0
+    relicList: Optional[List[Relic]]
     property: Optional[List[Property]]
 
 
-class ChallengeData(BaseModel):
+class ChallengeInfo(BaseModel):
     MazeGroupID: Optional[int]
     MazeGroupIndex: Optional[int]
     PreMazeGroupIndex: Optional[int]
 
 
-class PlayerSpaceInfo(BaseModel):
-    AchievementCount: Optional[int] = 0
-    AvatarCount: Optional[int] = 0
-    ChallengeData: ChallengeData
-    LightConeCount: Optional[int] = 0
-    PassAreaProgress: Optional[int] = 0
+class RecordInfo(BaseModel):
+    achievementCount: Optional[int] = 0
+    avatarCount: Optional[int] = 0
+    challengeInfo: ChallengeInfo
+    equipmentCount: Optional[int] = 0
+    maxRogueChallengeScore: Optional[int] = 0
 
 
 class PlayerInfo(BaseModel):
-    Birthday: Optional[int]
-    CurFriendCount: Optional[int]
-    AvatarList: List[Avatar]
-    HeadIconID: Optional[int]
-    IsDisplayAvatarList: bool
-    Level: int
-    NickName: str
-    PlayerSpaceInfo: PlayerSpaceInfo
-    Signature: Optional[str]
-    UID: int
-    WorldLevel: Optional[int]
+    platform: Optional[str]
+    friendCount: Optional[int]
+    avatarList: List[Avatar]
+    headIcon: Optional[int]
+    isDisplayAvatar: bool
+    level: int
+    worldLevel: Optional[int]
+    nickname: str
+    recordInfo: RecordInfo
+    signature: Optional[str]
+    uid: int
 
 
 class PlayerCardsError(Exception):
@@ -151,7 +151,7 @@ class PlayerCards:
             error_code = data.get("ErrCode", 0)
             if error_code:
                 raise PlayerCardsError(f"请求异常，错误代码 {error_code}")
-            data = data.get("PlayerDetailInfo", {})
+            data = data.get("detailInfo", {})
             props = await self.get_property(uid)
             data = await self.player_cards_file.merge_info(uid, data, props)
             await self.cache.set(uid, data)
@@ -171,15 +171,15 @@ class PlayerCards:
         return 101
 
     def get_affix(self, relic: Relic, main: bool = True, sub: bool = True) -> List[EquipmentsStats]:
-        affix = self.get_affix_by_id(relic.ID)
+        affix = self.get_affix_by_id(relic.tid)
         if not affix:
             return []
-        main_affix = affix.main_affix[str(relic.MainAffixID)]
+        main_affix = affix.main_affix[str(relic.mainAffixId)]
         datas = (
             [
                 EquipmentsStats(
                     prop_id=main_affix.property,
-                    prop_value=main_affix.get_value(relic.Level),
+                    prop_value=main_affix.get_value(relic.level),
                 )
             ]
             if main
@@ -187,13 +187,13 @@ class PlayerCards:
         )
         if not sub:
             return datas
-        if relic.RelicSubAffix:
-            for sub_a in relic.RelicSubAffix:
-                sub_affix = affix.sub_affix[str(sub_a.SubAffixID)]
+        if relic.subAffixList:
+            for sub_a in relic.subAffixList:
+                sub_affix = affix.sub_affix[str(sub_a.affixId)]
                 datas.append(
                     EquipmentsStats(
                         prop_id=sub_affix.property,
-                        prop_value=sub_affix.get_value(sub_a.Step, sub_a.Cnt),
+                        prop_value=sub_affix.get_value(sub_a.step, sub_a.cnt),
                     )
                 )
         return datas
