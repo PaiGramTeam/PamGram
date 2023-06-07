@@ -221,7 +221,7 @@ class GachaLog:
         temp_id_data = {pool_name: {i.id: i for i in pool_data} for pool_name, pool_data in gacha_log.item_list.items()}
         try:
             for pool_id, pool_name in GACHA_TYPE_LIST.items():
-                async for data in client.wish_history(pool_id, authkey=authkey):
+                async for data in client.warp_history(pool_id, authkey=authkey):
                     item = GachaItem(
                         id=str(data.id),
                         name=data.name,
