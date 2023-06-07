@@ -27,9 +27,7 @@ class PlayerStatsPlugins(Plugin):
         self.template_service = template
         self.helper = helper
 
-    async def get_uid(
-        self, user_id: int, args: List[str], reply: Optional[Message]
-    ) -> int:
+    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
         uid, user_id_ = None, user_id
         if args:
