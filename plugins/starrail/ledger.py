@@ -3,6 +3,7 @@ import re
 from datetime import datetime, timedelta
 
 from genshin import DataNotPublic, InvalidCookies, GenshinException
+from genshin.types import Region
 from genshin.models.genshin.diary import StarRailDiary
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatAction
@@ -35,7 +36,7 @@ class LedgerPlugin(Plugin):
 
     async def _start_get_ledger(self, client, year, month) -> RenderResult:
         req_month = f"{year}0{month}" if month < 10 else f"{year}{month}"
-        diary_info: StarRailDiary = await client.get_diary(client.uid, month=req_month)
+        diary_info: StarRailDiary = await client.get_starrail_diary(client.uid, month=req_month)
         color = ["#73a9c6", "#d56565", "#70b2b4", "#bd9a5a", "#739970", "#7a6da7", "#597ea0"]
         categories = [
             {
@@ -77,7 +78,6 @@ class LedgerPlugin(Plugin):
 
         now = datetime.now()
         now_time = (now - timedelta(days=1)) if now.day == 1 and now.hour <= 4 else now
-        year = now_time.year
         month = now_time.month
         try:
             args = self.get_args(context)
@@ -110,6 +110,13 @@ class LedgerPlugin(Plugin):
         await message.reply_chat_action(ChatAction.TYPING)
         try:
             client = await self.helper.get_genshin_client(user.id)
+            # todo: 支持国际服
+            if client.region == Region.OVERSEAS:
+                reply_message = await message.reply_text("此功能暂不支持国际服")
+                if filters.ChatType.GROUPS.filter(message):
+                    self.add_delete_message_job(reply_message, delay=30)
+                    self.add_delete_message_job(message, delay=30)
+                return
             try:
                 render_result = await self._start_get_ledger(client, year, month)
             except InvalidCookies as exc:  # 如果抛出InvalidCookies 判断是否真的玄学过期（或权限不足？）

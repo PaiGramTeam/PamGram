@@ -1,4 +1,4 @@
-from genshin.models import StarRailBannerType
+from genshin.models.genshin.gacha import StarRailBannerType
 
 SRGF_VERSION = "v1.0"
 

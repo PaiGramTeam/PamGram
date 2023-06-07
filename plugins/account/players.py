@@ -151,7 +151,7 @@ class PlayersManagesPlugin(Plugin):
             await callback_query.edit_message_text(f"账号 {player_id} 未找到")
             return
 
-        status = await self.player_info_service.update_from_enka(player)
+        status = await self.player_info_service.update_from_mihomo(player)
 
         buttons = [
             [

@@ -34,7 +34,7 @@ class AccountCookiesPluginData(TelegramObject):
     cookies: dict = {}
     account_id: int = 0
     # player_id: int = 0
-    genshin_account: Optional[GenshinAccount] = None
+    starrail_account: Optional[GenshinAccount] = None
 
     def reset(self):
         self.player = None
@@ -42,7 +42,7 @@ class AccountCookiesPluginData(TelegramObject):
         self.region = RegionEnum.NULL
         self.cookies = {}
         self.account_id = 0
-        self.genshin_account = None
+        self.starrail_account = None
 
 
 CHECK_SERVER, INPUT_COOKIES, COMMAND_RESULT = range(10100, 10103)
@@ -129,8 +129,8 @@ class AccountCookiesPlugin(Plugin.Conversation):
             region = RegionEnum.HYPERION
             bbs_name = "米游社"
         elif message.text == "HoYoLab":
-            await message.reply_text("很抱歉，暂不支持HoYoLab服务器", reply_markup=ReplyKeyboardRemove())
-            return ConversationHandler.END
+            region = RegionEnum.HOYOLAB
+            bbs_name = "HoYoLab"
         else:
             await message.reply_text("选择错误，请重新选择")
             return CHECK_SERVER
@@ -214,9 +214,9 @@ class AccountCookiesPlugin(Plugin.Conversation):
         account_cookies_plugin_data: AccountCookiesPluginData = context.chat_data.get("account_cookies_plugin_data")
         cookies = CookiesModel(**account_cookies_plugin_data.cookies)
         if account_cookies_plugin_data.region == RegionEnum.HYPERION:
-            client = genshin.Client(cookies=cookies.to_dict(), region=types.Region.CHINESE)
+            client = genshin.Client(cookies=cookies.to_dict(), region=types.Region.CHINESE, game=types.Game.STARRAIL)
         elif account_cookies_plugin_data.region == RegionEnum.HOYOLAB:
-            client = genshin.Client(cookies=cookies.to_dict(), region=types.Region.OVERSEAS)
+            client = genshin.Client(cookies=cookies.to_dict(), region=types.Region.OVERSEAS, game=types.Game.STARRAIL)
         else:
             logger.error("用户 %s[%s] region 异常", user.full_name, user.id)
             await message.reply_text("数据错误", reply_markup=ReplyKeyboardRemove())
@@ -294,7 +294,7 @@ class AccountCookiesPlugin(Plugin.Conversation):
         if starrail_account is None:
             await message.reply_text("未找到星穹铁道账号，请确认账号信息无误。")
             return ConversationHandler.END
-        account_cookies_plugin_data.genshin_account = starrail_account
+        account_cookies_plugin_data.starrail_account = starrail_account
         player_info = await self.players_service.get(
             user.id, player_id=starrail_account.uid, region=account_cookies_plugin_data.region
         )
@@ -333,7 +333,7 @@ class AccountCookiesPlugin(Plugin.Conversation):
             return ConversationHandler.END
         if message.text == "确认":
             player = account_cookies_plugin_data.player
-            genshin_account = account_cookies_plugin_data.genshin_account
+            genshin_account = account_cookies_plugin_data.starrail_account
             if player:
                 player.account_id = account_cookies_plugin_data.account_id
                 await self.players_service.update(player)

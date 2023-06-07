@@ -80,10 +80,9 @@ class RecordInfo(BaseModel):
     maxRogueChallengeScore: Optional[int] = 0
 
 
-class PlayerInfo(BaseModel):
+class PlayerBaseInfo(BaseModel):
     platform: Optional[str]
     friendCount: Optional[int]
-    avatarList: List[Avatar]
     headIcon: Optional[int]
     isDisplayAvatar: bool
     level: int
@@ -92,6 +91,10 @@ class PlayerInfo(BaseModel):
     recordInfo: RecordInfo
     signature: Optional[str]
     uid: int
+
+
+class PlayerInfo(PlayerBaseInfo):
+    avatarList: List[Avatar]
 
 
 class PlayerCardsError(Exception):
@@ -161,6 +164,19 @@ class PlayerCards:
         except PlayerCardsError as e:
             error = e.msg
         return error
+
+    async def get_player_base_info(self, uid: int) -> PlayerBaseInfo:
+        try:
+            user = await self.client.get(f"{self.url}{uid}", timeout=30, headers=self.headers)
+            if user.status_code != 200:
+                raise PlayerCardsError(f"请求异常，错误代码 {user.status_code}")
+            data = ujson.loads(user.text)
+            error_code = data.get("ErrCode", 0)
+            if error_code:
+                raise PlayerCardsError(f"请求异常，错误代码 {error_code}")
+            return PlayerBaseInfo.parse_obj(data["detailInfo"])
+        except TimeoutException as e:
+            raise PlayerCardsError("服务请求超时，请稍后重试") from e
 
     def get_affix_by_id(self, cid: int) -> RelicAffixAll:
         return self.relic_datas_map.get(cid)

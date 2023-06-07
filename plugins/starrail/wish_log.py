@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from genshin.models import StarRailBannerType
+from genshin.models.genshin.gacha import StarRailBannerType
 from telegram import Document, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler, filters

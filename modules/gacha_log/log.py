@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple
 
 import aiofiles
 from genshin import AuthkeyTimeout, Client, InvalidAuthkey
-from genshin.models import StarRailBannerType
+from genshin.models.genshin.gacha import StarRailBannerType
 
 from core.dependence.assets import AssetsService
 from metadata.pool.pool import get_pool_by_id
