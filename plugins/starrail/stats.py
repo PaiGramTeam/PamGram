@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 
 from genshin import Client, GenshinException, types
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
 from telegram.helpers import create_deep_linked_url
@@ -27,21 +27,36 @@ class PlayerStatsPlugins(Plugin):
         self.template_service = template
         self.helper = helper
 
+    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
+        """通过消息获取 uid，优先级：args > reply > self"""
+        uid, user_id_ = None, user_id
+        if args:
+            for i in args:
+                if i is not None:
+                    if i.isdigit() and len(i) == 9:
+                        uid = int(i)
+        if reply:
+            try:
+                user_id_ = reply.from_user.id
+            except AttributeError:
+                pass
+        if not uid:
+            player_info = await self.helper.players_service.get_player(user_id_)
+            if player_info is not None:
+                uid = player_info.player_id
+            if (not uid) and (user_id_ != user_id):
+                player_info = await self.helper.players_service.get_player(user_id)
+                if player_info is not None:
+                    uid = player_info.player_id
+        return uid
+
     @handler.command("stats", block=False)
     @handler.message(filters.Regex("^玩家统计查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] 查询游戏用户命令请求", user.full_name, user.id)
-        uid: Optional[int] = None
-        try:
-            args = context.args
-            if args is not None and len(args) >= 1:
-                uid = int(args[0])
-        except ValueError as exc:
-            logger.warning("获取 uid 发生错误！ 错误信息为 %s", str(exc))
-            await message.reply_text("输入错误")
-            return
+        uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
         try:
             try:
                 client = await self.helper.get_genshin_client(user.id)
@@ -80,12 +95,10 @@ class PlayerStatsPlugins(Plugin):
             uid = client.uid
 
         user_info = await client.get_starrail_user(uid)
-        record_cards = await client.get_record_cards()
-        record_card = record_cards[0]
-        for card in record_cards:
-            if card.game == types.Game.STARRAIL:
-                record_card = card
-                break
+        try:
+            rogue = await client.get_starrail_rogue(uid)
+        except GenshinException:
+            rogue = None
         logger.debug(user_info)
 
         # 因为需要替换线上图片地址为本地地址，先克隆数据，避免修改原数据
@@ -93,7 +106,7 @@ class PlayerStatsPlugins(Plugin):
 
         data = {
             "uid": uid,
-            "info": record_card,
+            "info": user_info.info,
             "stats": user_info.stats,
             "stats_labels": [
                 ("活跃天数", "active_days"),
@@ -101,6 +114,12 @@ class PlayerStatsPlugins(Plugin):
                 ("获取角色数", "avatar_num"),
                 ("忘却之庭", "abyss_process"),
                 ("战利品开启数", "chest_num"),
+            ],
+            "rogue": rogue.basic_info if rogue else None,
+            "rogue_labels": [
+                ("技能树已激活", "unlocked_skill_points"),
+                ("已解锁奇物", "unlocked_miracle_num"),
+                ("已解锁祝福", "unlocked_buff_num"),
             ],
             "style": "xianzhou",  # nosec
         }

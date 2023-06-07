@@ -1,53 +1,61 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
     <title>Title</title>
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <link href="./{{style}}.css" rel="stylesheet" />
-    <link type="text/css" href="../../styles/public.css" rel="stylesheet" />
+    <link href="./{{style}}.css" rel="stylesheet"/>
+    <link type="text/css" href="../../styles/public.css" rel="stylesheet"/>
     <script src="../../js/tailwindcss-3.1.8.js"></script>
-  </head>
-  <body class="text-neutral-600">
-    <div class="mx-auto max-w-[600px] py-8">
-      <div class="header p-2 rounded-xl bg-cover mb-6">
+</head>
+<body class="text-neutral-600">
+<div class="mx-auto max-w-[600px] py-8">
+    <div class="header p-2 rounded-xl bg-cover mb-6">
         <div
-          class="frame-pic p-4 flex justify-between rounded-lg border-solid border-2"
+                class="frame-pic p-4 flex justify-between rounded-lg border-solid border-2"
         >
-          <div class="flex flex-col items-center justify-center">
-            <h1 class="name text-4xl italic mb-2 px-2 text-shadow">
-              {{ info.nickname }}
-              <span class="text-lg">lv.{{ info.level }}</span>
-            </h1>
-            <h1 class="italic uid px-10">UID - {{ uid }}</h1>
-          </div>
-        </div>
-      </div>
-      <div class="box p-2 rounded-xl overflow-hidden">
-        <div class="frame rounded-lg border-solid border-2">
-          <h2
-            class="title font-semibold pt-4 text-center text-xl text-neutral-700 p-1"
-          >
-            <img src="./items/star.png" class="inline-block w-4" />
-            数据总览
-          </h2>
-          <div class="p-6 grid grid-cols-4 gap-4 text-center">
-            {% for label, key in stats_labels %}
-            <div class="">
-              <div class="text-xl box-stats">{{ stats[key] }}</div>
-              <div class="text-neutral-400 box-stats-label">{{ label }}</div>
+            <div class="flex flex-col items-center justify-center">
+                <h1 class="name text-4xl italic mb-2 px-2 text-shadow">
+                    {{ info.nickname }}
+                    <span class="text-lg">lv.{{ info.level }}</span>
+                </h1>
+                <h1 class="italic uid px-10">UID - {{ uid }}</h1>
             </div>
-            {% endfor %}
-          </div>
-
-          <div class="about text-center leading-8 text-xs opacity-50">
-            所有数据会有一小时延迟 以游戏内为准 此处仅供参考
-          </div>
         </div>
-      </div>
     </div>
-  </body>
+    <div class="box p-2 rounded-xl overflow-hidden">
+        <div class="frame rounded-lg border-solid border-2">
+            <h2
+                    class="title font-semibold pt-4 text-center text-xl text-neutral-700 p-1"
+            >
+                <img src="./items/star.png" class="inline-block w-4"/>
+                数据总览
+            </h2>
+            <div class="p-6 grid grid-cols-4 gap-4 text-center">
+                {% for label, key in stats_labels %}
+                <div class="">
+                    <div class="text-xl box-stats">{{ stats[key] }}</div>
+                    <div class="text-neutral-400 box-stats-label">{{ label }}</div>
+                </div>
+                {% endfor %}
+                {% if rogue %}
+                {% for label, key in rogue_labels %}
+                <div class="">
+                    <div class="text-xl box-stats">{{ rogue[key] }}</div>
+                    <div class="text-neutral-400 box-stats-label">{{ label }}</div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="about text-center leading-8 text-xs opacity-50">
+                所有数据会有一小时延迟 以游戏内为准 此处仅供参考
+            </div>
+        </div>
+    </div>
+</div>
+</body>
 </html>
