@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import List, Optional, Union, Dict
 
 import ujson
@@ -42,17 +43,15 @@ class Relic(BaseModel):
 
 class Property(BaseModel):
     name: str
-    base: str
-    addition: Optional[str]
+    base: float = 0.0
+    addition: float = 0.0
+    percent: bool
 
     @property
     def total(self):
-        if not self.addition:
-            return self.base
-        percent = "%" in self.base
-        real_base = float(self.base.replace("%", "")) if percent else int(self.base)
-        real_addition = float(self.addition.replace("%", "")) if percent else int(self.addition)
-        return f"{real_base + real_addition}{'%' if percent else ''}"
+        total_num = (Decimal(self.base) + Decimal(self.addition)) * (Decimal(100.0) if self.percent else Decimal(1.0))
+        total_num = round(total_num, 2)
+        return f"{total_num}{'%' if self.percent else ''}"
 
 
 class Avatar(BaseModel):
@@ -137,7 +136,29 @@ class PlayerCards:
                 cid = int(character.get("id", 0))
                 if not cid:
                     continue
-                final_data[cid] = character.get("property", [])
+                datas = []
+                datas_map = {}
+                for attr in character.get("attributes", []):
+                    prop = Property(
+                        name=attr["name"],
+                        base=attr["value"],
+                        percent=attr["percent"],
+                    )
+                    datas.append(prop)
+                    datas_map[prop.name] = prop
+                for attr in character.get("additions", []):
+                    prop = datas_map.get(attr["name"])
+                    if prop:
+                        prop.addition = attr["value"]
+                    else:
+                        prop = Property(
+                            name=attr["name"],
+                            addition=attr["value"],
+                            percent=attr["percent"],
+                        )
+                        datas.append(prop)
+                        datas_map[prop.name] = prop
+                final_data[cid] = [i.dict() for i in datas]
         except (TimeoutException, PlayerCardsError):
             pass
         return final_data
