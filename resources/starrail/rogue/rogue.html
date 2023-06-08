@@ -20,19 +20,22 @@
             <div class="row" style="width: 90%; margin-left: 25px;">
                 <div class="col">
                     <p class="text-white text-center">
-                        <span>{{ basic.unlocked_skill_points }}</span><br/><span>已激活技能树</span></p>
+                        <span>{{ basic.unlocked_skill_points }}</span><br/><span>激活技能</span></p>
                 </div>
                 <div class="col">
                     <p class="text-white text-center">
-                        <span>{{ basic.unlocked_miracle_num }}</span><br/><span>已解锁奇物</span></p>
+                        <span>{{ basic.unlocked_miracle_num }}</span><br/><span>解锁奇物</span></p>
                 </div>
                 <div class="col">
                     <p class="text-white text-center">
-                        <span>{{ basic.unlocked_buff_num }}</span><br/><span>已解锁祝福</span></p>
+                        <span>{{ basic.unlocked_buff_num }}</span><br/><span>解锁祝福</span></p>
+                </div>
+                <div class="col">
+                    <p class="text-white text-center">
+                        <span>{{ finish_cnt }}</span><br/><span>通关次数</span></p>
                 </div>
             </div>
         </div>
-        <div style="height: 30px;"></div>
         <div id="detail">
             <div style="height: 30px;"></div>
             <p class="text-white text-center"><span>{{ name }}</span></p>
@@ -43,7 +46,7 @@
             <div class="hr"></div>
             <div style="height: 10px"></div>
             <div id="avatars">
-                <div class="row" style="width: 90%; margin-left: 5%;">
+                <div class="row" style="width: 90%; margin-left: 7.5%;">
                     {% for avatar in avatars %}
                     <div class="col avatar_width">
                         <img class="avatar" src="{{ avatar.icon }}" alt="">
@@ -65,11 +68,11 @@
                     </p>
                     <div>
                         {% set item_bg = ['', 'bg-secondary', 'bg-primary', 'bg-warning'] %}
-                        {% for i in range(0, buff.items|length, 3) %}
-                        {% set items = buff.items[i:i+3] %}
+                        {% for i in range(0, buff.items|length, 4) %}
+                        {% set items = buff.items[i:i+4] %}
                         <div class="row" style="width: 90%; margin-left: 20px;">
                             {% for item in items %}
-                            <div class="col" style="padding: 0;">
+                            <div class="col" style="padding: 2px;">
                                 <p class="text-white text-center small text-width text-over {{ item_bg[item.rank] }}">
                                     {{ item.name }}
                                 </p>
@@ -94,7 +97,7 @@
             </div>
             <div style="height: 30px;"></div>
         </div>
-        <div style="height: 30px;"></div>
+        <div style="height: 10px;"></div>
     </div>
 </div>
 </body>
