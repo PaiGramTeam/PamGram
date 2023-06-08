@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../../styles/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div>
+    <div id="new-container">
+        <div style="height: 10px;"></div>
+        <div>
+            <p class="text-white text-center"><span class="border rounded-pill">
+						&nbsp;&nbsp;UID {{ uid }}&nbsp;&nbsp;
+					</span></p>
+        </div>
+        <div id="overview">
+            <div style="height: 27px;"></div>
+            <div class="row" style="width: 90%; margin-left: 25px;">
+                <div class="col">
+                    <p class="text-white text-center">
+                        <span>{{ basic.unlocked_skill_points }}</span><br/><span>已激活技能树</span></p>
+                </div>
+                <div class="col">
+                    <p class="text-white text-center">
+                        <span>{{ basic.unlocked_miracle_num }}</span><br/><span>已解锁奇物</span></p>
+                </div>
+                <div class="col">
+                    <p class="text-white text-center">
+                        <span>{{ basic.unlocked_buff_num }}</span><br/><span>已解锁祝福</span></p>
+                </div>
+            </div>
+        </div>
+        <div style="height: 30px;"></div>
+        <div id="detail">
+            <div style="height: 30px;"></div>
+            <p class="text-white text-center"><span>{{ name }}</span></p>
+            <p class="text-white small" style="position: relative;">
+                <span style="margin-left: 40px;">{{ time }}</span>
+                <span style="position:absolute; right: 45px;">{{ score }} 分</span>
+            </p>
+            <div class="hr"></div>
+            <div style="height: 10px"></div>
+            <div id="avatars">
+                <div class="row" style="width: 90%; margin-left: 5%;">
+                    {% for avatar in avatars %}
+                    <div class="col avatar_width">
+                        <img class="avatar" src="{{ avatar.icon }}" alt="">
+                        <p class="avatar_text_width text-white text-center small">Lv.{{ avatar.level }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="hr"></div>
+            <div style="height: 10px"></div>
+            <div id="buff">
+                {% for buff in buffs %}
+                <div>
+                    <p class="text-white text-center">
+                        <img class="buff-img"
+                             src="../../img/path/{{ buff_en_map.get(buff.base_type.name, 'None') }}.png" alt="">&nbsp;&nbsp;
+                        {{ buff.base_type.name }}
+                        <span class="badge rounded-pill bg-info">{{ buff.base_type.cnt }}</span>
+                    </p>
+                    <div>
+                        {% set item_bg = ['', 'bg-secondary', 'bg-primary', 'bg-warning'] %}
+                        {% for i in range(0, buff.items|length, 3) %}
+                        {% set items = buff.items[i:i+3] %}
+                        <div class="row" style="width: 90%; margin-left: 20px;">
+                            {% for item in items %}
+                            <div class="col" style="padding: 0;">
+                                <p class="text-white text-center small text-width text-over {{ item_bg[item.rank] }}">
+                                    {{ item.name }}
+                                </p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="hr"></div>
+            <div style="height: 10px;"></div>
+            <div id="m">
+                <div class="row" style="width: 90%; margin-left: 20px;">
+                    {% for miracle in miracles %}
+                    <div class="col">
+                        <img class="buff-img" src="{{ miracle.icon }}" alt="">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="height: 30px;"></div>
+        </div>
+        <div style="height: 30px;"></div>
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,65 @@
+#new-container {
+    width: 400px;
+    background-image: url("img/bg.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+#overview {
+    width: 100%;
+    height: 100px;
+    background-image: url("img/data.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+#detail {
+    width: 100%;
+    background-image: url("img/floor_bg.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.small {
+    font-size: 15px;
+}
+
+.avatar {
+    width: 66px;
+    height: 66px;
+}
+
+.avatar_width {
+    width: 90px;
+}
+
+.avatar_text_width {
+    width: 66px;
+}
+
+.hr {
+    width: 100%;
+    height: 1px;
+    background-image: url("img/center.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.text-width {
+    width: 115px;
+}
+
+.text-over {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.buff-img {
+    width: 25px;
+    height: 25px;
+}
+
+.bg-warning {
+    background-image: url("img/zhufu_3_0.png");
+}
