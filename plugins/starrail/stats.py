@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from genshin import Client, GenshinException, types
+from genshin import Client, GenshinException
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
@@ -56,12 +56,14 @@ class PlayerStatsPlugins(Plugin):
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] 查询游戏用户命令请求", user.full_name, user.id)
-        uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
         try:
+            uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
             try:
                 client = await self.helper.get_genshin_client(user.id)
+                if client.uid != uid:
+                    raise CookiesNotFoundError
             except CookiesNotFoundError:
-                client, uid = await self.helper.get_public_genshin_client(user.id)
+                client, _ = await self.helper.get_public_genshin_client(user.id)
             render_result = await self.render(client, uid)
         except PlayerNotFoundError:
             buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
@@ -75,7 +77,7 @@ class PlayerStatsPlugins(Plugin):
                 await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
             return
         except GenshinException as exc:
-            if exc.retcode == 1034 and uid:
+            if exc.retcode == 1034:
                 await message.reply_text("出错了呜呜呜 ~ 请稍后重试")
                 return
             raise exc
