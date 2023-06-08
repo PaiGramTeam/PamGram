@@ -303,7 +303,7 @@ class GachaLog:
                         "name": item.name,
                         "icon": assets.light_cone.icon(item.name).as_uri(),
                         "count": count,
-                        "type": "武器",
+                        "type": "光锥",
                         "isUp": False,
                         "isBig": False,
                         "time": item.time,
@@ -392,7 +392,7 @@ class GachaLog:
         five_star = len(all_five)
         # 五星平均
         five_star_avg = round((total - no_five_star) / five_star, 2) if five_star != 0 else 0
-        # 五星武器
+        # 五星光锥
         five_star_weapon = len([i for i in all_five if i.type == "光锥"])
         # 总共四星
         four_star = len(all_four)
@@ -425,7 +425,7 @@ class GachaLog:
         five_star = len(all_five)
         # 五星平均
         five_star_avg = round((total - no_five_star) / five_star, 2) if five_star != 0 else 0
-        # 四星武器
+        # 四星光锥
         four_star_weapon = len([i for i in all_four if i.type == "光锥"])
         # 总共四星
         four_star = len(all_four)

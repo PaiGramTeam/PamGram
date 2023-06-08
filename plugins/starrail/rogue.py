@@ -30,10 +30,10 @@ class PlayerRoguePlugins(Plugin):
     """玩家模拟宇宙信息查询"""
 
     def __init__(
-            self,
-            template: TemplateService,
-            assets: AssetsService,
-            helper: GenshinHelper,
+        self,
+        template: TemplateService,
+        assets: AssetsService,
+        helper: GenshinHelper,
     ):
         self.template_service = template
         self.assets = assets
@@ -83,8 +83,7 @@ class PlayerRoguePlugins(Plugin):
                 client, _ = await self.helper.get_public_genshin_client(user.id)
             render_result = await self.render(client, pre, uid)
         except PlayerNotFoundError:
-            buttons = [
-                [InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
+            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
             if filters.ChatType.GROUPS.filter(message):
                 reply_message = await message.reply_text(
                     "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
@@ -92,8 +91,7 @@ class PlayerRoguePlugins(Plugin):
                 self.add_delete_message_job(reply_message, delay=30)
                 self.add_delete_message_job(message, delay=30)
             else:
-                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号",
-                                         reply_markup=InlineKeyboardMarkup(buttons))
+                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
             return
         except GenshinException as exc:
             if exc.retcode == 1034:
