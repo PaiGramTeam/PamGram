@@ -49,8 +49,10 @@
                 <div class="row" style="width: 90%; margin-left: 7.5%;">
                     {% for avatar in avatars %}
                     <div class="col avatar_width">
+                        {% if avatar %}
                         <img class="avatar" src="{{ avatar.icon }}" alt="">
                         <p class="avatar_text_width text-white text-center small">Lv.{{ avatar.level }}</p>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
