@@ -62,12 +62,35 @@ class ChallengePlugin(Plugin):
         self.helper = helper
         self.assets_service = assets_service
 
+    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
+        """通过消息获取 uid，优先级：args > reply > self"""
+        uid, user_id_ = None, user_id
+        if args:
+            for i in args:
+                if i is not None:
+                    if i.isdigit() and len(i) == 9:
+                        uid = int(i)
+        if reply:
+            try:
+                user_id_ = reply.from_user.id
+            except AttributeError:
+                pass
+        if not uid:
+            player_info = await self.helper.players_service.get_player(user_id_)
+            if player_info is not None:
+                uid = player_info.player_id
+            if (not uid) and (user_id_ != user_id):
+                player_info = await self.helper.players_service.get_player(user_id)
+                if player_info is not None:
+                    uid = player_info.player_id
+        return uid
+
     @handler.command("challenge", block=False)
     @handler.message(filters.Regex(msg_pattern), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         user = update.effective_user
         message = update.effective_message
-        uid: Optional[int] = None
+        uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
 
         # 若查询帮助
         if (message.text.startswith("/") and "help" in message.text) or "帮助" in message.text:
@@ -106,9 +129,10 @@ class ChallengePlugin(Plugin):
         try:
             try:
                 client = await self.helper.get_genshin_client(user.id)
-                uid = client.uid
+                if client.uid != uid:
+                    raise CookiesNotFoundError(uid)
             except CookiesNotFoundError:
-                client, uid = await self.helper.get_public_genshin_client(user.id)
+                client, _ = await self.helper.get_public_genshin_client(user.id)
         except PlayerNotFoundError:  # 若未找到账号
             buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_uid"))]]
             if filters.ChatType.GROUPS.filter(message):
@@ -147,7 +171,7 @@ class ChallengePlugin(Plugin):
             return
         except GenshinException as exc:
             if exc.retcode == 1034 and client.uid != uid:
-                await message.reply_text("出错了呜呜呜 ~ 请稍后重试")
+                await message.reply_text("出错了呜呜呜 ~ 请稍后重试 ~ 米游社风控太严力")
                 return
             raise exc
         if images is None:

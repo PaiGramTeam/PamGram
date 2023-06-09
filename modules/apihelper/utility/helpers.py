@@ -28,6 +28,7 @@ def update_device_headers(account_id: int, headers: Dict = None) -> Dict[str, st
     headers = headers or {}
     headers["x-rpc-device_id"] = get_device_id(str(account_id))
     headers["x-rpc-device_fp"] = hex_digest(headers["x-rpc-device_id"])[:13]
+    headers["x-rpc-device_name"] = "Xiaomi"
     return headers
 
 

@@ -61,7 +61,7 @@ class PlayerStatsPlugins(Plugin):
             try:
                 client = await self.helper.get_genshin_client(user.id)
                 if client.uid != uid:
-                    raise CookiesNotFoundError
+                    raise CookiesNotFoundError(uid)
             except CookiesNotFoundError:
                 client, _ = await self.helper.get_public_genshin_client(user.id)
             render_result = await self.render(client, uid)
