@@ -11,7 +11,7 @@
     <div id="new-container">
         <div style="height: 10px;"></div>
         <div>
-            <p class="text-white text-center"><span class="border rounded-pill">
+            <p class="text-white text-center"><span class="border rounded-pill p-1">
 						&nbsp;&nbsp;UID {{ uid }}&nbsp;&nbsp;
 					</span></p>
         </div>
@@ -39,7 +39,7 @@
         <div id="detail">
             <div style="height: 30px;"></div>
             <p class="text-white text-center"><span>{{ name }}</span></p>
-            <p class="text-white small" style="position: relative;">
+            <p class="text-white small mx-3" style="position: relative;">
                 <span style="margin-left: 40px;">{{ time }}</span>
                 <span style="position:absolute; right: 45px;">{{ score }} 分</span>
             </p>
@@ -50,8 +50,8 @@
                     {% for avatar in avatars %}
                     <div class="col avatar_width">
                         {% if avatar %}
-                        <img class="avatar" src="{{ avatar.icon }}" alt="">
-                        <p class="avatar_text_width text-white text-center small">Lv.{{ avatar.level }}</p>
+                        <img class="avatar rounded-2" src="{{ avatar.icon }}" alt="">
+                        <p class="avatar_text_width text-white text-center small mt-1">Lv.{{ avatar.level }}</p>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -68,14 +68,14 @@
                         {{ buff.base_type.name }}
                         <span class="badge rounded-pill bg-info">{{ buff.base_type.cnt }}</span>
                     </p>
-                    <div>
+                    <div class="ms-2">
                         {% set item_bg = ['', 'bg-secondary', 'bg-primary', 'bg-warning'] %}
                         {% for i in range(0, buff.items|length, 4) %}
                         {% set items = buff.items[i:i+4] %}
                         <div class="row" style="width: 90%; margin-left: 20px;">
                             {% for item in items %}
                             <div class="col" style="padding: 2px;">
-                                <p class="text-white text-center small text-width text-over {{ item_bg[item.rank] }}">
+                                <p class="text-white text-center small text-width text-over rounded-2 p-1 {{ item_bg[item.rank] }}">
                                     {{ item.name }}
                                 </p>
                             </div>
@@ -88,7 +88,7 @@
             </div>
             <div class="hr"></div>
             <div style="height: 10px;"></div>
-            <div id="m">
+            <div id="m ms-2">
                 <div class="row" style="width: 90%; margin-left: 20px;">
                     {% for miracle in miracles %}
                     <div class="col">
