@@ -15,7 +15,7 @@ class TitlePlugin(Plugin):
         args = self.get_args(context)
         title = args[0].strip() if args else ""
         logger.info("用户 %s[%s] 发出 title 命令", user.full_name, user.id)
-        is_admin, can_edit = False, False
+        can_edit = False
         with contextlib.suppress(Exception):
             member = await context.bot.get_chat_member(message.chat.id, user.id)
             if isinstance(member, ChatMemberAdministrator):
