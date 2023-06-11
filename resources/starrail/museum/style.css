@@ -1,0 +1,22 @@
+.common-width {
+    width: 90%;
+    margin-left: 5%;
+}
+
+.exhibition {
+    width: 50px;
+    height: 50px;
+}
+
+.exhibition-lock {
+    height: 50px;
+}
+
+.director {
+    width: 50px;
+    height: 65px;
+}
+
+.director-lock {
+    height: 65px;
+}
