@@ -1,6 +1,6 @@
-from typing import Optional, Dict
+from typing import Optional
 
-from sqlmodel import SQLModel, Field, Column, JSON, Integer, BigInteger
+from sqlmodel import SQLModel, Field, Column, Integer, BigInteger
 
 __all__ = ("Devices", "DevicesDataBase")
 
@@ -14,7 +14,9 @@ class Devices(SQLModel):
             BigInteger(),
         ),
     )
-    data: Optional[Dict[str, str]] = Field(sa_column=Column(JSON))
+    device_id: str = Field()
+    device_fp: str = Field()
+    device_name: Optional[str] = Field(default=None)
 
 
 class DevicesDataBase(Devices, table=True):

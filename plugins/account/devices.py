@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 import ujson
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, TelegramObject, Update
@@ -19,11 +19,15 @@ __all__ = ("AccountDevicesPlugin",)
 
 
 class AccountDevicesPluginData(TelegramObject):
-    devices: dict = {}
+    device_id: str = ""
+    device_fp: str = ""
+    device_name: Optional[str] = None
     account_id: int = 0
 
     def reset(self):
-        self.devices = {}
+        self.device_id = ""
+        self.device_fp = ""
+        self.device_name = None
         self.account_id = 0
 
 
@@ -45,20 +49,25 @@ class AccountDevicesPlugin(Plugin.Conversation):
         devices_methods.service = devices_service
 
     @staticmethod
-    def parse_cookie(cookie: Dict[str, str]) -> Dict[str, str]:
+    def parse_cookie(data: AccountDevicesPluginData, cookie: Dict[str, str]) -> None:
         if not isinstance(cookie, dict):
             raise ValueError
-        cookies = {}
-        must_keys = ["x-rpc-device_id", "x-rpc-device_fp"]
+        must_keys = {"x-rpc-device_id": 36, "x-rpc-device_fp": 13}
         optional_keys = ["x-rpc-device_name"]
-        for k in must_keys:
+        for k, v in must_keys.items():
+            if (k not in cookie) or (not cookie.get(k)):
+                raise ValueError
+            if len(cookie.get(k)) != v:
+                raise ValueError
+        for k in optional_keys:
             if k not in cookie:
-                return {}.copy()
+                continue
+            elif cookie.get(k) and len(cookie.get(k)) > 64:
+                raise ValueError
 
-        for k in must_keys + optional_keys:
-            cookies[k] = cookie.get(k)
-
-        return {k: v for k, v in cookies.items() if v is not None}
+        data.device_id = cookie.get("x-rpc-device_id")
+        data.device_fp = cookie.get("x-rpc-device_fp")
+        data.device_name = cookie.get("x-rpc-device_name")
 
     @conversation.entry_point
     @handler.command(command="setdevice", filters=filters.ChatType.PRIVATE, block=False)
@@ -75,7 +84,7 @@ class AccountDevicesPlugin(Plugin.Conversation):
             account_devices_plugin_data.reset()
 
         text = f'你好 {user.mention_markdown_v2()} {escape_markdown("！请选择要绑定的服务器！或回复退出取消操作")}'
-        reply_keyboard = [["米游社", "HoYoLab"], ["退出"]]
+        reply_keyboard = [["米游社"], ["退出"]]
         await message.reply_markdown_v2(text, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         return CHECK_SERVER
 
@@ -91,9 +100,6 @@ class AccountDevicesPlugin(Plugin.Conversation):
         if message.text == "米游社":
             region = RegionEnum.HYPERION
             bbs_name = "米游社"
-        elif message.text == "HoYoLab":
-            region = RegionEnum.HOYOLAB
-            bbs_name = "HoYoLab"
         else:
             await message.reply_text("选择错误，请重新选择")
             return CHECK_SERVER
@@ -120,17 +126,12 @@ class AccountDevicesPlugin(Plugin.Conversation):
             await message.reply_text("退出任务", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         try:
-            devices = self.parse_cookie(ujson.loads(message.text))
-        except (AttributeError, ValueError, IndexError, ujson.JSONDecodeError) as exc:
+            self.parse_cookie(account_devices_plugin_data, ujson.loads(message.text))
+        except (ValueError, ujson.JSONDecodeError) as exc:
             logger.info("用户 %s[%s] Devices解析出现错误\ntext:%s", user.full_name, user.id, message.text)
             logger.debug("解析Devices出现错误", exc_info=exc)
             await message.reply_text("解析Devices出现错误，请检查是否正确", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
-        if not devices:
-            logger.info("用户 %s[%s] Devices格式有误", user.full_name, user.id)
-            await message.reply_text("Devices格式有误，请检查", reply_markup=ReplyKeyboardRemove())
-            return ConversationHandler.END
-        account_devices_plugin_data.devices = devices
         reply_keyboard = [["确认", "退出"]]
         await message.reply_markdown_v2("请确认修改！", reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         return COMMAND_RESULT
@@ -147,13 +148,17 @@ class AccountDevicesPlugin(Plugin.Conversation):
         if message.text == "确认":
             device = await self.devices_service.get(account_devices_plugin_data.account_id)
             if device:
-                device.data = account_devices_plugin_data.devices
+                device.device_id = account_devices_plugin_data.device_id
+                device.device_fp = account_devices_plugin_data.device_fp
+                device.device_name = account_devices_plugin_data.device_name
                 await self.devices_service.update(device)
                 logger.success("用户 %s[%s] 更新Devices", user.full_name, user.id)
             else:
                 device = Devices(
                     account_id=account_devices_plugin_data.account_id,
-                    data=account_devices_plugin_data.devices,
+                    device_id=account_devices_plugin_data.device_id,
+                    device_fp=account_devices_plugin_data.device_fp,
+                    device_name=account_devices_plugin_data.device_name,
                 )
                 await self.devices_service.add(device)
                 logger.info("用户 %s[%s] 绑定Devices成功", user.full_name, user.id)

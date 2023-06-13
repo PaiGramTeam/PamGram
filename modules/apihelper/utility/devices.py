@@ -24,7 +24,9 @@ class DevicesMethods:
         if not device:
             return self.get_default_device_header(account_id, headers)
         headers = headers or {}
-        headers.update(device.data)
+        headers["x-rpc-device_id"] = device.device_id
+        headers["x-rpc-device_fp"] = device.device_fp
+        headers["x-rpc-device_name"] = device.device_name or "Xiaomi"
         return headers
 
 

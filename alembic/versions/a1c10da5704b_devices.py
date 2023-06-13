@@ -1,15 +1,16 @@
-"""Add devices table
+"""devices
 
-Revision ID: 625904389f54
+Revision ID: a1c10da5704b
 Revises: ddcfba3c7d5c
-Create Date: 2023-06-13 18:22:14.658784
+Create Date: 2023-06-13 19:34:47.189846
 
 """
 from alembic import op
 import sqlalchemy as sa
+import sqlmodel
 
 # revision identifiers, used by Alembic.
-revision = "625904389f54"
+revision = "a1c10da5704b"
 down_revision = "ddcfba3c7d5c"
 branch_labels = None
 depends_on = None
@@ -21,7 +22,15 @@ def upgrade() -> None:
         "devices",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("account_id", sa.BigInteger(), nullable=True),
-        sa.Column("data", sa.JSON(), nullable=True),
+        sa.Column(
+            "device_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+        ),
+        sa.Column(
+            "device_fp", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+        ),
+        sa.Column(
+            "device_name", sqlmodel.sql.sqltypes.AutoString(), nullable=True
+        ),
         sa.PrimaryKeyConstraint("id"),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_general_ci",
