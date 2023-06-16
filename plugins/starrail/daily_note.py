@@ -83,16 +83,18 @@ class DailyNotePlugin(Plugin):
 
     @handler.command("dailynote", block=False)
     @handler.message(filters.Regex("^当前状态(.*)"), block=False)
-    async def command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
+    async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
         message = update.effective_message
         user = update.effective_user
-        logger.info("用户 %s[%s] 每日便签命令请求", user.full_name, user.id)
+        args = self.get_args(context)
+        use_stoken = len(args) > 0
+        logger.info("用户 %s[%s] 每日便签命令请求 use_stoken=%s", user.full_name, user.id, use_stoken)
 
         try:
             # 获取当前用户的 genshin.Client
             client = await self.helper.get_genshin_client(user.id)
             # 渲染
-            if "stoken" in client.cookie_manager.cookies:
+            if "stoken" in client.cookie_manager.cookies and not use_stoken:
                 try:
                     render_result = await self._get_daily_note_by_stoken(client)
                 except InvalidCookies:
