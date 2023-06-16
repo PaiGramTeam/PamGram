@@ -1,9 +1,10 @@
 import datetime
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 import genshin
-from genshin import DataNotPublic
+from genshin import DataNotPublic, InvalidCookies
+from genshin.models import StarRailNote
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatAction
 from telegram.ext import ConversationHandler, filters, CallbackContext
@@ -12,6 +13,8 @@ from telegram.helpers import create_deep_linked_url
 from core.plugin import Plugin, handler
 from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
+from modules.apihelper.client.components.widget import Widget
+from modules.apihelper.models.genshin.widget import StarRailWidget
 from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError, PlayerNotFoundError
 from utils.log import logger
 
@@ -29,9 +32,7 @@ class DailyNotePlugin(Plugin):
         self.template_service = template
         self.helper = helper
 
-    async def _get_daily_note(self, client: genshin.Client) -> RenderResult:
-        daily_info = await client.get_starrail_notes(client.uid)
-
+    async def _gen_render_data(self, uid: int, daily_info: Union[StarRailNote, StarRailWidget]) -> RenderResult:
         day = datetime.now().strftime("%m-%d %H:%M") + " 星期" + "一二三四五六日"[datetime.now().weekday()]
         resin_recovery_time = (
             (datetime.now() + daily_info.stamina_recover_time).strftime("%m-%d %H:%M")
@@ -50,7 +51,7 @@ class DailyNotePlugin(Plugin):
             remained_time = (datetime.now().astimezone() + remained_time).strftime("%m-%d %H:%M")
 
         render_data = {
-            "uid": client.uid,
+            "uid": uid,
             "day": day,
             "resin_recovery_time": resin_recovery_time,
             "current_resin": daily_info.current_stamina,
@@ -69,6 +70,17 @@ class DailyNotePlugin(Plugin):
         )
         return render_result
 
+    async def _get_daily_note(self, client: genshin.Client) -> RenderResult:
+        daily_info = await client.get_starrail_notes(client.uid)
+        return await self._gen_render_data(client.uid, daily_info)
+
+    async def _get_daily_note_by_stoken(self, client: genshin.Client) -> RenderResult:
+        cookies = client.cookie_manager.cookies  # noqa
+        cookies["stuid"] = client.hoyolab_id
+        client.set_cookies(cookies)
+        daily_info = await Widget.get_starrail_widget(client)
+        return await self._gen_render_data(client.uid, daily_info)
+
     @handler.command("dailynote", block=False)
     @handler.message(filters.Regex("^当前状态(.*)"), block=False)
     async def command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
@@ -80,7 +92,13 @@ class DailyNotePlugin(Plugin):
             # 获取当前用户的 genshin.Client
             client = await self.helper.get_genshin_client(user.id)
             # 渲染
-            render_result = await self._get_daily_note(client)
+            if "stoken" in client.cookie_manager.cookies:
+                try:
+                    render_result = await self._get_daily_note_by_stoken(client)
+                except InvalidCookies:
+                    render_result = await self._get_daily_note(client)
+            else:
+                render_result = await self._get_daily_note(client)
         except (CookiesNotFoundError, PlayerNotFoundError):
             buttons = [
                 [

@@ -1,3 +1,5 @@
+from typing import Dict
+
 from genshin import Client
 
 from modules.apihelper.models.genshin.widget import StarRailWidget, GenshinWidget
@@ -18,7 +20,7 @@ class Widget:
     }
 
     @staticmethod
-    async def get_headers(hoyolab_id: int):
+    async def get_headers(hoyolab_id: int) -> Dict[str, str]:
         app_version, client_type, ds_sign = get_ds()
         headers = Widget.HEADERS.copy()
         headers["x-rpc-app_version"] = app_version
@@ -28,13 +30,13 @@ class Widget:
         return headers
 
     @staticmethod
-    async def get_starrail_widget(client: Client):
+    async def get_starrail_widget(client: Client) -> StarRailWidget:
         headers = await Widget.get_headers(client.hoyolab_id)
         data = await client.cookie_manager.request(Widget.starrail_url, method="GET", headers=headers)
         return StarRailWidget(**data)
 
     @staticmethod
-    async def get_genshin_widget(client: Client):
+    async def get_genshin_widget(client: Client) -> GenshinWidget:
         headers = await Widget.get_headers(client.hoyolab_id)
         data = await client.cookie_manager.request(Widget.genshin_url, method="GET", headers=headers)
         return GenshinWidget(**data)
