@@ -94,7 +94,7 @@ class DailyNotePlugin(Plugin):
             # 获取当前用户的 genshin.Client
             client = await self.helper.get_genshin_client(user.id)
             # 渲染
-            if "stoken" in client.cookie_manager.cookies and not use_stoken:
+            if "stoken" in client.cookie_manager.cookies and use_stoken:
                 try:
                     render_result = await self._get_daily_note_by_stoken(client)
                 except InvalidCookies:
