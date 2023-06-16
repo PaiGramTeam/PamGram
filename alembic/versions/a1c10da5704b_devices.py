@@ -22,15 +22,9 @@ def upgrade() -> None:
         "devices",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("account_id", sa.BigInteger(), nullable=True),
-        sa.Column(
-            "device_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False
-        ),
-        sa.Column(
-            "device_fp", sqlmodel.sql.sqltypes.AutoString(), nullable=False
-        ),
-        sa.Column(
-            "device_name", sqlmodel.sql.sqltypes.AutoString(), nullable=True
-        ),
+        sa.Column("device_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("device_fp", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("device_name", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_general_ci",
