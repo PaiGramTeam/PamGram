@@ -3,7 +3,6 @@ import re
 from datetime import datetime, timedelta
 
 from genshin import DataNotPublic, InvalidCookies, GenshinException
-from genshin.types import Region
 from genshin.models.genshin.diary import StarRailDiary
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatAction
@@ -110,13 +109,6 @@ class LedgerPlugin(Plugin):
         await message.reply_chat_action(ChatAction.TYPING)
         try:
             client = await self.helper.get_genshin_client(user.id)
-            # todo: 支持国际服
-            if client.region == Region.OVERSEAS:
-                reply_message = await message.reply_text("此功能暂不支持国际服")
-                if filters.ChatType.GROUPS.filter(message):
-                    self.add_delete_message_job(reply_message, delay=30)
-                    self.add_delete_message_job(message, delay=30)
-                return
             try:
                 render_result = await self._start_get_ledger(client, year, month)
             except InvalidCookies as exc:  # 如果抛出InvalidCookies 判断是否真的玄学过期（或权限不足？）
