@@ -112,7 +112,7 @@ class LedgerPlugin(Plugin):
             try:
                 render_result = await self._start_get_ledger(client, year, month)
             except InvalidCookies as exc:  # 如果抛出InvalidCookies 判断是否真的玄学过期（或权限不足？）
-                await client.get_genshin_user(client.uid)
+                await client.get_starrail_user(client.uid)
                 logger.warning(
                     "用户 %s[%s] 无法请求开拓月历数据 API返回信息为 [%s]%s", user.full_name, user.id, exc.retcode, exc.original
                 )
