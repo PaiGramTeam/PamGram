@@ -1,7 +1,7 @@
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict
 
 from genshin import Client, GenshinException
-from genshin.models import StarRailRogue, RogueCharacter
+from genshin.models import StarRailStarFight
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
@@ -15,7 +15,7 @@ from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNotFoundError
 from utils.log import logger
 
-__all__ = ("PlayerRoguePlugins",)
+__all__ = ("PlayerActivityPlugins",)
 
 
 class NotSupport(Exception):
@@ -26,8 +26,8 @@ class NotHaveData(Exception):
     """没有数据"""
 
 
-class PlayerRoguePlugins(Plugin):
-    """玩家模拟宇宙信息查询"""
+class PlayerActivityPlugins(Plugin):
+    """玩家活动信息查询"""
 
     def __init__(
         self,
@@ -39,16 +39,14 @@ class PlayerRoguePlugins(Plugin):
         self.assets = assets
         self.helper = helper
 
-    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> Tuple[int, bool]:
+    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
-        uid, user_id_, pre = None, user_id, False
+        uid, user_id_ = None, user_id
         if args:
             for i in args:
                 if i is not None:
                     if i.isdigit() and len(i) == 9:
                         uid = int(i)
-                    if "上" in i:
-                        pre = True
         if reply:
             try:
                 user_id_ = reply.from_user.id
@@ -62,23 +60,23 @@ class PlayerRoguePlugins(Plugin):
                 player_info = await self.helper.players_service.get_player(user_id)
                 if player_info is not None:
                     uid = player_info.player_id
-        return uid, pre
+        return uid
 
-    @handler.command("rogue", block=False)
-    @handler.message(filters.Regex("^模拟宇宙信息查询(.*)"), block=False)
-    async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    @handler.command("star_fight", block=False)
+    @handler.message(filters.Regex("^星芒战幕信息查询(.*)"), block=False)
+    async def star_fight_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
         user = update.effective_user
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询模拟宇宙信息命令请求", user.full_name, user.id)
+        logger.info("用户 %s[%s] 查询星芒战幕信息命令请求", user.full_name, user.id)
         try:
-            uid, pre = await self.get_uid(user.id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
             try:
                 client = await self.helper.get_genshin_client(user.id)
                 if client.uid != uid:
                     raise CookiesNotFoundError(uid)
             except CookiesNotFoundError:
                 client, _ = await self.helper.get_public_genshin_client(user.id)
-            render_result = await self.render(client, pre, uid)
+            render_result = await self.star_fight_render(client, uid)
         except PlayerNotFoundError:
             buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
             if filters.ChatType.GROUPS.filter(message):
@@ -99,18 +97,18 @@ class PlayerRoguePlugins(Plugin):
             await message.reply_text("用户查询次数过多 请稍后重试")
             return
         except AttributeError as exc:
-            logger.error("模拟宇宙数据有误")
+            logger.error("活动数据有误")
             logger.exception(exc)
-            await message.reply_text("模拟宇宙数据有误 估计是彦卿晕了")
+            await message.reply_text("活动数据有误 估计是彦卿晕了")
             return
         except NotSupport:
-            reply_message = await message.reply_text("暂不支持该服务器查询模拟宇宙数据")
+            reply_message = await message.reply_text("暂不支持该服务器查询活动数据")
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
             return
         except NotHaveData:
-            reply_message = await message.reply_text("没有查找到模拟宇宙数据")
+            reply_message = await message.reply_text("没有查找到此活动数据")
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
@@ -118,54 +116,34 @@ class PlayerRoguePlugins(Plugin):
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
 
-    async def get_rander_data(self, uid: int, data: StarRailRogue, pre: bool) -> Dict:
-        luo_ma_bum = ["", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ"]
-        buff_en_map = {
-            "「丰饶」": "Abundance",
-            "「毁灭」": "Destruction",
-            "「智识」": "Erudition",
-            "「协同」": "Harmony",
-            "「巡猎」": "Hunt",
-            "「欢愉」": "Joy",
-            "「记忆」": "Memory",
-            "「虚无」": "Nihility",
-            "「存护」": "Preservation",
-        }
-        record_raw = data.last_record if pre else data.current_record
-        if not record_raw.has_data:
+    async def get_star_fight_rander_data(self, uid: int, data: StarRailStarFight) -> Dict:
+        if not data.exists_data:
             raise NotHaveData
-        record = record_raw.records[0]
-        avatars = record.final_lineup
-        new_avatars = [None, None, None, None]
-        for idx, avatar in enumerate(avatars):
-            old_avatar = avatar.dict()
-            old_avatar["icon"] = self.assets.avatar.square(avatar.id).as_uri()
-            new_avatars[idx] = RogueCharacter(**old_avatar)
-
+        avatar_icons = {}
+        for record in data.records:
+            for avatar in record.lineup:
+                avatar_icons[avatar.id] = self.assets.avatar.square(avatar.id).as_uri()
         return {
             "uid": uid,
-            "basic": data.basic_info,
-            "name": f"{record.name} {luo_ma_bum[record.difficulty]}",
-            "finish_cnt": record_raw.basic.finish_cnt,
-            "time": record.finish_time.datetime.strftime("%Y-%m-%d %H:%M"),
-            "score": record.score,
-            "avatars": new_avatars,
-            "buffs": record.buffs,
-            "buff_en_map": buff_en_map,
-            "miracles": record.miracles,
+            "records": data.records,
+            "avatar_icons": avatar_icons,
         }
 
-    async def render(self, client: Client, pre: bool, uid: Optional[int] = None) -> RenderResult:
+    async def star_fight_render(self, client: Client, uid: Optional[int] = None) -> RenderResult:
         if uid is None:
             uid = client.uid
 
-        rogue = await client.get_starrail_rogue(uid)
-        data = await self.get_rander_data(uid, rogue, pre)
+        act_data = await client.get_starrail_activity(uid)
+        try:
+            star_fight_data = act_data.star_fight
+        except ValueError:
+            raise NotHaveData
+        data = await self.get_star_fight_rander_data(uid, star_fight_data)
 
         return await self.template_service.render(
-            "starrail/rogue/rogue.html",
+            "starrail/activity/star_fight.html",
             data,
-            {"width": 520, "height": 1000},
+            {"width": 500, "height": 1200},
             full_page=True,
-            query_selector="#new-container",
+            query_selector="#container",
         )
