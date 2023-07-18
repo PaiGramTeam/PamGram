@@ -95,9 +95,9 @@ class Sign(Plugin):
         try:
             client = await self.genshin_helper.get_genshin_client(user.id)
             await message.reply_chat_action(ChatAction.TYPING)
-            _, challenge = await self.sign_system.get_challenge(client.uid)
+            _, challenge = await self.sign_system.get_challenge(client.player_id)
             if validate:
-                _, challenge = await self.sign_system.get_challenge(client.uid)
+                _, challenge = await self.sign_system.get_challenge(client.player_id)
                 if challenge:
                     sign_text = await self.sign_system.start_sign(client, challenge=challenge, validate=validate)
                 else:

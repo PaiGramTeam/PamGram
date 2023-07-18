@@ -1,6 +1,7 @@
 from io import BytesIO
+from typing import Optional
 
-from genshin.models.genshin.gacha import StarRailBannerType
+from simnet.models.starrail.wish import StarRailBannerType
 from telegram import Document, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler, filters
@@ -22,7 +23,7 @@ from modules.gacha_log.error import (
 )
 from modules.gacha_log.helpers import from_url_get_authkey
 from modules.gacha_log.log import GachaLog
-from plugins.tools.genshin import PlayerNotFoundError, GenshinHelper
+from plugins.tools.genshin import PlayerNotFoundError
 from utils.log import logger
 
 try:
@@ -43,14 +44,20 @@ class WishLogPlugin(Plugin.Conversation):
         players_service: PlayersService,
         assets: AssetsService,
         cookie_service: CookiesService,
-        helper: GenshinHelper,
     ):
         self.template_service = template_service
         self.players_service = players_service
         self.assets_service = assets
         self.cookie_service = cookie_service
         self.gacha_log = GachaLog()
-        self.helper = helper
+
+    async def get_player_id(self, uid: int) -> Optional[int]:
+        """ 获取绑定的游戏ID """
+        logger.debug("尝试获取已绑定的星穹铁道账号")
+        player = await self.players_service.get_player(uid)
+        if player is None:
+            raise PlayerNotFoundError(uid)
+        return player.player_id
 
     async def _refresh_user_data(
         self, user: User, data: dict = None, authkey: str = None, verify_uid: bool = True
@@ -63,12 +70,12 @@ class WishLogPlugin(Plugin.Conversation):
         """
         try:
             logger.debug("尝试获取已绑定的星穹铁道账号")
-            client = await self.helper.get_genshin_client(user.id, need_cookie=False)
+            player_id = await self.get_player_id(user.id)
             if authkey:
-                new_num = await self.gacha_log.get_gacha_log_data(user.id, client, authkey)
+                new_num = await self.gacha_log.get_gacha_log_data(user.id, player_id, authkey)
                 return "更新完成，本次没有新增数据" if new_num == 0 else f"更新完成，本次共新增{new_num}条跃迁记录"
             if data:
-                new_num = await self.gacha_log.import_gacha_log_data(user.id, client, data, verify_uid)
+                new_num = await self.gacha_log.import_gacha_log_data(user.id, player_id, data, verify_uid)
                 return "更新完成，本次没有新增数据" if new_num == 0 else f"更新完成，本次共新增{new_num}条跃迁记录"
         except GachaLogNotFound:
             return "彦卿没有找到你的跃迁记录，快来私聊彦卿导入吧~"
@@ -136,23 +143,6 @@ class WishLogPlugin(Plugin.Conversation):
         args = self.get_args(context)
         logger.info("用户 %s[%s] 导入跃迁记录命令请求", user.full_name, user.id)
         authkey = from_url_get_authkey(args[0] if args else "")
-        # if not args:
-        #     player_info = await self.players_service.get_player(user.id, region=RegionEnum.HYPERION)
-        #     if player_info is not None:
-        #         cookies = await self.cookie_service.get(user.id, account_id=player_info.account_id)
-        #         if cookies is not None and cookies.data and "stoken" in cookies.data:
-        #             if stuid := next(
-        #                 (value for key, value in cookies.data.items() if key in ["ltuid", "login_uid"]), None
-        #             ):
-        #                 cookies.data["stuid"] = stuid
-        #                 client = genshin.Client(
-        #                     cookies=cookies.data,
-        #                     game=genshin.types.Game.STARRAIL,
-        #                     region=genshin.Region.CHINESE,
-        #                     lang="zh-cn",
-        #                     uid=player_info.player_id,
-        #                 )
-        #                 authkey = await get_authkey_by_stoken(client)
         if not authkey:
             await message.reply_text(
                 "<b>开始导入跃迁历史记录：请通过 https://starrailstation.com/cn/warp#import 获取跃迁记录链接后发送给我"
@@ -198,13 +188,13 @@ class WishLogPlugin(Plugin.Conversation):
         user = update.effective_user
         logger.info("用户 %s[%s] 删除跃迁记录命令请求", user.full_name, user.id)
         try:
-            client = await self.helper.get_genshin_client(user.id, need_cookie=False)
-            context.chat_data["uid"] = client.uid
+            player_id = await self.get_player_id(user.id)
+            context.chat_data["uid"] = player_id
         except PlayerNotFoundError:
             logger.info("未查询到用户 %s[%s] 所绑定的账号信息", user.full_name, user.id)
             await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号")
             return ConversationHandler.END
-        _, status = await self.gacha_log.load_history_info(str(user.id), str(client.uid), only_status=True)
+        _, status = await self.gacha_log.load_history_info(str(user.id), str(player_id), only_status=True)
         if not status:
             await message.reply_text("你还没有导入跃迁记录哦~")
             return ConversationHandler.END
@@ -234,12 +224,12 @@ class WishLogPlugin(Plugin.Conversation):
             cid = int(args[0])
             if cid < 0:
                 raise ValueError("Invalid cid")
-            client = await self.helper.get_genshin_client(cid, need_cookie=False)
-            _, status = await self.gacha_log.load_history_info(str(cid), str(client.uid), only_status=True)
+            player_id = await self.get_player_id(cid)
+            _, status = await self.gacha_log.load_history_info(str(cid), str(player_id), only_status=True)
             if not status:
                 await message.reply_text("该用户还没有导入跃迁记录")
                 return
-            status = await self.gacha_log.remove_history_info(str(cid), str(client.uid))
+            status = await self.gacha_log.remove_history_info(str(cid), str(player_id))
             await message.reply_text("跃迁记录已强制删除" if status else "跃迁记录删除失败")
         except GachaLogNotFound:
             await message.reply_text("该用户还没有导入跃迁记录")
@@ -255,9 +245,9 @@ class WishLogPlugin(Plugin.Conversation):
         user = update.effective_user
         logger.info("用户 %s[%s] 导出跃迁记录命令请求", user.full_name, user.id)
         try:
-            client = await self.helper.get_genshin_client(user.id, need_cookie=False)
             await message.reply_chat_action(ChatAction.TYPING)
-            path = await self.gacha_log.gacha_log_to_srgf(str(user.id), str(client.uid))
+            player_id = await self.get_player_id(user.id)
+            path = await self.gacha_log.gacha_log_to_srgf(str(user.id), str(player_id))
             await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT)
             await message.reply_document(document=open(path, "rb+"), caption="跃迁记录导出文件 - SRGF V1.0")
         except GachaLogNotFound:
@@ -289,9 +279,9 @@ class WishLogPlugin(Plugin.Conversation):
                 pool_type = StarRailBannerType.NOVICE
         logger.info("用户 %s[%s] 跃迁记录命令请求 || 参数 %s", user.full_name, user.id, pool_type.name)
         try:
-            client = await self.helper.get_genshin_client(user.id, need_cookie=False)
             await message.reply_chat_action(ChatAction.TYPING)
-            data = await self.gacha_log.get_analysis(user.id, client, pool_type, self.assets_service)
+            player_id = await self.get_player_id(user.id)
+            data = await self.gacha_log.get_analysis(user.id, player_id, pool_type, self.assets_service)
             if isinstance(data, str):
                 reply_message = await message.reply_text(data)
                 if filters.ChatType.GROUPS.filter(message):
@@ -346,13 +336,13 @@ class WishLogPlugin(Plugin.Conversation):
                 all_five = True
         logger.info("用户 %s[%s] 跃迁统计命令请求 || 参数 %s || 仅五星 %s", user.full_name, user.id, pool_type.name, all_five)
         try:
-            client = await self.helper.get_genshin_client(user.id, need_cookie=False)
             group = filters.ChatType.GROUPS.filter(message)
             await message.reply_chat_action(ChatAction.TYPING)
+            player_id = await self.get_player_id(user.id)
             if all_five:
-                data = await self.gacha_log.get_all_five_analysis(user.id, client, self.assets_service)
+                data = await self.gacha_log.get_all_five_analysis(user.id, player_id, self.assets_service)
             else:
-                data = await self.gacha_log.get_pool_analysis(user.id, client, pool_type, self.assets_service, group)
+                data = await self.gacha_log.get_pool_analysis(user.id, player_id, pool_type, self.assets_service, group)
             if isinstance(data, str):
                 reply_message = await message.reply_text(data)
                 if filters.ChatType.GROUPS.filter(message):

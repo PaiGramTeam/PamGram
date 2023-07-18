@@ -1,8 +1,8 @@
 from typing import List, Optional, TYPE_CHECKING
 
-from genshin import Client, InvalidCookies, Game
-from genshin.models.starrail.chronicle import StarRailDetailCharacter
 from pydantic import BaseModel
+from simnet.errors import InvalidCookies
+from simnet.models.starrail.chronicle.characters import StarRailDetailCharacter
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction, ParseMode
 from telegram.ext import filters
@@ -18,6 +18,7 @@ from plugins.tools.genshin import CookiesNotFoundError, GenshinHelper, PlayerNot
 from utils.log import logger
 
 if TYPE_CHECKING:
+    from simnet import StarRailClient
     from telegram.ext import ContextTypes
     from telegram import Update
 
@@ -58,7 +59,7 @@ class AvatarListPlugin(Plugin):
         self.wiki_service = wiki_service
         self.helper = helper
 
-    async def get_user_client(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> Optional[Client]:
+    async def get_user_client(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> Optional["StarRailClient"]:
         message = update.effective_message
         user = update.effective_user
         try:
@@ -91,7 +92,7 @@ class AvatarListPlugin(Plugin):
                 )
 
     @staticmethod
-    async def get_avatars_data(client: Client) -> List[StarRailDetailCharacter]:
+    async def get_avatars_data(client: "StarRailClient") -> List[StarRailDetailCharacter]:
         task_results = (await client.get_starrail_characters()).avatar_list
         return sorted(
             list(filter(lambda x: x, task_results)),
@@ -150,21 +151,18 @@ class AvatarListPlugin(Plugin):
         await message.reply_chat_action(ChatAction.TYPING)
         try:
             characters: List[StarRailDetailCharacter] = await self.get_avatars_data(client)
-            record_cards = await client.get_record_cards()
-            record_card = record_cards[0]
-            for card in record_cards:
-                if card.game == Game.STARRAIL:
-                    record_card = card
-                    break
+            record_card = await client.get_record_card()
             nickname = record_card.nickname
         except InvalidCookies as exc:
-            await client.get_starrail_user(client.uid)
+            await client.get_starrail_user(client.player_id)
             logger.warning("用户 %s[%s] 无法请求角色数数据 API返回信息为 [%s]%s", user.full_name, user.id, exc.retcode, exc.original)
             reply_message = await message.reply_text("出错了呜呜呜 ~ 当前访问令牌无法请求角色数数据，请尝试重新获取Cookie。")
             if filters.ChatType.GROUPS.filter(message):
                 self.add_delete_message_job(reply_message, delay=30)
                 self.add_delete_message_job(message, delay=30)
             return
+        finally:
+            await client.shutdown()
 
         has_more = (not all_avatars) and len(characters) > 20
         if has_more:
@@ -172,7 +170,7 @@ class AvatarListPlugin(Plugin):
         avatar_datas = await self.get_final_data(characters)
 
         render_data = {
-            "uid": client.uid,  # 玩家uid
+            "uid": client.player_id,  # 玩家uid
             "nickname": nickname,  # 玩家昵称
             "avatar_datas": avatar_datas,  # 角色数据
             "has_more": has_more,  # 是否显示了全部角色
