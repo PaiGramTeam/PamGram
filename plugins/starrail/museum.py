@@ -22,10 +22,6 @@ if TYPE_CHECKING:
 __all__ = ("PlayerMuseumPlugins",)
 
 
-class NotSupport(Exception):
-    """不支持的服务器"""
-
-
 class NotHaveData(Exception):
     """没有数据"""
 
@@ -106,12 +102,6 @@ class PlayerMuseumPlugins(Plugin):
             logger.exception(exc)
             await message.reply_text("冬城博物珍奇簿数据有误 估计是彦卿晕了")
             return
-        except NotSupport:
-            reply_message = await message.reply_text("暂不支持该服务器查询冬城博物珍奇簿数据")
-            if filters.ChatType.GROUPS.filter(reply_message):
-                self.add_delete_message_job(message)
-                self.add_delete_message_job(reply_message)
-            return
         except NotHaveData:
             reply_message = await message.reply_text("没有查找到冬城博物珍奇簿数据")
             if filters.ChatType.GROUPS.filter(reply_message):
@@ -139,8 +129,8 @@ class PlayerMuseumPlugins(Plugin):
         if uid is None:
             uid = client.player_id
 
-        basic = await client.get_starrail_museum_info(uid)
         try:
+            basic = await client.get_starrail_museum_info(uid)
             detail = await client.get_starrail_museum_detail(uid)
         except SimnetBadRequest as e:
             if e.retcode == 10301:
