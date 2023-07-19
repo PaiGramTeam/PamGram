@@ -1,30 +1,29 @@
 [tool.poetry]
-name = "PaiGram"
+name = "PamGram"
 version = "0.4.0"
-description = "Telegarm robot, query the official genshin information."
+description = "Telegarm robot, query the official starrail information."
 authors = ["洛水居室", "zhxy-CN", "Chuangbo Li", "kotoriのねこ", "omg-xtao", "艾迪", "Karako", "SiHuaN"]
 license = "AGPL-3.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-httpx = "^0.23.3"
-ujson = "^5.7.0"
-genshin = { git = "https://github.com/thesadru/genshin.py" }
+httpx = "^0.24.0"
+ujson = "^5.8.0"
 Jinja2 = "^3.1.2"
 python-telegram-bot = { version = "^20.1", extras = ["ext", "rate-limiter"] }
 sqlmodel = "^0.0.8"
 colorlog = "^6.7.0"
-fakeredis = "^2.10.3"
-redis = "^4.5.4"
+fakeredis = "^2.16.0"
+redis = "^4.6.0"
 beautifulsoup4 = "^4.12.1"
 asyncmy = "^0.2.7"
 pyppeteer = "^1.0.2"
 aiofiles = "^23.1.0"
 python-dotenv = "^1.0.0"
-alembic = "^1.10.3"
+alembic = "^1.11.1"
 black = "^23.3.0"
-rich = "^13.3.1"
+rich = "^13.4.1"
 enkanetwork-py = { git = "https://github.com/mrwan200/EnkaNetwork.py" }
 TgCrypto = { version = "^1.2.5", optional = true }
 Pyrogram = { version = "^2.0.102", optional = true }
@@ -33,18 +32,19 @@ pytest-asyncio = { version = "^0.21.0", optional = true }
 flaky = { version = "^3.7.0", optional = true }
 lxml = "^4.9.2"
 arko-wrapper = "^0.2.8"
-fastapi = "^0.95.0"
-uvicorn = { extras = ["standard"], version = "^0.21.1" }
-sentry-sdk = "^1.19.1"
+fastapi = "<0.100.0"
+uvicorn = { extras = ["standard"], version = "^0.23.1" }
+sentry-sdk = "^1.28.1"
 GitPython = "^3.1.30"
 openpyxl = "^3.1.1"
 async-lru = "^2.0.2"
 thefuzz = "^0.19.0"
 qrcode = "^7.4.2"
-cryptography = "^40.0.1"
-pillow = "^9.4.0"
+cryptography = "^41.0.2"
+pillow = "^10.0.0"
 playwright = "^1.27.1"
 aiosqlite = { extras = ["sqlite"], version = "^0.19.0" }
+simnet = { git = "https://github.com/PaiGramTeam/SIMNet" }
 
 [tool.poetry.extras]
 pyro = ["Pyrogram", "TgCrypto"]
