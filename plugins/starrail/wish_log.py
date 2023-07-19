@@ -52,7 +52,7 @@ class WishLogPlugin(Plugin.Conversation):
         self.gacha_log = GachaLog()
 
     async def get_player_id(self, uid: int) -> Optional[int]:
-        """ 获取绑定的游戏ID """
+        """获取绑定的游戏ID"""
         logger.debug("尝试获取已绑定的星穹铁道账号")
         player = await self.players_service.get_player(uid)
         if player is None:

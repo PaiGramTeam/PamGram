@@ -59,7 +59,9 @@ class AvatarListPlugin(Plugin):
         self.wiki_service = wiki_service
         self.helper = helper
 
-    async def get_user_client(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> Optional["StarRailClient"]:
+    async def get_user_client(
+        self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"
+    ) -> Optional["StarRailClient"]:
         message = update.effective_message
         user = update.effective_user
         try:

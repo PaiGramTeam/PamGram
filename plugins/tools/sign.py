@@ -204,7 +204,9 @@ class SignSystem(Plugin):
                                     logger.warning("UID[%s] 触发验证码\nchallenge[%s]", client.player_id, _challenge)
                                     gt = request_daily_reward.get("gt", "")
                                     challenge = request_daily_reward.get("challenge", "")
-                                    logger.success("UID[%s] 创建验证成功\ngt[%s]\nchallenge[%s]", client.player_id, gt, challenge)
+                                    logger.success(
+                                        "UID[%s] 创建验证成功\ngt[%s]\nchallenge[%s]", client.player_id, gt, challenge
+                                    )
                                     raise NeedChallenge(
                                         uid=client.player_id,
                                         gt=gt,
