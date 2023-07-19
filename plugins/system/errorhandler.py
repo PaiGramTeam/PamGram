@@ -146,7 +146,7 @@ class ErrorHandler(Plugin):
                 if message:
                     notice = self.ERROR_MSG_PREFIX + f"获取信息发生错误 错误信息为 {message} ~ 请稍后再试"
                 else:
-                    notice = self.ERROR_MSG_PREFIX + f"获取信息发生错误 请稍后再试"
+                    notice = self.ERROR_MSG_PREFIX + "获取信息发生错误 请稍后再试"
         if notice:
             self.create_notice_task(update, context, notice)
             raise ApplicationHandlerStop
