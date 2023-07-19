@@ -1,7 +1,5 @@
 from typing import Dict, Any, Optional, TYPE_CHECKING
 
-from enkanetwork import Cache
-
 try:
     import ujson as jsonlib
 except ImportError:
@@ -14,7 +12,7 @@ if TYPE_CHECKING:
 __all__ = ("RedisCache",)
 
 
-class RedisCache(Cache):
+class RedisCache:
     def __init__(self, redis: "aioredis.Redis", key: Optional[str] = None, ex: int = 60 * 3) -> None:
         self.redis = redis
         self.ex = ex
