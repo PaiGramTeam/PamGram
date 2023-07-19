@@ -173,7 +173,7 @@ class ChallengePlugin(Plugin):
             await reply_message_func("还没有挑战本层呢，咕咕咕~")
             return
         except SimnetBadRequest as exc:
-            if exc.retcode == 1034 and client.uid != uid:
+            if exc.retcode == 1034 and client.player_id != uid:
                 await message.reply_text("出错了呜呜呜 ~ 请稍后重试 ~ 米游社风控太严力")
                 return
             raise exc

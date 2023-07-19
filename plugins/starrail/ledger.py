@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 from simnet.errors import BadRequest as SimnetBadRequest, DataNotPublic, InvalidCookies
 from simnet.models.starrail.diary import StarRailDiary
@@ -15,6 +16,9 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import CookiesNotFoundError, GenshinHelper, PlayerNotFoundError
 from utils.log import logger
+
+if TYPE_CHECKING:
+    from simnet import StarRailClient
 
 
 __all__ = ("LedgerPlugin",)
@@ -34,9 +38,9 @@ class LedgerPlugin(Plugin):
         self.current_dir = os.getcwd()
         self.helper = helper
 
-    async def _start_get_ledger(self, client, year, month) -> RenderResult:
+    async def _start_get_ledger(self, client: "StarRailClient", year, month) -> RenderResult:
         req_month = f"{year}0{month}" if month < 10 else f"{year}{month}"
-        diary_info: StarRailDiary = await client.get_starrail_diary(client.uid, month=req_month)
+        diary_info: StarRailDiary = await client.get_starrail_diary(client.player_id, month=req_month)
         color = ["#73a9c6", "#d56565", "#70b2b4", "#bd9a5a", "#739970", "#7a6da7", "#597ea0"]
         categories = [
             {
@@ -54,7 +58,7 @@ class LedgerPlugin(Plugin):
             return f"{round(amount / 10000, 2)}w" if amount >= 10000 else amount
 
         ledger_data = {
-            "uid": client.uid,
+            "uid": client.player_id,
             "day": month,
             "current_hcoin": format_amount(diary_info.month_data.current_hcoin),
             "gacha": int(diary_info.month_data.current_hcoin / 160),
@@ -113,7 +117,7 @@ class LedgerPlugin(Plugin):
                 try:
                     render_result = await self._start_get_ledger(client, year, month)
                 except InvalidCookies as exc:  # 如果抛出InvalidCookies 判断是否真的玄学过期（或权限不足？）
-                    await client.get_starrail_user(client.uid)
+                    await client.get_starrail_user(client.player_id)
                     logger.warning(
                         "用户 %s[%s] 无法请求开拓月历数据 API返回信息为 [%s]%s", user.full_name, user.id, exc.retcode, exc.original
                     )

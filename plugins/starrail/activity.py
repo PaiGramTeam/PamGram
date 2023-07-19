@@ -119,7 +119,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
 
     async def get_star_fight_rander_data(self, uid: int, data: StarRailStarFight) -> Dict:
         if not data.exists_data:

@@ -76,7 +76,7 @@ class PlayerMuseumPlugins(Plugin):
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
             try:
                 async with self.helper.genshin(user.id) as client:
-                    if client.uid != uid:
+                    if client.player_id != uid:
                         raise CookiesNotFoundError(uid)
                     render_result = await self.render(client, uid)
             except CookiesNotFoundError:
@@ -119,7 +119,7 @@ class PlayerMuseumPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
 
     @staticmethod
     async def get_rander_data(uid: int, basic: StarRailMuseumBasic, detail: StarRailMuseumDetail) -> Dict:

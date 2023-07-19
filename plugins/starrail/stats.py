@@ -64,7 +64,7 @@ class PlayerStatsPlugins(Plugin):
             uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
             try:
                 async with self.helper.genshin(user.id) as client:
-                    if client.uid != uid:
+                    if client.player_id != uid:
                         raise CookiesNotFoundError(uid)
                     render_result = await self.render(client, uid)
             except CookiesNotFoundError:
@@ -95,7 +95,7 @@ class PlayerStatsPlugins(Plugin):
             await message.reply_text("角色数据有误 估计是彦卿晕了")
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
 
     async def render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:

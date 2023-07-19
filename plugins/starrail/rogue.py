@@ -79,7 +79,7 @@ class PlayerRoguePlugins(Plugin):
             uid, pre = await self.get_uid(user.id, context.args, message.reply_to_message)
             try:
                 async with self.helper.genshin(user.id) as client:
-                    if client.uid != uid:
+                    if client.player_id != uid:
                         raise CookiesNotFoundError(uid)
                     render_result = await self.render(client, pre, uid)
             except CookiesNotFoundError:
@@ -122,7 +122,7 @@ class PlayerRoguePlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
 
     async def get_rander_data(self, uid: int, data: StarRailRogue, pre: bool) -> Dict:
         luo_ma_bum = ["", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ"]
