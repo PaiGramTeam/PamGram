@@ -5,8 +5,14 @@ from typing import Optional
 
 import aiofiles
 from aiohttp import ClientError, ClientConnectorError
-from genshin import DataNotPublic, GenshinException, InvalidCookies, TooManyRequests
 from httpx import HTTPError, TimeoutException
+from simnet.errors import (
+    DataNotPublic,
+    BadRequest as SIMNetBadRequest,
+    InvalidCookies,
+    TooManyRequests,
+    CookieException,
+)
 from telegram import ReplyKeyboardRemove, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.error import BadRequest, Forbidden, TelegramError, TimedOut, NetworkError
@@ -100,7 +106,7 @@ class ErrorHandler(Plugin):
 
     @error_handler()
     async def process_genshin_exception(self, update: object, context: CallbackContext):
-        if not isinstance(context.error, GenshinException) or not isinstance(update, Update):
+        if not isinstance(context.error, SIMNetBadRequest) or not isinstance(update, Update):
             return
         exc = context.error
         notice: Optional[str] = None
@@ -114,6 +120,12 @@ class ErrorHandler(Plugin):
             else:
                 logger.error("未知Cookie错误", exc_info=exc)
                 notice = self.ERROR_MSG_PREFIX + f"Cookie 无效 错误信息为 {exc.original} 请尝试重新绑定"
+        elif isinstance(exc, CookieException):
+            if exc.retcode == 0:
+                notice = self.ERROR_MSG_PREFIX + "Cookie 已经被刷新，请尝试重试操作~"
+            else:
+                logger.error("未知Cookie错误", exc_info=exc)
+                notice = self.ERROR_MSG_PREFIX + f"Cookie 无效 错误信息为 {exc.original} 请尝试重新绑定"
         elif isinstance(exc, DataNotPublic):
             notice = self.ERROR_MSG_PREFIX + "查询的用户数据未公开"
         else:
@@ -124,14 +136,17 @@ class ErrorHandler(Plugin):
             elif exc.retcode == -500001:
                 notice = self.ERROR_MSG_PREFIX + "网络出小差了，请稍后重试~"
             elif exc.retcode == -1:
-                notice = self.ERROR_MSG_PREFIX + "系统发生错误，请稍后重试~"
+                logger.warning("内部数据库错误 [%s]%s", exc.ret_code, exc.original)
+                notice = self.ERROR_MSG_PREFIX + "系统内部数据库错误，请稍后重试~"
             elif exc.retcode == -10001:  # 参数异常 不应该抛出异常 进入下一步处理
                 pass
             else:
                 logger.error("GenshinException", exc_info=exc)
-                notice = (
-                    self.ERROR_MSG_PREFIX + f"获取账号信息发生错误 错误信息为 {exc.original if exc.original else exc.retcode} ~ 请稍后再试"
-                )
+                message = exc.original if exc.original else exc.message
+                if message:
+                    notice = self.ERROR_MSG_PREFIX + f"获取信息发生错误 错误信息为 {message} ~ 请稍后再试"
+                else:
+                    notice = self.ERROR_MSG_PREFIX + "获取信息发生错误 请稍后再试"
         if notice:
             self.create_notice_task(update, context, notice)
             raise ApplicationHandlerStop

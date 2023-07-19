@@ -1,9 +1,8 @@
 import datetime
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-import genshin
-from genshin import DataNotPublic
+from simnet.errors import DataNotPublic
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatAction
 from telegram.ext import ConversationHandler, filters, CallbackContext
@@ -14,6 +13,10 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError, PlayerNotFoundError
 from utils.log import logger
+
+if TYPE_CHECKING:
+    from simnet import StarRailClient
+
 
 __all__ = ("DailyNotePlugin",)
 
@@ -29,8 +32,8 @@ class DailyNotePlugin(Plugin):
         self.template_service = template
         self.helper = helper
 
-    async def _get_daily_note(self, client: genshin.Client) -> RenderResult:
-        daily_info = await client.get_starrail_notes(client.uid)
+    async def _get_daily_note(self, client: "StarRailClient") -> RenderResult:
+        daily_info = await client.get_starrail_notes(client.player_id)
 
         day = datetime.now().strftime("%m-%d %H:%M") + " 星期" + "一二三四五六日"[datetime.now().weekday()]
         resin_recovery_time = (
@@ -50,7 +53,7 @@ class DailyNotePlugin(Plugin):
             remained_time = (datetime.now().astimezone() + remained_time).strftime("%m-%d %H:%M")
 
         render_data = {
-            "uid": client.uid,
+            "uid": client.player_id,
             "day": day,
             "resin_recovery_time": resin_recovery_time,
             "current_resin": daily_info.current_stamina,
@@ -77,10 +80,8 @@ class DailyNotePlugin(Plugin):
         logger.info("用户 %s[%s] 每日便签命令请求", user.full_name, user.id)
 
         try:
-            # 获取当前用户的 genshin.Client
-            client = await self.helper.get_genshin_client(user.id)
-            # 渲染
-            render_result = await self._get_daily_note(client)
+            async with self.helper.genshin(user.id) as client:
+                render_result = await self._get_daily_note(client)
         except (CookiesNotFoundError, PlayerNotFoundError):
             buttons = [
                 [
@@ -106,4 +107,4 @@ class DailyNotePlugin(Plugin):
             return ConversationHandler.END
 
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{client.player_id}.png", allow_sending_without_reply=True)

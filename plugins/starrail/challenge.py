@@ -2,11 +2,11 @@
 import asyncio
 import re
 from functools import lru_cache
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 
 from arkowrapper import ArkoWrapper
-from genshin import Client, GenshinException
 from pytz import timezone
+from simnet.errors import BadRequest as SimnetBadRequest
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Message, Update
 from telegram.constants import ChatAction, ParseMode
 from telegram.ext import CallbackContext, filters
@@ -25,6 +25,9 @@ try:
 
 except ImportError:
     import json as jsonlib
+
+if TYPE_CHECKING:
+    from simnet import StarRailClient
 
 
 TZ = timezone("Asia/Shanghai")
@@ -126,13 +129,26 @@ class ChallengePlugin(Plugin):
             extra={"markup": True},
         )
 
+        async def reply_message_func(content: str) -> None:
+            _reply_msg = await message.reply_text(f"开拓者 (<code>{uid}</code>) {content}", parse_mode=ParseMode.HTML)
+
+        reply_text: Optional[Message] = None
+
         try:
             try:
-                client = await self.helper.get_genshin_client(user.id)
-                if client.uid != uid:
-                    raise CookiesNotFoundError(uid)
+                async with self.helper.genshin(user.id) as client:
+                    if client.player_id != uid:
+                        raise CookiesNotFoundError(uid)
+                    if total:
+                        reply_text = await message.reply_text("彦卿需要时间整理混沌回忆数据，还请耐心等待哦~")
+                    await message.reply_chat_action(ChatAction.TYPING)
+                    images = await self.get_rendered_pic(client, uid, floor, total, previous)
             except CookiesNotFoundError:
-                client, _ = await self.helper.get_public_genshin_client(user.id)
+                async with self.helper.public_genshin(user.id) as client:
+                    if total:
+                        reply_text = await message.reply_text("彦卿需要时间整理混沌回忆数据，还请耐心等待哦~")
+                    await message.reply_chat_action(ChatAction.TYPING)
+                    images = await self.get_rendered_pic(client, uid, floor, total, previous)
         except PlayerNotFoundError:  # 若未找到账号
             buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_uid"))]]
             if filters.ChatType.GROUPS.filter(message):
@@ -150,27 +166,14 @@ class ChallengePlugin(Plugin):
                 self.add_delete_message_job(reply_message)
                 self.add_delete_message_job(message)
             return
-
-        async def reply_message_func(content: str) -> None:
-            _reply_msg = await message.reply_text(f"开拓者 (<code>{uid}</code>) {content}", parse_mode=ParseMode.HTML)
-
-        reply_text: Optional[Message] = None
-
-        if total:
-            reply_text = await message.reply_text("彦卿需要时间整理混沌回忆数据，还请耐心等待哦~")
-
-        await message.reply_chat_action(ChatAction.TYPING)
-
-        try:
-            images = await self.get_rendered_pic(client, uid, floor, total, previous)
         except AbyssUnlocked:  # 若混沌回忆未解锁
             await reply_message_func("还未解锁混沌回忆哦~")
             return
         except IndexError:  # 若混沌回忆为挑战此层
             await reply_message_func("还没有挑战本层呢，咕咕咕~")
             return
-        except GenshinException as exc:
-            if exc.retcode == 1034 and client.uid != uid:
+        except SimnetBadRequest as exc:
+            if exc.retcode == 1034 and client.player_id != uid:
                 await message.reply_text("出错了呜呜呜 ~ 请稍后重试 ~ 米游社风控太严力")
                 return
             raise exc
@@ -216,7 +219,7 @@ class ChallengePlugin(Plugin):
         return avatar_data
 
     async def get_rendered_pic(
-        self, client: Client, uid: int, floor: int, total: bool, previous: bool
+        self, client: "StarRailClient", uid: int, floor: int, total: bool, previous: bool
     ) -> Union[
         Tuple[
             Union[BaseException, Any],

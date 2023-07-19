@@ -1,6 +1,6 @@
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 
-from genshin import Client, GenshinException
+from simnet.errors import BadRequest as SimnetBadRequest
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
@@ -12,6 +12,10 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNotFoundError
 from utils.log import logger
+
+if TYPE_CHECKING:
+    from simnet import StarRailClient
+
 
 __all__ = ("PlayerStatsPlugins",)
 
@@ -59,12 +63,13 @@ class PlayerStatsPlugins(Plugin):
         try:
             uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
             try:
-                client = await self.helper.get_genshin_client(user.id)
-                if client.uid != uid:
-                    raise CookiesNotFoundError(uid)
+                async with self.helper.genshin(user.id) as client:
+                    if client.player_id != uid:
+                        raise CookiesNotFoundError(uid)
+                    render_result = await self.render(client, uid)
             except CookiesNotFoundError:
-                client, _ = await self.helper.get_public_genshin_client(user.id)
-            render_result = await self.render(client, uid)
+                async with self.helper.public_genshin(user.id) as client:
+                    render_result = await self.render(client, uid)
         except PlayerNotFoundError:
             buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
             if filters.ChatType.GROUPS.filter(message):
@@ -76,7 +81,7 @@ class PlayerStatsPlugins(Plugin):
             else:
                 await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
             return
-        except GenshinException as exc:
+        except SimnetBadRequest as exc:
             if exc.retcode == 1034:
                 await message.reply_text("出错了呜呜呜 ~ 请稍后重试")
                 return
@@ -90,16 +95,16 @@ class PlayerStatsPlugins(Plugin):
             await message.reply_text("角色数据有误 估计是彦卿晕了")
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
 
-    async def render(self, client: Client, uid: Optional[int] = None) -> RenderResult:
+    async def render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
-            uid = client.uid
+            uid = client.player_id
 
         user_info = await client.get_starrail_user(uid)
         try:
             rogue = await client.get_starrail_rogue(uid)
-        except GenshinException:
+        except SimnetBadRequest:
             rogue = None
         logger.debug(user_info)
 

@@ -1,9 +1,10 @@
 import os
 import re
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
-from genshin import DataNotPublic, InvalidCookies, GenshinException
-from genshin.models.genshin.diary import StarRailDiary
+from simnet.errors import BadRequest as SimnetBadRequest, DataNotPublic, InvalidCookies
+from simnet.models.starrail.diary import StarRailDiary
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatAction
 from telegram.ext import filters, CallbackContext
@@ -15,6 +16,10 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import CookiesNotFoundError, GenshinHelper, PlayerNotFoundError
 from utils.log import logger
+
+if TYPE_CHECKING:
+    from simnet import StarRailClient
+
 
 __all__ = ("LedgerPlugin",)
 
@@ -33,9 +38,9 @@ class LedgerPlugin(Plugin):
         self.current_dir = os.getcwd()
         self.helper = helper
 
-    async def _start_get_ledger(self, client, year, month) -> RenderResult:
+    async def _start_get_ledger(self, client: "StarRailClient", year, month) -> RenderResult:
         req_month = f"{year}0{month}" if month < 10 else f"{year}{month}"
-        diary_info: StarRailDiary = await client.get_starrail_diary(client.uid, month=req_month)
+        diary_info: StarRailDiary = await client.get_starrail_diary(client.player_id, month=req_month)
         color = ["#73a9c6", "#d56565", "#70b2b4", "#bd9a5a", "#739970", "#7a6da7", "#597ea0"]
         categories = [
             {
@@ -53,7 +58,7 @@ class LedgerPlugin(Plugin):
             return f"{round(amount / 10000, 2)}w" if amount >= 10000 else amount
 
         ledger_data = {
-            "uid": client.uid,
+            "uid": client.player_id,
             "day": month,
             "current_hcoin": format_amount(diary_info.month_data.current_hcoin),
             "gacha": int(diary_info.month_data.current_hcoin / 160),
@@ -108,19 +113,19 @@ class LedgerPlugin(Plugin):
         logger.info("用户 %s[%s] 查询开拓月历", user.full_name, user.id)
         await message.reply_chat_action(ChatAction.TYPING)
         try:
-            client = await self.helper.get_genshin_client(user.id)
-            try:
-                render_result = await self._start_get_ledger(client, year, month)
-            except InvalidCookies as exc:  # 如果抛出InvalidCookies 判断是否真的玄学过期（或权限不足？）
-                await client.get_starrail_user(client.uid)
-                logger.warning(
-                    "用户 %s[%s] 无法请求开拓月历数据 API返回信息为 [%s]%s", user.full_name, user.id, exc.retcode, exc.original
-                )
-                reply_message = await message.reply_text("出错了呜呜呜 ~ 当前访问令牌无法请求角色数数据，请尝试重新获取Cookie。")
-                if filters.ChatType.GROUPS.filter(message):
-                    self.add_delete_message_job(reply_message, delay=30)
-                    self.add_delete_message_job(message, delay=30)
-                return
+            async with self.helper.genshin(user.id) as client:
+                try:
+                    render_result = await self._start_get_ledger(client, year, month)
+                except InvalidCookies as exc:  # 如果抛出InvalidCookies 判断是否真的玄学过期（或权限不足？）
+                    await client.get_starrail_user(client.player_id)
+                    logger.warning(
+                        "用户 %s[%s] 无法请求开拓月历数据 API返回信息为 [%s]%s", user.full_name, user.id, exc.retcode, exc.original
+                    )
+                    reply_message = await message.reply_text("出错了呜呜呜 ~ 当前访问令牌无法请求角色数数据，请尝试重新获取Cookie。")
+                    if filters.ChatType.GROUPS.filter(message):
+                        self.add_delete_message_job(reply_message, delay=30)
+                        self.add_delete_message_job(message, delay=30)
+                    return
         except (PlayerNotFoundError, CookiesNotFoundError):
             buttons = [
                 [
@@ -144,10 +149,10 @@ class LedgerPlugin(Plugin):
                 self.add_delete_message_job(reply_message, delay=30)
                 self.add_delete_message_job(message, delay=30)
             return
-        except GenshinException as exc:
+        except SimnetBadRequest as exc:
             if exc.retcode == -120:
                 await message.reply_text("当前角色开拓等级不足，暂时无法获取信息")
                 return
             raise exc
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{client.uid}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{client.player_id}.png", allow_sending_without_reply=True)

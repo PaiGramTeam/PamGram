@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-import genshin
-from genshin import GenshinException, InvalidCookies, TooManyRequests, types, Game
+from simnet import StarRailClient, Region, Game
+from simnet.errors import InvalidCookies, BadRequest as SimnetBadRequest, TooManyRequests
 
 from core.base_service import BaseService
 from core.basemodel import RegionEnum
@@ -86,31 +86,29 @@ class PublicCookiesService(BaseService):
                 await self._cache.delete_public_cookies(public_id, region)
                 continue
             if region == RegionEnum.HYPERION:
-                client = genshin.Client(cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.CHINESE)
+                client = StarRailClient(cookies=cookies.data, region=Region.CHINESE)
             elif region == RegionEnum.HOYOLAB:
-                client = genshin.Client(
-                    cookies=cookies.data, game=types.Game.STARRAIL, region=types.Region.OVERSEAS, lang="zh-cn"
-                )
+                client = StarRailClient(cookies=cookies.data, region=Region.OVERSEAS, lang="zh-cn")
             else:
                 raise CookieServiceError
             try:
-                if client.cookie_manager.user_id is None:
+                if client.account_id is None:
                     raise RuntimeError("account_id not found")
                 record_cards = await client.get_record_cards()
                 for record_card in record_cards:
-                    if record_card.game == Game.STARRAIL:
+                    if record_card.game == Game.GENSHIN:
                         await client.get_starrail_user(record_card.uid)
                         break
                 else:
                     accounts = await client.get_game_accounts()
                     for account in accounts:
-                        if account.game == Game.STARRAIL:
+                        if account.game == Game.GENSHIN:
                             await client.get_starrail_user(account.uid)
                             break
             except InvalidCookies as exc:
-                if exc.retcode in (10001, -100):
+                if exc.ret_code in (10001, -100):
                     logger.warning("用户 [%s] Cookies无效", public_id)
-                elif exc.retcode == 10103:
+                elif exc.ret_code == 10103:
                     logger.warning("用户 [%s] Cookies有效，但没有绑定到游戏帐户", public_id)
                 else:
                     logger.warning("Cookies无效 ")
@@ -125,10 +123,10 @@ class PublicCookiesService(BaseService):
                 await self._repository.update(cookies)
                 await self._cache.delete_public_cookies(cookies.user_id, region)
                 continue
-            except GenshinException as exc:
-                if "invalid content type" in exc.msg:
+            except SimnetBadRequest as exc:
+                if "invalid content type" in exc.message:
                     raise exc
-                if exc.retcode == 1034:
+                if exc.ret_code == 1034:
                     logger.warning("用户 [%s] 触发验证", public_id)
                 else:
                     logger.warning("用户 [%s] 获取账号信息发生错误，错误信息为", public_id)
@@ -145,6 +143,8 @@ class PublicCookiesService(BaseService):
             except Exception as exc:
                 await self._cache.delete_public_cookies(cookies.user_id, region)
                 raise exc
+            finally:
+                await client.shutdown()
             logger.info("用户 user_id[%s] 请求用户 user_id[%s] 的公共Cookies 该Cookies使用次数为%s次 ", user_id, public_id, count)
             return cookies
 

@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Dict, Optional
 
-import genshin
 from arkowrapper import ArkoWrapper
-from genshin import DataNotPublic, GenshinException, InvalidCookies, types
-from genshin.models import GenshinAccount
+from simnet import StarRailClient, Region
+from simnet.errors import DataNotPublic, InvalidCookies, BadRequest as SimnetBadRequest
+from simnet.models.lab.record import Account
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, TelegramObject, Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler, filters
@@ -34,7 +34,7 @@ class AccountCookiesPluginData(TelegramObject):
     cookies: dict = {}
     account_id: int = 0
     # player_id: int = 0
-    starrail_account: Optional[GenshinAccount] = None
+    starrail_account: Optional[Account] = None
 
     def reset(self):
         self.player = None
@@ -136,44 +136,32 @@ class AccountCookiesPlugin(Plugin.Conversation):
             return CHECK_SERVER
         account_cookies_plugin_data.region = region
         await message.reply_text(f"请输入{bbs_name}的Cookies！或回复退出取消操作", reply_markup=ReplyKeyboardRemove())
-        if bbs_name == "米游社":
-            help_message = (
-                "<b>关于如何获取Cookies</b>\n"
-                "<b>现在因为网站HttpOnly策略无法通过脚本获取，因此操作只能在PC上运行。</b>\n\n"
-                "PC：\n"
-                "1、打开<a href='https://user.mihoyo.com/'>通行证</a>或<a href='https://www.miyoushe.com/ys/'>社区</a>并登录\n"
-                "2、进入通行证按F12打开开发者工具\n"
-                "3、将开发者工具切换至网络(Network)并点击过滤栏中的文档(Document)并刷新页面\n"
-                "4、在请求列表中选择第一个并点击\n"
-                "5、找到并复制请求标头(Request Headers)中的<b>Cookie</b>\n"
-                "<u>如发现没有请求标头(Request Headers)大概因为缓存的存在需要你点击禁用缓存(Disable Cache)再次刷新页面</u>"
-            )
-        else:
-            javascript = (
-                "javascript:(()=>{_=(n)=>{for(i in(r=document.cookie.split(';'))){var a=r[i].split('=');if(a["
-                "0].trim()==n)return a[1]}};c=_('account_id')||alert('无效的Cookie,请重新登录!');c&&confirm("
-                "'将Cookie复制到剪贴板?')&&copy(document.cookie)})(); "
-            )
-            javascript_android = "javascript:(()=>{prompt('',document.cookie)})();"
-            help_message = (
-                f"<b>关于如何获取Cookies</b>\n\n"
-                f"PC：\n"
-                f"1、<a href='https://www.hoyolab.com/home'>打开社区并登录</a>\n"
-                "2、按F12打开开发者工具\n"
-                "3、将开发者工具切换至控制台(Console)\n"
-                "4、复制下方的代码，并将其粘贴在控制台中，按下回车\n"
-                f"<pre><code class='javascript'>{javascript}</code></pre>\n"
-                "Android：\n"
-                f"1、<a href='https://www.hoyolab.com/home'>通过 Via 打开 {bbs_name} 并登录</a>\n"
-                "2、复制下方的代码，并将其粘贴在地址栏中，点击右侧箭头\n"
-                f"<code>{javascript_android}</code>\n"
-                "iOS：\n"
-                "1、在App Store上安装Web Inspector，并在iOS设置- Safari浏览器-扩展-允许这些扩展下找到Web Inspector-打开，允许所有网站\n"
-                f"2、<a href='https://www.hoyolab.com/home'>通过 Safari 打开 {bbs_name} 并登录</a>\n"
-                "3、点击地址栏左侧的大小按钮 - Web Inspector扩展 - Console - 点击下方文本框复制下方代码粘贴：\n"
-                f"<pre><code class='javascript'>{javascript}</code></pre>\n"
-                "4、点击Console下的Execute"
-            )
+        javascript = (
+            "javascript:(()=>{_=(n)=>{for(i in(r=document.cookie.split(';'))){var a=r[i].split('=');if(a["
+            "0].trim()==n)return a[1]}};c=_('login_ticket')||alert('无效的Cookie,请重新登录!');c&&confirm("
+            "'将Cookie复制到剪贴板?')&&copy(document.cookie)})(); "
+        )
+        javascript_android = "javascript:(()=>{prompt('',document.cookie)})();"
+        account_host = "https://user.mihoyo.com" if bbs_name == "米游社" else "https://account.hoyoverse.com"
+        help_message = (
+            "<b>关于如何获取Cookies</b>\n\n"
+            "PC：\n"
+            f"1、打开<a href='{account_host}'>通行证</a>并登录\n"
+            "2、按F12打开开发者工具\n"
+            "3、将开发者工具切换至控制台(Console)\n"
+            "4、复制下方的代码，并将其粘贴在控制台中，按下回车\n"
+            f"<pre><code class='javascript'>{javascript}</code></pre>\n"
+            "Android：\n"
+            f"1、通过 Via 打开<a href='{account_host}'>通行证</a>并登录\n"
+            "2、复制下方的代码，并将其粘贴在地址栏中，点击右侧箭头\n"
+            f"<code>{javascript_android}</code>\n"
+            "iOS：\n"
+            "1、在App Store上安装Web Inspector，并在iOS设置- Safari浏览器-扩展-允许这些扩展下找到Web Inspector-打开，允许所有网站\n"
+            f"2、通过 Safari 打开<a href='{account_host}'>通行证</a>并登录\n"
+            "3、点击地址栏左侧的大小按钮 - Web Inspector扩展 - Console - 点击下方文本框复制下方代码粘贴：\n"
+            f"<pre><code class='javascript'>{javascript}</code></pre>\n"
+            "4、点击Console下的Execute"
+        )
         await message.reply_html(help_message, disable_web_page_preview=True)
         return INPUT_COOKIES
 
@@ -214,77 +202,75 @@ class AccountCookiesPlugin(Plugin.Conversation):
         account_cookies_plugin_data: AccountCookiesPluginData = context.chat_data.get("account_cookies_plugin_data")
         cookies = CookiesModel(**account_cookies_plugin_data.cookies)
         if account_cookies_plugin_data.region == RegionEnum.HYPERION:
-            client = genshin.Client(cookies=cookies.to_dict(), region=types.Region.CHINESE, game=types.Game.STARRAIL)
+            region = Region.CHINESE
         elif account_cookies_plugin_data.region == RegionEnum.HOYOLAB:
-            client = genshin.Client(cookies=cookies.to_dict(), region=types.Region.OVERSEAS, game=types.Game.STARRAIL)
+            region = Region.OVERSEAS
         else:
             logger.error("用户 %s[%s] region 异常", user.full_name, user.id)
             await message.reply_text("数据错误", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
-        if not cookies.check():
-            await message.reply_text("检测到Cookie不完整，可能会出现问题。", reply_markup=ReplyKeyboardRemove())
-        try:
-            if client.cookie_manager.user_id is None and cookies.is_v2:
-                logger.info("检测到用户 %s[%s] 使用 V2 Cookie 正在尝试获取 account_id", user.full_name, user.id)
-                if client.region == types.Region.CHINESE:
-                    account_info = await client.get_hoyolab_user()
-                    account_id = account_info.hoyolab_id
+        async with StarRailClient(cookies=cookies.to_dict(), region=region, lang="zh-cn") as client:
+            check_cookie = cookies.check()
+            if cookies.login_ticket is not None:
+                try:
+                    cookies.cookie_token = await client.get_cookie_token_by_login_ticket()
+                    cookies.account_id = client.account_id
+                    cookies.ltuid = client.account_id
+                    logger.success("用户 %s[%s] 绑定时获取 cookie_token 成功", user.full_name, user.id)
+                    cookies.stoken = await client.get_stoken_by_login_ticket()
+                    logger.success("用户 %s[%s] 绑定时获取 stoken 成功", user.full_name, user.id)
+                    cookies.ltoken = await client.get_ltoken_by_stoken()
+                    logger.success("用户 %s[%s] 绑定时获取 ltoken 成功", user.full_name, user.id)
+                    check_cookie = True
+                except SimnetBadRequest as exc:
+                    logger.warning("用户 %s[%s] 获取账号信息发生错误 [%s]%s", user.full_name, user.id, exc.ret_code, exc.original)
+                except Exception as exc:
+                    logger.error("绑定时获取新Cookie失败 [%s]", (str(exc)))
+                finally:
+                    cookies.login_ticket = None
+                    cookies.login_uid = None
+            if not check_cookie:
+                await message.reply_text("检测到Cookie不完整，可能会出现问题。", reply_markup=ReplyKeyboardRemove())
+            try:
+                if client.account_id is None and cookies.is_v2:
+                    logger.info("检测到用户 %s[%s] 使用 V2 Cookie 正在尝试获取 account_id", user.full_name, user.id)
+                    account_info = await client.get_user_info()
+                    account_id = account_info.accident_id
                     account_cookies_plugin_data.account_id = account_id
                     cookies.set_v2_uid(account_id)
                     logger.success("获取用户 %s[%s] account_id[%s] 成功", user.full_name, user.id, account_id)
                 else:
-                    logger.warning("用户 %s[%s] region[%s] 也许是不正确的", user.full_name, user.id, client.region.name)
-            else:
-                account_cookies_plugin_data.account_id = client.cookie_manager.user_id
-            accounts = await client.get_game_accounts()
-            starrail_accounts = [account for account in accounts if account.game == types.Game.STARRAIL]
-        except DataNotPublic:
-            logger.info("用户 %s[%s] 账号疑似被注销", user.full_name, user.id)
-            await message.reply_text("账号疑似被注销，请检查账号状态", reply_markup=ReplyKeyboardRemove())
-            return ConversationHandler.END
-        except InvalidCookies:
-            logger.info("用户 %s[%s] Cookies已经过期", user.full_name, user.id)
-            await message.reply_text(
-                "获取账号信息失败，返回Cookies已经过期，请尝试在无痕浏览器中登录获取Cookies。", reply_markup=ReplyKeyboardRemove()
-            )
-            return ConversationHandler.END
-        except GenshinException as exc:
-            logger.info("用户 %s[%s] 获取账号信息发生错误 [%s]%s", user.full_name, user.id, exc.retcode, exc.original)
-            await message.reply_text(
-                f"获取账号信息发生错误，错误信息为 {exc.original}，请检查Cookie或者账号是否正常", reply_markup=ReplyKeyboardRemove()
-            )
-            return ConversationHandler.END
-        except AccountIdNotFound:
-            logger.info("用户 %s[%s] 无法获取账号ID", user.full_name, user.id)
-            await message.reply_text("无法获取账号ID，请检查Cookie是否正常", reply_markup=ReplyKeyboardRemove())
-            return ConversationHandler.END
-        except (AttributeError, ValueError) as exc:
-            logger.warning("用户 %s[%s] Cookies错误", user.full_name, user.id)
-            logger.debug("用户 %s[%s] Cookies错误", user.full_name, user.id, exc_info=exc)
-            await message.reply_text("Cookies错误，请检查是否正确", reply_markup=ReplyKeyboardRemove())
-            return ConversationHandler.END
-        if cookies.login_ticket is not None:
-            try:
-                if cookies.login_ticket is not None:
-                    auth_client = AuthClient(cookies=cookies)
-                    if await auth_client.get_stoken_by_login_ticket():
-                        logger.success("用户 %s[%s] 绑定时获取 stoken 成功", user.full_name, user.id)
-                        if await auth_client.get_cookie_token_by_stoken():
-                            logger.success("用户 %s[%s] 绑定时获取 cookie_token 成功", user.full_name, user.id)
-                            if await auth_client.get_ltoken_by_stoken():
-                                logger.success("用户 %s[%s] 绑定时获取 ltoken 成功", user.full_name, user.id)
-                                auth_client.cookies.remove_v2()
-            except Exception as exc:  # pylint: disable=W0703
-                logger.error("绑定时获取新Cookie失败 [%s]", (str(exc)))
-            finally:
-                if cookies.user_id is not None:
-                    account_cookies_plugin_data.account_id = cookies.user_id
-                cookies.login_ticket = None
-                cookies.login_uid = None
+                    account_cookies_plugin_data.account_id = client.account_id
+                starrail_accounts = await client.get_starrail_accounts()
+            except DataNotPublic:
+                logger.info("用户 %s[%s] 账号疑似被注销", user.full_name, user.id)
+                await message.reply_text("账号疑似被注销，请检查账号状态", reply_markup=ReplyKeyboardRemove())
+                return ConversationHandler.END
+            except InvalidCookies:
+                logger.info("用户 %s[%s] Cookies已经过期", user.full_name, user.id)
+                await message.reply_text(
+                    "获取账号信息失败，返回Cookies已经过期，请尝试在无痕浏览器中登录获取Cookies。", reply_markup=ReplyKeyboardRemove()
+                )
+                return ConversationHandler.END
+            except SimnetBadRequest as exc:
+                logger.info("用户 %s[%s] 获取账号信息发生错误 [%s]%s", user.full_name, user.id, exc.ret_code, exc.original)
+                await message.reply_text(
+                    f"获取账号信息发生错误，错误信息为 {exc.original}，请检查Cookie或者账号是否正常", reply_markup=ReplyKeyboardRemove()
+                )
+                return ConversationHandler.END
+            except AccountIdNotFound:
+                logger.info("用户 %s[%s] 无法获取账号ID", user.full_name, user.id)
+                await message.reply_text("无法获取账号ID，请检查Cookie是否正常", reply_markup=ReplyKeyboardRemove())
+                return ConversationHandler.END
+            except (AttributeError, ValueError) as exc:
+                logger.warning("用户 %s[%s] Cookies错误", user.full_name, user.id)
+                logger.debug("用户 %s[%s] Cookies错误", user.full_name, user.id, exc_info=exc)
+                await message.reply_text("Cookies错误，请检查是否正确", reply_markup=ReplyKeyboardRemove())
+                return ConversationHandler.END
         if account_cookies_plugin_data.account_id is None:
             await message.reply_text("无法获取账号ID，请检查Cookie是否正确或请稍后重试")
             return ConversationHandler.END
-        starrail_account: Optional[GenshinAccount] = None
+        starrail_account: Optional[Account] = None
         level: int = 0
         # todo : 多账号绑定
         for temp in starrail_accounts:
