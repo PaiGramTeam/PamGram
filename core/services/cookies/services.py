@@ -96,13 +96,13 @@ class PublicCookiesService(BaseService):
                     raise RuntimeError("account_id not found")
                 record_cards = await client.get_record_cards()
                 for record_card in record_cards:
-                    if record_card.game == Game.GENSHIN:
+                    if record_card.game == Game.STARRAIL:
                         await client.get_starrail_user(record_card.uid)
                         break
                 else:
                     accounts = await client.get_game_accounts()
                     for account in accounts:
-                        if account.game == Game.GENSHIN:
+                        if account.game == Game.STARRAIL:
                             await client.get_starrail_user(account.uid)
                             break
             except InvalidCookies as exc:

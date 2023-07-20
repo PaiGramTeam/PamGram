@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 
 from modules.wiki.base import WikiModel
-from modules.wiki.models.avatar import Avatar
+from modules.wiki.models.avatar import YattaAvatar
 
 
 class Character(WikiModel):
@@ -10,9 +10,9 @@ class Character(WikiModel):
 
     def __init__(self):
         super().__init__()
-        self.all_avatars: List[Avatar] = []
-        self.all_avatars_map: Dict[int, Avatar] = {}
-        self.all_avatars_name: Dict[str, Avatar] = {}
+        self.all_avatars: List[YattaAvatar] = []
+        self.all_avatars_map: Dict[int, YattaAvatar] = {}
+        self.all_avatars_name: Dict[str, YattaAvatar] = {}
 
     def clear_class_data(self) -> None:
         self.all_avatars.clear()
@@ -31,15 +31,15 @@ class Character(WikiModel):
         datas = await WikiModel.read(self.avatar_path)
         self.clear_class_data()
         for data in datas:
-            m = Avatar(**data)
+            m = YattaAvatar(**data)
             self.all_avatars.append(m)
             self.all_avatars_map[m.id] = m
             self.all_avatars_name[m.name] = m
 
-    def get_by_id(self, cid: int) -> Optional[Avatar]:
+    def get_by_id(self, cid: int) -> Optional[YattaAvatar]:
         return self.all_avatars_map.get(cid)
 
-    def get_by_name(self, name: str) -> Optional[Avatar]:
+    def get_by_name(self, name: str) -> Optional[YattaAvatar]:
         return self.all_avatars_name.get(name)
 
     def get_name_list(self) -> List[str]:
