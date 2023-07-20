@@ -72,7 +72,7 @@ class DailyNotePlugin(Plugin):
         render_result = await self.template_service.render(
             "starrail/daily_note/daily_note.html",
             render_data,
-            {"width": 600, "height": 520},
+            {"width": 600, "height": 444},
             full_page=False,
             ttl=8 * 60,
         )
