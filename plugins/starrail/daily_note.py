@@ -62,11 +62,17 @@ class DailyNotePlugin(Plugin):
             "remained_time": remained_time,
             "current_expeditions": len(daily_info.expeditions),
             "max_expeditions": daily_info.total_expedition_num,
+            "current_train_score": daily_info.current_train_score,
+            "max_train_score": daily_info.max_train_score,
+            "remaining_weekly_discounts": daily_info.remaining_weekly_discounts,
+            "max_weekly_discounts": daily_info.max_weekly_discounts,
+            "current_rogue_score": daily_info.current_rogue_score,
+            "max_rogue_score": daily_info.max_rogue_score,
         }
         render_result = await self.template_service.render(
             "starrail/daily_note/daily_note.html",
             render_data,
-            {"width": 600, "height": 220},
+            {"width": 600, "height": 444},
             full_page=False,
             ttl=8 * 60,
         )
