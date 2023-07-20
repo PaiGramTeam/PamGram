@@ -550,4 +550,5 @@ class RenderTemplate:
                 substat_scores=[substat_score(s) for s in self.client.get_affix(e, False)],
             )
             for e in relic_list
+            if self.client.get_affix_by_id(e.tid) is not None
         ]
