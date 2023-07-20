@@ -52,6 +52,46 @@
           <span>{{ current_expeditions }}/{{ max_expeditions }}</span>
         </div>
       </div>
+      <div class="item">
+        <div class="main">
+          <div class="bg"></div>
+          <img class="icon" src="./items/里程.webp" alt="" />
+          <div class="info">
+            <div class="name">每日实训</div>
+          </div>
+        </div>
+        <div class="right">
+          <span>{{ current_train_score }}/{{ max_train_score }}</span>
+        </div>
+      </div>
+      <div class="item">
+        <div class="main">
+          <div class="bg"></div>
+          <img class="icon" src="./items/银河大乐透.webp" alt="" />
+          <div class="info">
+            <div class="name">模拟宇宙</div>
+          </div>
+        </div>
+        <div class="right">
+          <span>{{ current_rogue_score }}/{{ max_rogue_score }}</span>
+        </div>
+      </div>
+      <div class="item">
+        <div class="main">
+            <div class="bg"></div>
+            <img class="icon" src="./items/毁灭者的末路.webp" alt=""/>
+            <div class="info">
+                <div class="name">历战余响</div>
+                <div class="time">
+                    {% if remaining_weekly_discounts<=0 %}周本已完成
+                    {% else %}周本次数剩余{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <span>{{ remaining_weekly_discounts }}/{{ max_weekly_discounts }}</span>
+        </div>
+      </div>
     </div>
   </body>
   <script type="text/javascript"></script>
