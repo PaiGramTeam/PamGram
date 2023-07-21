@@ -1,0 +1,189 @@
+/*! Copyright © 2011 - 2023 miHoYo. All Rights Reserved */
+.no-data[data-v-5b777587] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.no-data .text[data-v-5b777587] {
+    margin-top: 2.66667vw;
+    font-size: 3.73333vw;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: #7f858a;
+    height: 3.73333vw;
+    line-height: 3.73333vw
+}
+
+.item.is-editable.unable-be-select[data-v-03247942] {
+    opacity: .3
+}
+
+.item .name[data-v-03247942] {
+    height: 3.73333vw;
+    font-size: 3.73333vw;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    color: #1e1f20;
+    line-height: 3.73333vw;
+    margin-top: 2.13333vw;
+    text-align: center
+}
+
+.item .name .text[data-v-03247942] {
+    text-align: center;
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    height: 3.73333vw;
+    line-height: 3.73333vw;
+    width: 22.4vw;
+    display: inline-block;
+    position: relative;
+    left: -.8vw
+}
+
+.item .inner[data-v-03247942] {
+    width: 100%;
+    position: relative
+}
+
+.item .inner .select-label[data-v-03247942], .item .inner[data-v-03247942] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.item .inner .select-label[data-v-03247942] {
+    width: 5.33333vw;
+    height: 5.33333vw;
+    border: .53333vw solid #fff;
+    position: absolute;
+    top: 1.06667vw;
+    right: 1.06667vw;
+    font-size: 3.73333vw;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    color: #fff;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    border-radius: 100%
+}
+
+.item .inner .select-label.selected[data-v-03247942] {
+    background: #f69502
+}
+
+.item .inner .avatar-box[data-v-03247942] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    border-radius: 0 4vw 0 0
+}
+
+.item .inner .avatar-box .avatar-bg[data-v-03247942] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 0
+}
+
+.item .inner .avatar[data-v-03247942] {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    top: -.53333vw;
+    display: inline-block
+}
+
+.item .inner .icon[data-v-03247942] {
+    position: absolute;
+    left: 1.6vw;
+    top: 1.6vw
+}
+
+.item .inner .index[data-v-03247942] {
+    top: 0;
+    right: 0;
+    width: 4.8vw;
+    height: 5.86667vw;
+    background: rgba(0, 0, 0, .5);
+    border-radius: 0 4vw 0 1.6vw;
+    font-size: 3.73333vw;
+    line-height: 3.73333vw
+}
+
+.item .inner .index[data-v-03247942], .item .inner .level[data-v-03247942] {
+    position: absolute;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.item .inner .level[data-v-03247942] {
+    bottom: .53333vw;
+    left: 0;
+    height: 3.73333vw;
+    background: #030b0e;
+    width: 100%;
+    font-size: 3.2vw;
+    line-height: 3.2vw
+}
+
+.item .inner .trial[data-v-03247942] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1px 1.06667vw;
+    background: #ffc870;
+    border-radius: 2.66667vw;
+    font-weight: 500;
+    font-size: 2.66667vw;
+    line-height: 2.66667vw;
+    font-family: PingFangSC-Medium, PingFang SC;
+    color: #000;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}

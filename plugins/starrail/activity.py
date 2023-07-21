@@ -1,7 +1,6 @@
 from typing import Optional, List, Dict, TYPE_CHECKING
 
-from simnet.errors import BadRequest as SimnetBadRequest
-from simnet.models.starrail.chronicle.activity import StarRailStarFight
+from simnet.models.starrail.chronicle.activity import StarRailStarFight, StarRailFantasticStory
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
@@ -9,7 +8,6 @@ from telegram.helpers import create_deep_linked_url
 
 from core.dependence.assets import AssetsService
 from core.plugin import Plugin, handler
-from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNotFoundError
@@ -74,15 +72,9 @@ class PlayerActivityPlugins(Plugin):
         logger.info("用户 %s[%s] 查询星芒战幕信息命令请求", user.full_name, user.id)
         try:
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            try:
-                async with self.helper.genshin(user.id) as client:
-                    if client.player_id != uid:
-                        raise CookiesNotFoundError(uid)
-                    render_result = await self.star_fight_render(client, uid)
-            except CookiesNotFoundError:
-                async with self.helper.public_genshin(user.id) as client:
-                    render_result = await self.star_fight_render(client, uid)
-        except PlayerNotFoundError:
+            async with self.helper.genshin(user.id) as client:
+                render_result = await self.star_fight_render(client, uid)
+        except (PlayerNotFoundError, CookiesNotFoundError):
             buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
             if filters.ChatType.GROUPS.filter(message):
                 reply_message = await message.reply_text(
@@ -93,24 +85,10 @@ class PlayerActivityPlugins(Plugin):
             else:
                 await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
             return
-        except SimnetBadRequest as exc:
-            if exc.retcode == 1034:
-                await message.reply_text("出错了呜呜呜 ~ 请稍后重试")
-                return
-            raise exc
-        except TooManyRequestPublicCookies:
-            await message.reply_text("用户查询次数过多 请稍后重试")
-            return
         except AttributeError as exc:
             logger.error("活动数据有误")
             logger.exception(exc)
             await message.reply_text("活动数据有误 估计是彦卿晕了")
-            return
-        except NotSupport:
-            reply_message = await message.reply_text("暂不支持该服务器查询活动数据")
-            if filters.ChatType.GROUPS.filter(reply_message):
-                self.add_delete_message_job(message)
-                self.add_delete_message_job(reply_message)
             return
         except NotHaveData:
             reply_message = await message.reply_text("没有查找到此活动数据")
@@ -147,6 +125,73 @@ class PlayerActivityPlugins(Plugin):
 
         return await self.template_service.render(
             "starrail/activity/star_fight.html",
+            data,
+            {"width": 500, "height": 1200},
+            full_page=True,
+            query_selector="#container",
+        )
+
+    @handler.command("fantastic_story", block=False)
+    @handler.message(filters.Regex("^评书奇谭信息查询(.*)"), block=False)
+    async def fantastic_story_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+        user = update.effective_user
+        message = update.effective_message
+        logger.info("用户 %s[%s] 查询评书奇谭信息命令请求", user.full_name, user.id)
+        try:
+            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
+            async with self.helper.genshin(user.id) as client:
+                render_result = await self.fantastic_story_render(client, uid)
+        except PlayerNotFoundError:
+            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
+            if filters.ChatType.GROUPS.filter(message):
+                reply_message = await message.reply_text(
+                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
+                )
+                self.add_delete_message_job(reply_message, delay=30)
+                self.add_delete_message_job(message, delay=30)
+            else:
+                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
+            return
+        except AttributeError as exc:
+            logger.error("活动数据有误")
+            logger.exception(exc)
+            await message.reply_text("活动数据有误 估计是彦卿晕了")
+            return
+        except NotHaveData:
+            reply_message = await message.reply_text("没有查找到此活动数据")
+            if filters.ChatType.GROUPS.filter(reply_message):
+                self.add_delete_message_job(message)
+                self.add_delete_message_job(reply_message)
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+
+    async def get_fantastic_story_rander_data(self, uid: int, data: StarRailFantasticStory) -> Dict:
+        if not data.exists_data:
+            raise NotHaveData
+        avatar_icons = {}
+        for record in data.records:
+            for avatar in record.avatars:
+                avatar_icons[avatar.id] = self.assets.avatar.square(avatar.id).as_uri()
+        return {
+            "uid": uid,
+            "records": data.records,
+            "avatar_icons": avatar_icons,
+        }
+
+    async def fantastic_story_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
+        if uid is None:
+            uid = client.player_id
+
+        act_data = await client.get_starrail_activity(uid)
+        try:
+            fantastic_story_data = act_data.fantastic_story
+        except ValueError:
+            raise NotHaveData
+        data = await self.get_fantastic_story_rander_data(uid, fantastic_story_data)
+
+        return await self.template_service.render(
+            "starrail/activity/fantastic_story.html",
             data,
             {"width": 500, "height": 1200},
             full_page=True,

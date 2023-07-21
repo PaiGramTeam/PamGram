@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fantastic Story</title>
+    <link href="css/7_1860676e902f99970620.css" rel="stylesheet">
+    <link href="css/32_a6abfefd22b3d1a40162.css" rel="stylesheet">
+</head>
+<body>
+<div id="container">
+    <div data-v-6cd4e78c="" data-v-056bcd56="" class="layout"
+         style="background: url('images/story-bg.436f1d88.png') 0% 0% / 100% no-repeat rgb(71, 89, 131);">
+        <div data-v-6cd4e78c="" class="header">
+            <div data-v-6cd4e78c="" class="border">
+                <div data-v-6cd4e78c="" class="left"><span data-v-6cd4e78c="">评书奇谭</span></div> <!---->
+            </div>
+        </div>
+        <div data-v-6cd4e78c="" class="container">
+            <div data-v-6cd4e78c="" class="border">
+                {% set bg = ['1.96e45c02', '2.3f186847', '3.f7c6b1e9', '4.32486a3e', '5.426291c0', '6.b4b0eadf'] %}
+                {% set level_icon = ['', '1212', '1213', '1214', '1215'] %}
+                {% for record in records %}
+                {% set not_challenge = record.score == 0 %}
+                <div data-v-44091bd3="" class="card" data-v-6cd4e78c="">
+                    <div data-v-44091bd3="" class="bg {% if not_challenge %}not-challenged{% endif %}">
+                        <img data-v-44091bd3="" src="images/{{ bg[loop.index0] }}.png" class="icon">
+                    </div>
+                    <div data-v-44091bd3="" class="inner {% if not_challenge %}not-challenged{% endif %}">
+                        <div data-v-44091bd3="" class="header">
+                            <div data-v-44091bd3="" class="name">
+                                {{ record.name }}
+                                {% if not not_challenge %}
+                                <span data-v-44091bd3="">{{ record.time_str }}</span>
+                                {% endif %}
+                            </div>
+                            {% if not not_challenge %}
+                            <div data-v-44091bd3="" class="info">
+                                <div data-v-44091bd3="" class="round">文段分数 {{ record.score }}</div>
+                            </div>
+                            <div data-v-44091bd3="" class="right">
+                                <img data-v-44091bd3="" src="images/{{ level_icon[record.score_rank] }}.png"
+                                     class="icon">
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if not_challenge %}
+                        <div data-v-44091bd3="" class="not-challenged-text">尚未挑战</div>
+                        {% else %}
+                        <div data-v-44091bd3="" class="line"></div>
+                        <div data-v-44091bd3="" class="roles">
+                            {% for role in record.avatars %}
+                            <div data-v-03247942="" data-v-44091bd3=""
+                                 class="role-item item unable-be-select">
+                                <div data-v-03247942="" class="inner">
+                                    <div data-v-03247942="" class="avatar-box"
+                                         style="width: 16.5333vw; height: 19.2vw;">
+                                        <div data-v-03247942="" class="avatar-bg"
+                                             style="background: url('{{ avatar_icons[role.id] }}') center center / 100% no-repeat;"></div>
+                                        <div data-v-03247942="" class="level">等级 {{ role.level }}</div>
+                                    </div>
+                                    {% if role.is_trial %}
+                                    <div data-v-03247942="" class="trial">试用</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div data-v-44091bd3="" class="buffs">
+                            {% for buff in record.buffs %}
+                            <div data-v-44091bd3="" class="buff-item">
+                                <div data-v-44091bd3="" class="icon"
+                                     style="background-image: url('{{ buff.icon }}');"></div>
+                                <div data-v-44091bd3="" class="text">
+                                    {{ buff.name }}：{{ buff.desc }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
