@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import BaseModel, validator
@@ -14,7 +15,7 @@ from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNot
 from utils.log import logger
 
 if TYPE_CHECKING:
-    from simnet import GenshinClient
+    from simnet import StarRailClient
     from telegram.ext import ContextTypes
 
 
@@ -120,23 +121,24 @@ class DailyNoteSystem(Plugin):
 
     @staticmethod
     async def start_get_notes(
-        client: "GenshinClient",
+        client: "StarRailClient",
         user: DailyNoteTaskUser = None,
     ) -> List[str]:
         if client.region == RegionEnum.HOYOLAB:
-            notes = await client.get_genshin_notes()
+            notes = await client.get_starrail_notes()
         else:
-            notes = await client.get_genshin_notes_by_stoken()
+            notes = await client.get_starrail_notes_by_stoken()
         if not user:
             return []
         notices = []
         notice = None
-        if user.resin_db and notes.max_resin > 0:
-            if notes.current_resin >= user.resin.notice_num:
+        if user.resin_db and notes.max_stamina > 0:
+            if notes.current_stamina >= user.resin.notice_num:
                 if not user.resin.noticed:
+                    rec_time = datetime.now().astimezone() + notes.stamina_recover_time
                     notice = (
-                        f"### 树脂提示 ####\n\n当前树脂为 {notes.current_resin} / {notes.max_resin} ，记得使用哦~\n"
-                        f"预计全部恢复完成：{notes.resin_recovery_time.strftime('%Y-%m-%d %H:%M')}"
+                        f"### 开拓力提示 ####\n\n当前开拓力为 {notes.current_stamina} / {notes.max_stamina} ，记得使用哦~\n"
+                        f"预计全部恢复完成：{rec_time.strftime('%Y-%m-%d %H:%M')}"
                     )
                     user.resin.noticed = True
             else:
