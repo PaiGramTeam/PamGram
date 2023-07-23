@@ -3,11 +3,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import BaseModel, validator
+from simnet import Region
 from simnet.errors import BadRequest as SimnetBadRequest, InvalidCookies, TimedOut as SimnetTimedOut
 from telegram.constants import ParseMode
 from telegram.error import BadRequest, Forbidden
 
-from core.basemodel import RegionEnum
 from core.plugin import Plugin
 from core.services.task.models import Task as TaskUser, TaskStatusEnum
 from core.services.task.services import TaskResinServices, TaskExpeditionServices
@@ -124,7 +124,7 @@ class DailyNoteSystem(Plugin):
         client: "StarRailClient",
         user: DailyNoteTaskUser = None,
     ) -> List[str]:
-        if client.region == RegionEnum.HOYOLAB:
+        if client.region == Region.OVERSEAS:
             notes = await client.get_starrail_notes()
         else:
             notes = await client.get_starrail_notes_by_stoken()
