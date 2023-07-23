@@ -1,5 +1,7 @@
 from pydantic import ValidationError
-from simnet import StarRailClient, Region
+from typing import TYPE_CHECKING
+
+from simnet import Region
 from simnet.errors import DataNotPublic, BadRequest as SimnetBadRequest
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, KeyboardButton, WebAppInfo
 from telegram.ext import CallbackContext, ConversationHandler, filters
@@ -13,6 +15,9 @@ from plugins.app.webapp import WebApp
 from plugins.tools.daily_note import DailyNoteSystem, WebAppData
 from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError, PlayerNotFoundError
 from utils.log import logger
+
+if TYPE_CHECKING:
+    from simnet import StarRailClient
 
 __all__ = ("DailyNoteTasksPlugin",)
 
