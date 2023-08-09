@@ -51,7 +51,7 @@ roles = {
     1209: ["彦卿", "yanqing", "马彦卿", "老马"],
     1211: ["白露", "bailu", "衔药龙女"],
 }
-not_real_roles = [1005]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
