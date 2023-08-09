@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/33_8822068204d7dabf8934.css" rel="stylesheet">
+    <style>
+        * {
+            -webkit-box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <div data-v-6cd4e78c="" data-v-056bcd56="" class="layout"
+         style="background: url('images/treasure-bg.4e14b9b5.png') 0% 0% / 100% no-repeat rgb(53, 47, 25);">
+        <div data-v-6cd4e78c="" class="header">
+            <div data-v-6cd4e78c="" class="border">
+                <div data-v-6cd4e78c="" class="left"><span data-v-6cd4e78c="">地城探宝</span></div>
+                <div data-v-e64e4972="" class="right">
+                    <span data-v-e64e4972="">UID:{{ uid }}</span>
+                </div>
+            </div>
+        </div>
+        <div data-v-6cd4e78c="" class="container">
+            <div data-v-6cd4e78c="" class="border">
+                <div data-v-4c014de0="" class="card" data-v-6cd4e78c="">
+                    <div data-v-4c014de0="" class="inner">
+                        <div data-v-4c014de0="" class="header">
+                            <div data-v-4c014de0="" class="name">
+                                {{ record.name }}
+                            </div>
+                            <div data-v-4c014de0="" class="time">
+                                {{ record.time_str }}
+                            </div>
+                            <div data-v-4c014de0="" class="difficulty" style="background-color: rgb(214, 168, 94);">
+                                {% if record.difficulty_id == 0 %}
+                                浅层探索
+                                {% else %}
+                                深层探索
+                                {% endif %}
+                            </div>
+                            <div data-v-4c014de0="" class="right">
+                                <img data-v-4c014de0="" src="{{ record.icon }}" alt="" class="icon">
+                            </div>
+                        </div>
+                        <div data-v-4c014de0="" class="line"></div>
+                        <div data-v-4c014de0="" class="sub-title">参与角色</div>
+                        <div data-v-4c014de0="" class="roles">
+                            {% for role in record.avatars %}
+                            <div data-v-4c014de0="" class="avatar-item">
+                                <img data-v-4c014de0="" src="{{ avatar_icons[role.id] }}" class="icon">
+                                <span data-v-4c014de0="">等级{{ role.level }}</span>
+                                {% if role.is_trial %}
+                                <span data-v-4c014de0="" class="is-trial">试用</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div data-v-4c014de0="" class="expand-container is-expand">
+                            <div data-v-4c014de0="" class="expand-item half-width">
+                                <div data-v-4c014de0="" class="left">
+                                    <img data-v-4c014de0="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAOVBMVEVHcEz///////////////////////////////////////////////////////////////////////99PJZNAAAAEnRSTlMAMJBg3xDPn4B/UKBvX0BwvyB19BZ7AAAAbklEQVQY063RSw6AIAwEUD5Fivid+x9WLMZY7dJZvpChBed+zpQls9aInqw0kckFFu8wmUyO+HIubgAodOZLR6B44t5Dy93Aza9ROD2axdvhzauZOUjPqtfOGIL06LXbGMyW17O/vp9Urh///qgDYFIHxdPoOxIAAAAASUVORK5CYII=" class="icon">
+                                    伤害提高
+                                </div>
+                                <span data-v-4c014de0="">{{ record.atk_buff }}%</span></div>
+                            <div data-v-4c014de0="" class="expand-item half-width">
+                                <div data-v-4c014de0="" class="left">
+                                    <img data-v-4c014de0="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAARVBMVEVHcEz///////////////////////////////////////////////////////////////////////////////////////9X1DS3AAAAFnRSTlMAvxAwYECg3yDvkIBQr59ff49wb7DPw3T3cwAAAKBJREFUGBmdwVtiwyAMBMAFBJJ42E7a7v2P2sbBNO1nZvCeWNw3wz9ZvVbVHa/ijdWkW+EtYsnqPSmpJqqG6YPBDp4OKzxwymwWOKk1ZjwIoVwUFDwkRufixoST3guXTRRPNQiXPWx4ym5cjBmT58ApdMel1DunvXziIm7Kk5ruuETdbPBHsKL4lTksiaQ42PGiK0drw13wh5UvUlvEO74BTGUNgYPvMN8AAAAASUVORK5CYII=" class="icon">
+                                    伤害减免
+                                </div>
+                                <span data-v-4c014de0="">{{ record.def_buff }}%</span></div>
+                            <div data-v-4c014de0="" class="expand-item">
+                                <div data-v-4c014de0="" class="left"><!---->
+                                    持续伤害提高
+                                </div>
+                                <span data-v-4c014de0="">{{ record.special_buff }}%</span></div>
+                            <div data-v-4c014de0="" class="expand-item">
+                                <div data-v-4c014de0="" class="left"><!---->
+                                    消耗耐力
+                                </div>
+                                <span data-v-4c014de0="">{{ record.used_stamina }}</span></div>
+                            <div data-v-4c014de0="" class="expand-item">
+                                <div data-v-4c014de0="" class="left"><!---->
+                                    击败敌人数量
+                                </div>
+                                <span data-v-4c014de0="">{{ record.enemy_killed }}</span></div>
+                            <div data-v-4c014de0="" class="expand-item">
+                                <div data-v-4c014de0="" class="left"><!---->
+                                    发现古代兵器
+                                </div>
+                                <span data-v-4c014de0="">{{ record.ancient_weapon }}</span></div>
+                            <div data-v-4c014de0="" class="expand-item">
+                                <div data-v-4c014de0="" class="left"><!---->
+                                    发现古代防具
+                                </div>
+                                <span data-v-4c014de0="">{{ record.ancient_armor }}</span></div>
+                            <div data-v-4c014de0="" class="expand-item">
+                                <div data-v-4c014de0="" class="left"><!---->
+                                    发现古代炸弹
+                                </div>
+                                <span data-v-4c014de0="">{{ record.ancient_bomb }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
