@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 TZ = timezone("Asia/Shanghai")
-cmd_pattern = r"(?i)^/challenge\s*((?:\d+)|(?:all))?\s*(pre)?"
+cmd_pattern = r"(?i)^/challenge(?:@[\w]+)?\s*((?:\d+)|(?:all))?\s*(pre)?"
 msg_pattern = r"^混沌回忆数据((?:查询)|(?:总览))(上期)?\D?(\d*)?.*?$"
 
 
