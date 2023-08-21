@@ -1,6 +1,6 @@
-from pydantic import ValidationError
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError
 from simnet import Region
 from simnet.errors import DataNotPublic, BadRequest as SimnetBadRequest
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, KeyboardButton, WebAppInfo
@@ -83,7 +83,7 @@ class DailyNoteTasksPlugin(Plugin.Conversation):
         except SimnetBadRequest as e:
             return f"获取便签失败，可能遇到验证码风控，请尝试重新绑定账号。{e}"
         except (CookiesNotFoundError, PlayerNotFoundError):
-            return "未查询到您所绑定的账号信息，请先私聊派蒙绑定账号"
+            return "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号"
 
     @conversation.state(state=SET_BY_WEB)
     @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)

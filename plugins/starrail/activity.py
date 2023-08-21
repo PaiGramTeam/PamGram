@@ -6,16 +6,15 @@ from simnet.models.starrail.chronicle.activity import (
     StarRailFantasticStory,
     StarRailTreasureDungeonRecord,
 )
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from telegram import Update, Message
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
-from telegram.helpers import create_deep_linked_url
 
 from core.dependence.assets import AssetsService
 from core.plugin import Plugin, handler
 from core.services.template.services import TemplateService
 from gram_core.services.template.models import RenderResult, RenderGroupResult
-from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNotFoundError
+from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
 
 if TYPE_CHECKING:
@@ -79,17 +78,6 @@ class PlayerActivityPlugins(Plugin):
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
             async with self.helper.genshin(user.id) as client:
                 render_result = await self.star_fight_render(client, uid)
-        except (PlayerNotFoundError, CookiesNotFoundError):
-            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
-            if filters.ChatType.GROUPS.filter(message):
-                reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
-                )
-                self.add_delete_message_job(reply_message, delay=30)
-                self.add_delete_message_job(message, delay=30)
-            else:
-                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
-            return
         except AttributeError as exc:
             logger.error("活动数据有误")
             logger.exception(exc)
@@ -146,17 +134,6 @@ class PlayerActivityPlugins(Plugin):
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
             async with self.helper.genshin(user.id) as client:
                 render_result = await self.fantastic_story_render(client, uid)
-        except PlayerNotFoundError:
-            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
-            if filters.ChatType.GROUPS.filter(message):
-                reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
-                )
-                self.add_delete_message_job(reply_message, delay=30)
-                self.add_delete_message_job(message, delay=30)
-            else:
-                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
-            return
         except AttributeError as exc:
             logger.error("活动数据有误")
             logger.exception(exc)
@@ -215,17 +192,6 @@ class PlayerActivityPlugins(Plugin):
                 render_result = await self.treasure_dungeon_render(client, uid)
                 if render_result is None:
                     raise NotHaveData
-        except PlayerNotFoundError:
-            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
-            if filters.ChatType.GROUPS.filter(message):
-                reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
-                )
-                self.add_delete_message_job(reply_message, delay=30)
-                self.add_delete_message_job(message, delay=30)
-            else:
-                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
-            return
         except AttributeError as exc:
             logger.error("活动数据有误")
             logger.exception(exc)

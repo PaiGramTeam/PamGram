@@ -7,17 +7,16 @@ from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 from arkowrapper import ArkoWrapper
 from pytz import timezone
 from simnet.errors import BadRequest as SimnetBadRequest
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Message, Update
+from telegram import Message, Update
 from telegram.constants import ChatAction, ParseMode
 from telegram.ext import CallbackContext, filters
-from telegram.helpers import create_deep_linked_url
 
 from core.dependence.assets import AssetsService
 from core.plugin import Plugin, handler
 from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.template.models import RenderGroupResult, RenderResult
 from core.services.template.services import TemplateService
-from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError, PlayerNotFoundError
+from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError
 from utils.log import logger
 
 try:
@@ -149,17 +148,6 @@ class ChallengePlugin(Plugin):
                         reply_text = await message.reply_text("彦卿需要时间整理混沌回忆数据，还请耐心等待哦~")
                     await message.reply_chat_action(ChatAction.TYPING)
                     images = await self.get_rendered_pic(client, uid, floor, total, previous)
-        except PlayerNotFoundError:  # 若未找到账号
-            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_uid"))]]
-            if filters.ChatType.GROUPS.filter(message):
-                reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
-                )
-                self.add_delete_message_job(reply_message)
-                self.add_delete_message_job(message)
-            else:
-                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
-            return
         except TooManyRequestPublicCookies:
             reply_message = await message.reply_text("查询次数太多，请您稍后重试")
             if filters.ChatType.GROUPS.filter(message):

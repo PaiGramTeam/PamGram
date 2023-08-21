@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import CommandHandler, CallbackContext
 from telegram.ext import MessageHandler, filters
@@ -104,17 +104,6 @@ class Sign(Plugin):
             reply_message = await message.reply_text(sign_text, allow_sending_without_reply=True)
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(reply_message)
-        except (PlayerNotFoundError, CookiesNotFoundError):
-            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
-            if filters.ChatType.GROUPS.filter(message):
-                reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
-                )
-                self.add_delete_message_job(reply_message, delay=30)
-
-                self.add_delete_message_job(message, delay=30)
-            else:
-                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
         except NeedChallenge as exc:
             button = await self.sign_system.get_challenge_button(
                 context.bot.username,
