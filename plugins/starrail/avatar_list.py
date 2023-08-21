@@ -1,12 +1,9 @@
 from typing import List, Optional, TYPE_CHECKING
 
 from pydantic import BaseModel
-from simnet.errors import InvalidCookies
 from simnet.models.starrail.chronicle.characters import StarRailDetailCharacter
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ChatAction, ParseMode
+from telegram.constants import ChatAction
 from telegram.ext import filters
-from telegram.helpers import create_deep_linked_url
 
 from core.dependence.assets import AssetsService, AssetsCouldNotFound
 from core.plugin import Plugin, handler
@@ -14,7 +11,7 @@ from core.services.cookies import CookiesService
 from core.services.template.models import FileType
 from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
-from plugins.tools.genshin import CookiesNotFoundError, GenshinHelper, PlayerNotFoundError
+from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
 
 if TYPE_CHECKING:
@@ -58,40 +55,6 @@ class AvatarListPlugin(Plugin):
         self.template_service = template_service
         self.wiki_service = wiki_service
         self.helper = helper
-
-    async def get_user_client(
-        self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"
-    ) -> Optional["StarRailClient"]:
-        message = update.effective_message
-        user = update.effective_user
-        try:
-            return await self.helper.get_genshin_client(user.id)
-        except PlayerNotFoundError:  # 若未找到账号
-            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
-            if filters.ChatType.GROUPS.filter(message):
-                reply_message = await message.reply_text(
-                    "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号", reply_markup=InlineKeyboardMarkup(buttons)
-                )
-                self.add_delete_message_job(reply_message, delay=30)
-                self.add_delete_message_job(message, delay=30)
-            else:
-                await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号", reply_markup=InlineKeyboardMarkup(buttons))
-        except CookiesNotFoundError:
-            buttons = [[InlineKeyboardButton("点我绑定账号", url=create_deep_linked_url(context.bot.username, "set_cookie"))]]
-            if filters.ChatType.GROUPS.filter(message):
-                reply_message = await message.reply_text(
-                    "此功能需要绑定<code>cookie</code>后使用，请先私聊彦卿绑定账号",
-                    reply_markup=InlineKeyboardMarkup(buttons),
-                    parse_mode=ParseMode.HTML,
-                )
-                self.add_delete_message_job(reply_message, delay=30)
-                self.add_delete_message_job(message, delay=30)
-            else:
-                await message.reply_text(
-                    "此功能需要绑定<code>cookie</code>后使用，请先私聊彦卿进行绑定",
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=InlineKeyboardMarkup(buttons),
-                )
 
     @staticmethod
     async def get_avatars_data(client: "StarRailClient") -> List[StarRailDetailCharacter]:
@@ -142,29 +105,17 @@ class AvatarListPlugin(Plugin):
 
     @handler.command("avatars", block=False)
     @handler.message(filters.Regex(r"^(全部)?练度统计$"), block=False)
-    async def avatar_list(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"):
+    async def avatar_list(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE"):
         user = update.effective_user
         message = update.effective_message
         all_avatars = "全部" in message.text or "all" in message.text  # 是否发送全部角色
         logger.info("用户 %s[%s] [bold]练度统计[/bold]: all=%s", user.full_name, user.id, all_avatars, extra={"markup": True})
-        client = await self.get_user_client(update, context)
-        if not client:
-            return
         await message.reply_chat_action(ChatAction.TYPING)
-        try:
+
+        async with self.helper.genshin(user.id) as client:
             characters: List[StarRailDetailCharacter] = await self.get_avatars_data(client)
             record_card = await client.get_record_card()
             nickname = record_card.nickname
-        except InvalidCookies as exc:
-            await client.get_starrail_user(client.player_id)
-            logger.warning("用户 %s[%s] 无法请求角色数数据 API返回信息为 [%s]%s", user.full_name, user.id, exc.retcode, exc.original)
-            reply_message = await message.reply_text("出错了呜呜呜 ~ 当前访问令牌无法请求角色数数据，请尝试重新获取Cookie。")
-            if filters.ChatType.GROUPS.filter(message):
-                self.add_delete_message_job(reply_message, delay=30)
-                self.add_delete_message_job(message, delay=30)
-            return
-        finally:
-            await client.shutdown()
 
         has_more = (not all_avatars) and len(characters) > 20
         if has_more:
