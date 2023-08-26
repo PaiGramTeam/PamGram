@@ -13,6 +13,7 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
@@ -107,7 +108,7 @@ class PlayerMuseumPlugins(Plugin):
                 exhibitions.append(exhibition)
         all_exhibitions = [exhibitions[i : i + 7] for i in range(0, len(exhibitions), 7)]
         return {
-            "uid": uid,
+            "uid": mask_number(uid),
             "basic": basic,
             "all_exhibitions": all_exhibitions,
             "directors": detail.director,

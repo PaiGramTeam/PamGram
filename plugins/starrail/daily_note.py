@@ -12,6 +12,7 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
@@ -52,7 +53,7 @@ class DailyNotePlugin(Plugin):
             remained_time = (datetime.now().astimezone() + remained_time).strftime("%m-%d %H:%M")
 
         render_data = {
-            "uid": client.player_id,
+            "uid": mask_number(client.player_id),
             "day": day,
             "resin_recovery_time": resin_recovery_time,
             "current_resin": daily_info.current_stamina,

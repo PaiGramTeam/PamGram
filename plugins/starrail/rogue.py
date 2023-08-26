@@ -14,6 +14,7 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
@@ -137,7 +138,7 @@ class PlayerRoguePlugins(Plugin):
             new_avatars[idx] = RogueCharacter(**old_avatar)
 
         return {
-            "uid": uid,
+            "uid": mask_number(uid),
             "basic": data.basic_info,
             "name": f"{record.name} {luo_ma_bum[record.difficulty]}",
             "finish_cnt": record_raw.basic.finish_cnt,

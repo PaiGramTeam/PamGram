@@ -19,6 +19,7 @@ from modules.apihelper.client.components.player_cards import PlayerCards as Play
 from modules.playercards.fight_prop import EquipmentsStats
 from modules.playercards.helpers import ArtifactStatsTheory
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from telegram.ext import ContextTypes
@@ -375,7 +376,7 @@ class PlayerCards(Plugin):
             if idx > 3:
                 break
         return {
-            "uid": data.uid,
+            "uid": mask_number(data.uid),
             "level": data.level or 0,
             "signature": data.signature or "",
             "characters": characters_data,
@@ -478,7 +479,7 @@ class RenderTemplate:
         for index in range(5):
             skills[index] = self.character.skillTreeList[index].level
         data = {
-            "uid": self.uid,
+            "uid": mask_number(self.uid),
             "character": self.character,
             "character_detail": self.wiki_service.character.get_by_id(self.character.avatarId),
             "weapon": weapon,

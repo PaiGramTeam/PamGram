@@ -18,6 +18,7 @@ from core.services.template.models import RenderGroupResult, RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError
 from utils.log import logger
+from utils.uid import mask_number
 
 try:
     import ujson as jsonlib
@@ -243,7 +244,7 @@ class ChallengePlugin(Plugin):
         render_data = {
             "time": time,
             "stars": total_stars,
-            "uid": uid,
+            "uid": mask_number(uid),
             "max_floor": abyss_data.max_floor,
             "total_battles": abyss_data.total_battles,
             "floor_colors": {

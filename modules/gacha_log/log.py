@@ -35,6 +35,7 @@ from modules.gacha_log.models import (
     SRGFModel,
 )
 from utils.const import PROJECT_ROOT
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from core.dependence.assets import AssetsService
@@ -527,7 +528,7 @@ class GachaLog:
         last_time = data[0].time.strftime("%Y-%m-%d %H:%M")
         first_time = data[-1].time.strftime("%Y-%m-%d %H:%M")
         return {
-            "uid": player_id,
+            "uid": mask_number(player_id),
             "allNum": total,
             "type": pool.value,
             "typeName": pool_name,
@@ -579,7 +580,7 @@ class GachaLog:
             )
         pool_data = [i for i in pool_data if i["count"] > 0]
         return {
-            "uid": player_id,
+            "uid": mask_number(player_id),
             "typeName": pool_name,
             "pool": pool_data[:6] if group else pool_data,
             "hasMore": len(pool_data) > 6,
@@ -620,7 +621,7 @@ class GachaLog:
             for up_pool in pools
         ]
         return {
-            "uid": player_id,
+            "uid": mask_number(player_id),
             "typeName": "五星列表",
             "pool": pool_data,
             "hasMore": False,

@@ -13,6 +13,7 @@ from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
@@ -123,7 +124,7 @@ class AvatarListPlugin(Plugin):
         avatar_datas = await self.get_final_data(characters)
 
         render_data = {
-            "uid": client.player_id,  # 玩家uid
+            "uid": mask_number(client.player_id),  # 玩家uid
             "nickname": nickname,  # 玩家昵称
             "avatar_datas": avatar_datas,  # 角色数据
             "has_more": has_more,  # 是否显示了全部角色

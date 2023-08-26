@@ -16,6 +16,7 @@ from core.services.template.services import TemplateService
 from gram_core.services.template.models import RenderResult, RenderGroupResult
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
@@ -100,7 +101,7 @@ class PlayerActivityPlugins(Plugin):
             for avatar in record.lineup:
                 avatar_icons[avatar.id] = self.assets.avatar.square(avatar.id).as_uri()
         return {
-            "uid": uid,
+            "uid": mask_number(uid),
             "records": data.records,
             "avatar_icons": avatar_icons,
         }
@@ -156,7 +157,7 @@ class PlayerActivityPlugins(Plugin):
             for avatar in record.avatars:
                 avatar_icons[avatar.id] = self.assets.avatar.square(avatar.id).as_uri()
         return {
-            "uid": uid,
+            "uid": mask_number(uid),
             "records": data.records,
             "avatar_icons": avatar_icons,
         }
@@ -230,7 +231,7 @@ class PlayerActivityPlugins(Plugin):
 
         def render(record: StarRailTreasureDungeonRecord) -> Coroutine[Any, Any, RenderResult]:
             render_data = {
-                "uid": uid,
+                "uid": mask_number(uid),
                 "record": record,
                 "avatar_icons": avatar_icons,
             }

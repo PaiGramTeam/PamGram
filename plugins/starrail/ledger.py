@@ -15,6 +15,7 @@ from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
@@ -57,7 +58,7 @@ class LedgerPlugin(Plugin):
             return f"{round(amount / 10000, 2)}w" if amount >= 10000 else amount
 
         ledger_data = {
-            "uid": client.player_id,
+            "uid": mask_number(client.player_id),
             "day": month,
             "current_hcoin": format_amount(diary_info.month_data.current_hcoin),
             "gacha": int(diary_info.month_data.current_hcoin / 160),
