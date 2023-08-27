@@ -89,6 +89,9 @@ class PlayerCardsFile:
                 if i.get(avatarId, 0) not in avatar_ids:
                     data[avatarList].append(i)
             for i in data[avatarList]:
-                i["property"] = props.get(i.get(avatarId, 0), [])
+                if property_ := props.get(i.get(avatarId, 0)):
+                    i["property"] = property_
+                if i.get("property") is None:
+                    i["property"] = []
             await self.save_json(self.get_file_path(uid), data)
             return data
