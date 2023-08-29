@@ -4,7 +4,7 @@ from typing import Optional
 from simnet.models.starrail.wish import StarRailBannerType
 from telegram import Document, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
 from telegram.constants import ChatAction
-from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler, filters
+from telegram.ext import CallbackContext, ConversationHandler, filters
 from telegram.helpers import create_deep_linked_url
 
 from core.dependence.assets import AssetsService
@@ -213,7 +213,7 @@ class WishLogPlugin(Plugin.Conversation):
         await message.reply_text("已取消")
         return ConversationHandler.END
 
-    @handler(CommandHandler, command="warp_log_force_delete", block=False, admin=True)
+    @handler.command(command="warp_log_force_delete", block=False, admin=True)
     async def command_warp_log_force_delete(self, update: Update, context: CallbackContext):
         message = update.effective_message
         args = self.get_args(context)
@@ -238,8 +238,8 @@ class WishLogPlugin(Plugin.Conversation):
         except (ValueError, IndexError):
             await message.reply_text("用户ID 不合法")
 
-    @handler(CommandHandler, command="warp_log_export", filters=filters.ChatType.PRIVATE, block=False)
-    @handler(MessageHandler, filters=filters.Regex("^导出跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
+    @handler.command(command="warp_log_export", filters=filters.ChatType.PRIVATE, block=False)
+    @handler.message(filters=filters.Regex("^导出跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
     async def command_start_export(self, update: Update, context: CallbackContext) -> None:
         message = update.effective_message
         user = update.effective_user
@@ -264,8 +264,8 @@ class WishLogPlugin(Plugin.Conversation):
             logger.info("未查询到用户 %s[%s] 所绑定的账号信息", user.full_name, user.id)
             await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号")
 
-    @handler(CommandHandler, command="warp_log", block=False)
-    @handler(MessageHandler, filters=filters.Regex("^跃迁记录?(光锥|角色|常驻|新手)$"), block=False)
+    @handler.command(command="warp_log", block=False)
+    @handler.message(filters=filters.Regex("^跃迁记录?(光锥|角色|常驻|新手)$"), block=False)
     async def command_start_analysis(self, update: Update, context: CallbackContext) -> None:
         message = update.effective_message
         user = update.effective_user
@@ -293,7 +293,7 @@ class WishLogPlugin(Plugin.Conversation):
                     "starrail/gacha_log/gacha_log.html",
                     data,
                     full_page=True,
-                    file_type=FileType.DOCUMENT if len(data.get("fiveLog")) > 36 else FileType.PHOTO,
+                    file_type=FileType.DOCUMENT if len(data.get("fiveLog")) > 300 else FileType.PHOTO,
                     query_selector=".body_box",
                 )
                 if png_data.file_type == FileType.DOCUMENT:
@@ -307,8 +307,8 @@ class WishLogPlugin(Plugin.Conversation):
             ]
             await message.reply_text("彦卿没有找到你此卡池的跃迁记录，快来点击按钮私聊彦卿导入吧~", reply_markup=InlineKeyboardMarkup(buttons))
 
-    @handler(CommandHandler, command="warp_count", block=False)
-    @handler(MessageHandler, filters=filters.Regex("^跃迁统计?(光锥|角色|常驻|新手)$"), block=False)
+    @handler.command(command="warp_count", block=False)
+    @handler.message(filters=filters.Regex("^跃迁统计?(光锥|角色|常驻|新手)$"), block=False)
     async def command_start_count(self, update: Update, context: CallbackContext) -> None:
         message = update.effective_message
         user = update.effective_user

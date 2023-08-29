@@ -396,8 +396,6 @@ class GachaLog:
                 {"num": five_star, "unit": "个", "lable": "五星"},
                 {"num": five_star_avg, "unit": "抽", "lable": "五星平均"},
                 {"num": small_protect, "unit": "%", "lable": "小保底不歪"},
-            ],
-            [
                 {"num": no_four_star, "unit": "抽", "lable": "未出四星"},
                 {"num": five_star_const, "unit": "个", "lable": "五星常驻"},
                 {"num": up_avg, "unit": "抽", "lable": "UP平均"},
@@ -429,8 +427,6 @@ class GachaLog:
                 {"num": five_star, "unit": "个", "lable": "五星"},
                 {"num": five_star_avg, "unit": "抽", "lable": "五星平均"},
                 {"num": five_star_weapon, "unit": "个", "lable": "五星光锥"},
-            ],
-            [
                 {"num": no_four_star, "unit": "抽", "lable": "未出四星"},
                 {"num": four_star, "unit": "个", "lable": "四星"},
                 {"num": four_star_avg, "unit": "抽", "lable": "四星平均"},
@@ -462,8 +458,6 @@ class GachaLog:
                 {"num": five_star, "unit": "个", "lable": "五星"},
                 {"num": five_star_avg, "unit": "抽", "lable": "五星平均"},
                 {"num": four_star_weapon, "unit": "个", "lable": "四星光锥"},
-            ],
-            [
                 {"num": no_four_star, "unit": "抽", "lable": "未出四星"},
                 {"num": four_star, "unit": "个", "lable": "四星"},
                 {"num": four_star_avg, "unit": "抽", "lable": "四星平均"},
@@ -536,7 +530,7 @@ class GachaLog:
             "firstTime": first_time,
             "lastTime": last_time,
             "fiveLog": all_five,
-            "fourLog": all_four[:18],
+            "fourLog": all_four[:36],
         }
 
     async def get_pool_analysis(
