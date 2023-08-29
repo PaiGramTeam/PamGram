@@ -26,7 +26,7 @@ class AvatarsPlugin(Plugin):
         self.wiki_service = wiki_service
         self.search_service = search_service
 
-    @handler.command(command="avatars", block=False)
+    @handler.command(command="avatar", block=False)
     @handler.message(filters=filters.Regex("^角色图鉴查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         message = update.effective_message

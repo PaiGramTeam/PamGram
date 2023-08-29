@@ -72,7 +72,7 @@ class AvatarListPlugin(Plugin):
 
     def get_light_cone_star(self, name: str) -> int:
         light_cone = self.wiki_service.light_cone.get_by_name(name)
-        return light_cone.rarity if light_cone else 3
+        return light_cone.rank if light_cone else 3
 
     async def get_final_data(self, characters: List[StarRailDetailCharacter]) -> List[AvatarData]:
         data = []
