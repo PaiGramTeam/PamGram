@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 
 from modules.wiki.base import WikiModel
-from modules.wiki.models.light_cone import LightCone as LightConeModel
+from modules.wiki.models.light_cone import YattaLightCone
 
 
 class LightCone(WikiModel):
@@ -10,9 +10,9 @@ class LightCone(WikiModel):
 
     def __init__(self):
         super().__init__()
-        self.all_light_cones: List[LightConeModel] = []
-        self.all_light_cones_map: Dict[int, LightConeModel] = {}
-        self.all_light_cones_name: Dict[str, LightConeModel] = {}
+        self.all_light_cones: List[YattaLightCone] = []
+        self.all_light_cones_map: Dict[int, YattaLightCone] = {}
+        self.all_light_cones_name: Dict[str, YattaLightCone] = {}
 
     def clear_class_data(self) -> None:
         self.all_light_cones.clear()
@@ -31,15 +31,15 @@ class LightCone(WikiModel):
         datas = await WikiModel.read(self.light_cone_path)
         self.clear_class_data()
         for data in datas:
-            m = LightConeModel(**data)
+            m = YattaLightCone(**data)
             self.all_light_cones.append(m)
             self.all_light_cones_map[m.id] = m
             self.all_light_cones_name[m.name] = m
 
-    def get_by_id(self, cid: int) -> Optional[LightConeModel]:
+    def get_by_id(self, cid: int) -> Optional[YattaLightCone]:
         return self.all_light_cones_map.get(cid)
 
-    def get_by_name(self, name: str) -> Optional[LightConeModel]:
+    def get_by_name(self, name: str) -> Optional[YattaLightCone]:
         return self.all_light_cones_name.get(name)
 
     def get_name_list(self) -> List[str]:

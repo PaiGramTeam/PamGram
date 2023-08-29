@@ -3,7 +3,14 @@ from typing import List
 from core.base_service import BaseService
 from core.dependence.redisdb import RedisDB
 
-__all__ = ["GameCache", "GameCacheForStrategy", "GameCacheForMaterial", "GameCacheForLightCone", "GameCacheForRelics"]
+__all__ = [
+    "GameCache",
+    "GameCacheForAvatar",
+    "GameCacheForStrategy",
+    "GameCacheForMaterial",
+    "GameCacheForLightCone",
+    "GameCacheForRelics",
+]
 
 
 class GameCache:
@@ -32,6 +39,10 @@ class GameCache:
         qname = f"{self.qname}:{character_name}"
         await self.client.set(qname, file)
         await self.client.expire(qname, self.ttl)
+
+
+class GameCacheForAvatar(BaseService.Component, GameCache):
+    qname = "game:avatar"
 
 
 class GameCacheForStrategy(BaseService.Component, GameCache):

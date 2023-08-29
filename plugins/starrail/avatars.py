@@ -11,10 +11,10 @@ from metadata.shortname import roleToName, roleToTag
 from utils.log import logger
 
 
-class StrategyPlugin(Plugin):
-    """角色攻略查询"""
+class AvatarsPlugin(Plugin):
+    """角色图鉴查询"""
 
-    KEYBOARD = [[InlineKeyboardButton(text="查看角色攻略列表并查询", switch_inline_query_current_chat="查看角色攻略列表并查询")]]
+    KEYBOARD = [[InlineKeyboardButton(text="查看角色图鉴列表并查询", switch_inline_query_current_chat="查看角色图鉴列表并查询")]]
 
     def __init__(
         self,
@@ -26,8 +26,8 @@ class StrategyPlugin(Plugin):
         self.wiki_service = wiki_service
         self.search_service = search_service
 
-    @handler.command(command="strategy", block=False)
-    @handler.message(filters=filters.Regex("^角色攻略查询(.*)"), block=False)
+    @handler.command(command="avatars", block=False)
+    @handler.message(filters=filters.Regex("^角色图鉴查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         message = update.effective_message
         user = update.effective_user
@@ -35,25 +35,25 @@ class StrategyPlugin(Plugin):
         if len(args) >= 1:
             character_name = args[0]
         else:
-            reply_message = await message.reply_text("请回复你要查询的攻略的角色名", reply_markup=InlineKeyboardMarkup(self.KEYBOARD))
+            reply_message = await message.reply_text("请回复你要查询的图鉴的角色名", reply_markup=InlineKeyboardMarkup(self.KEYBOARD))
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
             return
         character_name = roleToName(character_name)
-        file_path = self.wiki_service.raider.raider_guide_for_role_path / f"{character_name}.png"
+        file_path = self.wiki_service.raider.raider_role_path / f"{character_name}.png"
         if not file_path.exists():
             reply_message = await message.reply_text(
-                f"没有找到 {character_name} 的攻略", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
+                f"没有找到 {character_name} 的图鉴", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
             )
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
             return
-        logger.info("用户 %s[%s] 查询角色攻略命令请求 || 参数 %s", user.full_name, user.id, character_name)
+        logger.info("用户 %s[%s] 查询角色图鉴命令请求 || 参数 %s", user.full_name, user.id, character_name)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         caption = "From 米游社@听语惊花"
-        if file_id := await self.cache_service.get_strategy_cache(character_name):
+        if file_id := await self.cache_service.get_avatar_cache(character_name):
             await message.reply_photo(
                 photo=file_id,
                 caption=caption,
@@ -72,11 +72,11 @@ class StrategyPlugin(Plugin):
             if reply_photo.photo:
                 tags = roleToTag(character_name)
                 photo_file_id = reply_photo.photo[0].file_id
-                await self.cache_service.set_strategy_cache(character_name, photo_file_id)
+                await self.cache_service.set_avatar_cache(character_name, photo_file_id)
                 entry = StrategyEntry(
-                    key=f"plugin:strategy:{character_name}",
+                    key=f"plugin:avatar:{character_name}",
                     title=character_name,
-                    description=f"{character_name} 角色攻略",
+                    description=f"{character_name} 角色图鉴",
                     tags=tags,
                     caption=caption,
                     parse_mode="HTML",

@@ -1,5 +1,6 @@
 from core.base_service import BaseService
 from core.services.game.cache import (
+    GameCacheForAvatar,
     GameCacheForStrategy,
     GameCacheForMaterial,
     GameCacheForLightCone,
@@ -12,15 +13,25 @@ __all__ = "GameCacheService"
 class GameCacheService(BaseService):
     def __init__(
         self,
+        avatar_cache: GameCacheForAvatar,
         strategy_cache: GameCacheForStrategy,
         material_cache: GameCacheForMaterial,
         light_cone_cache: GameCacheForLightCone,
         relics_cache: GameCacheForRelics,
     ):
+        self.avatar_cache = avatar_cache
         self.strategy_cache = strategy_cache
         self.material_cache = material_cache
         self.light_cone_cache = light_cone_cache
         self.relics_cache = relics_cache
+
+    async def get_avatar_cache(self, character_name: str) -> str:
+        cache = await self.avatar_cache.get_file(character_name)
+        if cache is not None:
+            return cache.decode("utf-8")
+
+    async def set_avatar_cache(self, character_name: str, file: str) -> None:
+        await self.avatar_cache.set_file(character_name, file)
 
     async def get_strategy_cache(self, character_name: str) -> str:
         cache = await self.strategy_cache.get_file(character_name)

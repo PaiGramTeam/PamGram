@@ -27,7 +27,7 @@ class LightConePlugin(Plugin):
         self.search_service = search_service
 
     @handler.command(command="light_cone", block=False)
-    @handler.message(filters=filters.Regex("^光锥查询(.*)"), block=False)
+    @handler.message(filters=filters.Regex("^光锥图鉴查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         message = update.effective_message
         user = update.effective_user

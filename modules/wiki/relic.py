@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 
 from modules.wiki.base import WikiModel
-from modules.wiki.models.relic import Relic as RelicModel
+from modules.wiki.models.relic import YattaRelic
 
 
 class Relic(WikiModel):
@@ -10,9 +10,9 @@ class Relic(WikiModel):
 
     def __init__(self):
         super().__init__()
-        self.all_relics: List[RelicModel] = []
-        self.all_relics_map: Dict[int, RelicModel] = {}
-        self.all_relics_name: Dict[str, RelicModel] = {}
+        self.all_relics: List[YattaRelic] = []
+        self.all_relics_map: Dict[int, YattaRelic] = {}
+        self.all_relics_name: Dict[str, YattaRelic] = {}
 
     def clear_class_data(self) -> None:
         self.all_relics.clear()
@@ -31,15 +31,15 @@ class Relic(WikiModel):
         datas = await WikiModel.read(self.relic_path)
         self.clear_class_data()
         for data in datas:
-            m = RelicModel(**data)
+            m = YattaRelic(**data)
             self.all_relics.append(m)
             self.all_relics_map[m.id] = m
             self.all_relics_name[m.name] = m
 
-    def get_by_id(self, cid: int) -> Optional[RelicModel]:
+    def get_by_id(self, cid: int) -> Optional[YattaRelic]:
         return self.all_relics_map.get(cid)
 
-    def get_by_name(self, name: str) -> Optional[RelicModel]:
+    def get_by_name(self, name: str) -> Optional[YattaRelic]:
         return self.all_relics_name.get(name)
 
     def get_name_list(self) -> List[str]:

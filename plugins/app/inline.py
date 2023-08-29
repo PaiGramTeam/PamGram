@@ -35,6 +35,7 @@ class Inline(Plugin):
         self.weapons_list: List[Dict[str, str]] = []
         self.characters_list: List[Dict[str, str]] = []
         self.characters_material_list: List[Dict[str, str]] = []
+        self.characters_guide_list: List[Dict[str, str]] = []
         self.light_cone_list: List[Dict[str, str]] = []
         self.relics_list: List[Dict[str, str]] = []
         self.refresh_task: List[Awaitable] = []
@@ -89,6 +90,15 @@ class Inline(Plugin):
                         if character.startswith(key) or character.endswith(key):
                             self.characters_material_list.append({"name": character, "icon": value})
                             break
+            # 角色攻略
+            for character in self.wiki_service.raider.all_guide_for_role_raiders:
+                if character in datas:
+                    self.characters_guide_list.append({"name": character, "icon": datas[character]})
+                else:
+                    for key, value in datas.items():
+                        if character.startswith(key) or character.endswith(key):
+                            self.characters_guide_list.append({"name": character, "icon": value})
+                            break
             logger.success("Inline 模块获取角色列表成功")
 
         self.refresh_task.append(asyncio.create_task(task_characters()))
@@ -108,6 +118,8 @@ class Inline(Plugin):
             temp_data = [
                 ("光锥图鉴查询", "输入光锥名称即可查询光锥图鉴"),
                 ("角色攻略查询", "输入角色名即可查询角色攻略图鉴"),
+                ("角色图鉴查询", "输入角色名即可查询角色图鉴"),
+                ("角色培养素材查询", "输入角色名即可查询角色培养素材图鉴"),
                 ("遗器套装查询", "输入遗器套装名称即可查询遗器套装图鉴"),
             ]
             for i in temp_data:
@@ -120,11 +132,12 @@ class Inline(Plugin):
                     )
                 )
         else:
-            if args[0] in ["查看角色攻略列表并查询", "查看角色培养素材列表并查询", "查看光锥列表并查询", "查看遗器套装列表并查询"]:
+            if args[0] in ["查看角色攻略列表并查询", "查看角色图鉴列表并查询", "查看光锥列表并查询", "查看遗器套装列表并查询", "查看角色培养素材列表并查询"]:
                 temp_data = {
                     "查看角色攻略列表并查询": (self.characters_list, "角色攻略查询"),
+                    "查看角色图鉴列表并查询": (self.characters_guide_list, "角色图鉴查询"),
                     "查看角色培养素材列表并查询": (self.characters_material_list, "角色培养素材查询"),
-                    "查看光锥列表并查询": (self.light_cone_list, "光锥查询"),
+                    "查看光锥列表并查询": (self.light_cone_list, "光锥图鉴查询"),
                     "查看遗器套装列表并查询": (self.relics_list, "遗器套装查询"),
                 }[args[0]]
                 for character in temp_data[0]:

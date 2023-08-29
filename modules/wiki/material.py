@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 
 from modules.wiki.base import WikiModel
-from modules.wiki.models.material import Material as MaterialModel
+from modules.wiki.models.material import YattaMaterial
 
 
 class Material(WikiModel):
@@ -10,9 +10,9 @@ class Material(WikiModel):
 
     def __init__(self):
         super().__init__()
-        self.all_materials: List[MaterialModel] = []
-        self.all_materials_map: Dict[int, MaterialModel] = {}
-        self.all_materials_name: Dict[str, MaterialModel] = {}
+        self.all_materials: List[YattaMaterial] = []
+        self.all_materials_map: Dict[int, YattaMaterial] = {}
+        self.all_materials_name: Dict[str, YattaMaterial] = {}
 
     def clear_class_data(self) -> None:
         self.all_materials.clear()
@@ -31,15 +31,15 @@ class Material(WikiModel):
         datas = await WikiModel.read(self.material_path)
         self.clear_class_data()
         for data in datas:
-            m = MaterialModel(**data)
+            m = YattaMaterial(**data)
             self.all_materials.append(m)
             self.all_materials_map[m.id] = m
             self.all_materials_name[m.name] = m
 
-    def get_by_id(self, cid: int) -> Optional[MaterialModel]:
+    def get_by_id(self, cid: int) -> Optional[YattaMaterial]:
         return self.all_materials_map.get(cid)
 
-    def get_by_name(self, name: str) -> Optional[MaterialModel]:
+    def get_by_name(self, name: str) -> Optional[YattaMaterial]:
         return self.all_materials_name.get(name)
 
     def get_name_list(self) -> List[str]:
