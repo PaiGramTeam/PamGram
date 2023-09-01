@@ -2,7 +2,6 @@ import asyncio
 from typing import Optional, List, Dict, TYPE_CHECKING, Any, Coroutine
 
 from simnet.models.starrail.chronicle.activity import (
-    StarRailStarFight,
     StarRailFantasticStory,
     StarRailTreasureDungeonRecord,
 )
@@ -68,62 +67,6 @@ class PlayerActivityPlugins(Plugin):
                 if player_info is not None:
                     uid = player_info.player_id
         return uid
-
-    @handler.command("star_fight", block=False)
-    @handler.message(filters.Regex("^星芒战幕信息查询(.*)"), block=False)
-    async def star_fight_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
-        message = update.effective_message
-        logger.info("用户 %s[%s] 查询星芒战幕信息命令请求", user.full_name, user.id)
-        try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin(user.id) as client:
-                render_result = await self.star_fight_render(client, uid)
-        except AttributeError as exc:
-            logger.error("活动数据有误")
-            logger.exception(exc)
-            await message.reply_text("活动数据有误 估计是彦卿晕了")
-            return
-        except NotHaveData:
-            reply_message = await message.reply_text("没有查找到此活动数据")
-            if filters.ChatType.GROUPS.filter(reply_message):
-                self.add_delete_message_job(message)
-                self.add_delete_message_job(reply_message)
-            return
-        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
-
-    async def get_star_fight_rander_data(self, uid: int, data: StarRailStarFight) -> Dict:
-        if not data.exists_data:
-            raise NotHaveData
-        avatar_icons = {}
-        for record in data.records:
-            for avatar in record.lineup:
-                avatar_icons[avatar.id] = self.assets.avatar.square(avatar.id).as_uri()
-        return {
-            "uid": mask_number(uid),
-            "records": data.records,
-            "avatar_icons": avatar_icons,
-        }
-
-    async def star_fight_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
-        if uid is None:
-            uid = client.player_id
-
-        act_data = await client.get_starrail_activity(uid)
-        try:
-            star_fight_data = act_data.star_fight
-        except ValueError:
-            raise NotHaveData
-        data = await self.get_star_fight_rander_data(uid, star_fight_data)
-
-        return await self.template_service.render(
-            "starrail/activity/star_fight.html",
-            data,
-            {"width": 500, "height": 1200},
-            full_page=True,
-            query_selector="#container",
-        )
 
     @handler.command("fantastic_story", block=False)
     @handler.message(filters.Regex("^评书奇谭信息查询(.*)"), block=False)
@@ -246,4 +189,56 @@ class PlayerActivityPlugins(Plugin):
         tasks = [render(record) for record in data.records if record.finish_time is not None]
         if len(tasks) == 1:
             return [await tasks[0]]
-        return await asyncio.gather(*tasks)
+        return await asyncio.gather(*tasks)  # noqa
+
+    @handler.command("copper_man", block=False)
+    @handler.message(filters.Regex("^金人巷信息查询(.*)"), block=False)
+    async def copper_man_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+        user = update.effective_user
+        message = update.effective_message
+        logger.info("用户 %s[%s] 查询金人巷信息命令请求", user.full_name, user.id)
+        try:
+            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
+            async with self.helper.genshin(user.id) as client:
+                render_result = await self.copper_man_render(client, uid)
+        except AttributeError as exc:
+            logger.error("活动数据有误")
+            logger.exception(exc)
+            await message.reply_text("活动数据有误 估计是彦卿晕了")
+            return
+        except NotHaveData:
+            reply_message = await message.reply_text("没有查找到此活动数据")
+            if filters.ChatType.GROUPS.filter(reply_message):
+                self.add_delete_message_job(message)
+                self.add_delete_message_job(reply_message)
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+
+    async def copper_man_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
+        if uid is None:
+            uid = client.player_id
+
+        act_data = await client.get_starrail_activity(uid)
+        try:
+            copper_man_data = act_data.copper_man
+            if not copper_man_data.exists_data:
+                raise ValueError
+            if not copper_man_data.info.exists_data:
+                raise ValueError
+        except ValueError:
+            raise NotHaveData
+        data = {
+            "uid": mask_number(uid),
+            "basic": copper_man_data.info.basic,
+            "shops": copper_man_data.info.shops[:-1],
+            "last_shop": copper_man_data.info.shops[-1],
+        }
+
+        return await self.template_service.render(
+            "starrail/activity/copper_man.html",
+            data,
+            {"width": 500, "height": 1200},
+            full_page=True,
+            query_selector="#container",
+        )
