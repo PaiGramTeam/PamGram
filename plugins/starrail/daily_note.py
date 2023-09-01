@@ -58,6 +58,8 @@ class DailyNotePlugin(Plugin):
             "resin_recovery_time": resin_recovery_time,
             "current_resin": daily_info.current_stamina,
             "max_resin": daily_info.max_stamina,
+            "current_reserve_stamina": daily_info.current_reserve_stamina,
+            "is_reserve_stamina_full": daily_info.is_reserve_stamina_full,
             "expeditions": bool(daily_info.expeditions),
             "remained_time": remained_time,
             "current_expeditions": len(daily_info.expeditions),

@@ -110,7 +110,7 @@ class DailyNoteTasksPlugin(Plugin.Conversation):
                         validate = WebAppData(**result.data)
                     except ValidationError:
                         await message.reply_text(
-                            "数据错误\n开拓力提醒数值必须在 100 ~ 180 之间",
+                            "数据错误\n开拓力提醒数值必须在 100 ~ 240 之间",
                             reply_markup=ReplyKeyboardRemove(),
                         )
                         return ConversationHandler.END
