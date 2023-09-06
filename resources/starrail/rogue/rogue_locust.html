@@ -8,7 +8,7 @@
 </head>
 <body>
 <div>
-    <div id="new-container">
+    <div id="new-locust-container">
         <div style="height: 10px;"></div>
         <div>
             <p class="text-white text-center"><span class="border rounded-pill p-1">
@@ -20,28 +20,35 @@
             <div class="row" style="width: 90%; margin-left: 25px;">
                 <div class="col">
                     <p class="text-white text-center">
-                        <span>{{ basic.unlocked_skill_points }}</span><br/><span>激活技能</span></p>
+                        <span>{{ cnt.narrow }}</span><br/><span>行者之道</span></p>
                 </div>
                 <div class="col">
                     <p class="text-white text-center">
-                        <span>{{ basic.unlocked_miracle_num }}</span><br/><span>解锁奇物</span></p>
+                        <span>{{ cnt.miracle }}</span><br/><span>解锁奇物</span></p>
                 </div>
                 <div class="col">
                     <p class="text-white text-center">
-                        <span>{{ basic.unlocked_buff_num }}</span><br/><span>解锁祝福</span></p>
+                        <span>{{ cnt.event }}</span><br/><span>解锁事件</span></p>
                 </div>
                 <div class="col">
                     <p class="text-white text-center">
-                        <span>{{ finish_cnt }}</span><br/><span>通关次数</span></p>
+                        <span>{{ finish_cnt }}</span><br/><span>最近通关</span></p>
                 </div>
             </div>
         </div>
+        {% if record %}
         <div id="detail">
             <div style="height: 30px;"></div>
             <p class="text-white text-center"><span>{{ name }}</span></p>
             <p class="text-white small mx-3" style="position: relative;">
-                <span style="margin-left: 40px;">{{ time }}</span>
-                <span style="position:absolute; right: 45px;">{{ score }} 分</span>
+                <span style="margin-left: 40px;">{{ record.time_str }}</span>
+                {% if record.fury %}
+                <span style="position:absolute; right: 45px;">
+                    {% if record.fury.type == 1 %}
+                    扰动等级：{{ record.fury.point }}
+                    {% endif %}
+                </span>
+                {% endif %}
             </p>
             <div class="hr"></div>
             <div style="height: 10px"></div>
@@ -65,7 +72,7 @@
             <div class="hr"></div>
             <div style="height: 10px"></div>
             <div id="buff">
-                {% for buff in buffs %}
+                {% for buff in record.buffs %}
                 <div>
                     <p class="text-white text-center">
                         <img class="buff-img"
@@ -95,7 +102,7 @@
             <div style="height: 10px;"></div>
             <div id="m ms-2">
                 <div class="row" style="width: 90%; margin-left: 20px;">
-                    {% for miracle in miracles %}
+                    {% for miracle in record.miracles %}
                     <div class="col">
                         <img class="buff-img" src="{{ miracle.icon }}" alt="">
                     </div>
@@ -104,6 +111,7 @@
             </div>
             <div style="height: 30px;"></div>
         </div>
+        {% endif %}
         <div style="height: 10px;"></div>
     </div>
 </div>

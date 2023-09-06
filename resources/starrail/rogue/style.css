@@ -5,6 +5,13 @@
     background-size: 100% 100%;
 }
 
+#new-locust-container {
+    width: 520px;
+    background-image: url("img/detail_bg.ab3a5254.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
 #overview {
     width: 100%;
     height: 100px;
@@ -35,6 +42,17 @@
 
 .avatar_text_width {
     width: 66px;
+}
+
+.avatar_mz {
+    position: absolute;
+    top: 0;
+    right: 27px;
+    width: 30px;
+    height: 30px;
+    background: rgba(0,0,0,.5);
+    border-radius: 0 1px 0 1.6vw;
+    color: #fff;
 }
 
 .hr {

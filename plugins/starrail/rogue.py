@@ -2,7 +2,7 @@ from typing import Optional, List, Dict, Tuple, TYPE_CHECKING
 
 from simnet.errors import BadRequest as SimnetBadRequest
 from simnet.models.starrail.character import RogueCharacter
-from simnet.models.starrail.chronicle.rogue import StarRailRogue
+from simnet.models.starrail.chronicle.rogue import StarRailRogue, StarRailRogueLocust
 from telegram import Update, Message
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
@@ -33,6 +33,20 @@ class NotHaveData(Exception):
 
 class PlayerRoguePlugins(Plugin):
     """玩家模拟宇宙信息查询"""
+
+    LUO_MA = ["", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ"]
+    BUFF_EN = {
+        "「丰饶」": "Abundance",
+        "「毁灭」": "Destruction",
+        "「智识」": "Erudition",
+        "「协同」": "Harmony",
+        "「巡猎」": "Hunt",
+        "「欢愉」": "Joy",
+        "「记忆」": "Memory",
+        "「虚无」": "Nihility",
+        "「存护」": "Preservation",
+        "「繁育」": "Propagation",
+    }
 
     def __init__(
         self,
@@ -114,18 +128,6 @@ class PlayerRoguePlugins(Plugin):
         await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
 
     async def get_rander_data(self, uid: int, data: StarRailRogue, pre: bool) -> Dict:
-        luo_ma_bum = ["", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ"]
-        buff_en_map = {
-            "「丰饶」": "Abundance",
-            "「毁灭」": "Destruction",
-            "「智识」": "Erudition",
-            "「协同」": "Harmony",
-            "「巡猎」": "Hunt",
-            "「欢愉」": "Joy",
-            "「记忆」": "Memory",
-            "「虚无」": "Nihility",
-            "「存护」": "Preservation",
-        }
         record_raw = data.last_record if pre else data.current_record
         if not record_raw.has_data:
             raise NotHaveData
@@ -140,13 +142,13 @@ class PlayerRoguePlugins(Plugin):
         return {
             "uid": mask_number(uid),
             "basic": data.basic_info,
-            "name": f"{record.name} {luo_ma_bum[record.difficulty]}",
+            "name": f"{record.name} {self.LUO_MA[record.difficulty]}",
             "finish_cnt": record_raw.basic.finish_cnt,
             "time": record.finish_time.datetime.strftime("%Y-%m-%d %H:%M"),
             "score": record.score,
             "avatars": new_avatars,
             "buffs": record.buffs,
-            "buff_en_map": buff_en_map,
+            "buff_en_map": self.BUFF_EN,
             "miracles": record.miracles,
         }
 
@@ -163,4 +165,54 @@ class PlayerRoguePlugins(Plugin):
             {"width": 520, "height": 1000},
             full_page=True,
             query_selector="#new-container",
+        )
+
+    @handler.command("rogue_locust", block=False)
+    @handler.message(filters.Regex("^寰宇蝗灾信息查询(.*)"), block=False)
+    async def rogue_locust_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
+        user = update.effective_user
+        message = update.effective_message
+        logger.info("用户 %s[%s] 查询寰宇蝗灾信息命令请求", user.full_name, user.id)
+        try:
+            async with self.helper.genshin(user.id) as client:
+                data = await client.get_starrail_rogue_locust()
+            render_result = await self.rogue_locust_render(data, client.player_id)
+        except SimnetBadRequest as exc:
+            raise exc
+        except AttributeError as exc:
+            logger.error("寰宇蝗灾数据有误")
+            logger.exception(exc)
+            await message.reply_text("寰宇蝗灾数据有误 估计是彦卿晕了")
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+
+    async def rogue_locust_render(self, source: StarRailRogueLocust, uid: int) -> RenderResult:
+        try:
+            record = max(source.detail.records, key=lambda x: x.finish_time.datetime)
+            name = f"{record.name} {self.LUO_MA[record.difficulty]}"
+            new_avatars = [None, None, None, None]
+            for idx, avatar in enumerate(record.final_lineup):
+                old_avatar = avatar.dict()
+                old_avatar["icon"] = self.assets.avatar.square(avatar.id).as_uri()
+                new_avatars[idx] = RogueCharacter(**old_avatar)
+        except ValueError:
+            record, name, new_avatars = None, None, None
+
+        data = {
+            "uid": mask_number(uid),
+            "cnt": source.basic.cnt,
+            "finish_cnt": len(source.detail.records),
+            "record": record,
+            "name": name,
+            "avatars": new_avatars,
+            "buff_en_map": self.BUFF_EN,
+        }
+
+        return await self.template_service.render(
+            "starrail/rogue/rogue_locust.html",
+            data,
+            {"width": 520, "height": 1000},
+            full_page=True,
+            query_selector="#new-locust-container",
         )
