@@ -30,15 +30,15 @@ relic_affix_map = {
 relic_affix_name_map = {v: k for k, v in relic_affix_map.items()}
 relic_affix_score_map = {
     RelicAffix.AttackAddedRatio: 1.0,
-    RelicAffix.AttackDelta: 0.5,
+    RelicAffix.AttackDelta: 0.15,
     RelicAffix.BreakDamageAddedRatioBase: 1.0,
     RelicAffix.CriticalChanceBase: 2.0,
     RelicAffix.CriticalDamageBase: 2.0,
     RelicAffix.DefenceAddedRatio: 1.0,
-    RelicAffix.DefenceDelta: 0.5,
+    RelicAffix.DefenceDelta: 0.15,
     RelicAffix.FireAddedRatio: 1.0,
     RelicAffix.HPAddedRatio: 1.0,
-    RelicAffix.HPDelta: 0.5,
+    RelicAffix.HPDelta: 0.15,
     RelicAffix.HealRatioBase: 1.0,
     RelicAffix.IceAddedRatio: 1.0,
     RelicAffix.ImaginaryAddedRatio: 1.0,
