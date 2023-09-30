@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
 
 __all__ = ("PlayerActivityPlugins",)
+ACTIVITY_DATA_ERROR = "活动数据有误"
+ACTIVITY_ATTR_ERROR = "活动数据有误 估计是彦卿晕了"
 
 
 class NotSupport(Exception):
@@ -30,6 +32,8 @@ class NotSupport(Exception):
 
 class NotHaveData(Exception):
     """没有数据"""
+
+    MSG = "没有查找到此活动数据"
 
 
 class PlayerActivityPlugins(Plugin):
@@ -79,12 +83,12 @@ class PlayerActivityPlugins(Plugin):
             async with self.helper.genshin(user.id) as client:
                 render_result = await self.fantastic_story_render(client, uid)
         except AttributeError as exc:
-            logger.error("活动数据有误")
+            logger.error(ACTIVITY_DATA_ERROR)
             logger.exception(exc)
-            await message.reply_text("活动数据有误 估计是彦卿晕了")
+            await message.reply_text(ACTIVITY_ATTR_ERROR)
             return
-        except NotHaveData:
-            reply_message = await message.reply_text("没有查找到此活动数据")
+        except NotHaveData as e:
+            reply_message = await message.reply_text(e.MSG)
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
@@ -137,12 +141,12 @@ class PlayerActivityPlugins(Plugin):
                 if render_result is None:
                     raise NotHaveData
         except AttributeError as exc:
-            logger.error("活动数据有误")
+            logger.error(ACTIVITY_DATA_ERROR)
             logger.exception(exc)
-            await message.reply_text("活动数据有误 估计是彦卿晕了")
+            await message.reply_text(ACTIVITY_ATTR_ERROR)
             return
-        except NotHaveData:
-            reply_message = await message.reply_text("没有查找到此活动数据")
+        except NotHaveData as e:
+            reply_message = await message.reply_text(e.MSG)
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
@@ -202,12 +206,12 @@ class PlayerActivityPlugins(Plugin):
             async with self.helper.genshin(user.id) as client:
                 render_result = await self.copper_man_render(client, uid)
         except AttributeError as exc:
-            logger.error("活动数据有误")
+            logger.error(ACTIVITY_DATA_ERROR)
             logger.exception(exc)
-            await message.reply_text("活动数据有误 估计是彦卿晕了")
+            await message.reply_text(ACTIVITY_ATTR_ERROR)
             return
-        except NotHaveData:
-            reply_message = await message.reply_text("没有查找到此活动数据")
+        except NotHaveData as e:
+            reply_message = await message.reply_text(e.MSG)
             if filters.ChatType.GROUPS.filter(reply_message):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
@@ -219,10 +223,10 @@ class PlayerActivityPlugins(Plugin):
         if uid is None:
             uid = client.player_id
 
-        act_data = await client.get_starrail_activity(uid)
+        act_data = await client.get_starrail_resident(uid)
         try:
             copper_man_data = act_data.copper_man
-            if not copper_man_data.exists_data:
+            if not copper_man_data.base.exists_data:
                 raise ValueError
             if not copper_man_data.info.exists_data:
                 raise ValueError
