@@ -9,12 +9,19 @@ from httpx import URL, AsyncClient, RemoteProtocolError, Response
 from utils.const import AMBR_HOST, PROJECT_ROOT
 from utils.log import logger
 
-__all__ = ["update_metadata_from_ambr", "update_metadata_from_github", "make_github_fast", "RESOURCE_DEFAULT_PATH"]
+__all__ = [
+    "update_metadata_from_ambr",
+    "update_metadata_from_github",
+    "make_github_fast",
+    "RESOURCE_DEFAULT_PATH",
+    "RESOURCE_FightPropRule_URL",
+]
 GENSHIN_PY_DATA_REPO = parse_token("aHR0cHM6Ly9naXRsYWIuY29tL0RpbWJyZWF0aC9nYW1lZGF0YS8tL3Jhdy9tYXN0ZXIv").decode()
 RESOURCE_REPO = "PaiGramTeam/PaiGram_Resources"
 RESOURCE_BRANCH = "remote"
 RESOURCE_ROOT = "Resources"
 RESOURCE_DEFAULT_PATH = f"{RESOURCE_REPO}/{RESOURCE_BRANCH}/{RESOURCE_ROOT}/"
+RESOURCE_FightPropRule_URL = "https://fightproprule.paimon.vip/"
 
 client = AsyncClient()
 

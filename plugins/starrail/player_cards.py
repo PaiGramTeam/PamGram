@@ -16,6 +16,7 @@ from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
 from metadata.shortname import roleToName, idToRole
 from modules.apihelper.client.components.player_cards import PlayerCards as PlayerCardsClient, PlayerInfo, Avatar, Relic
+from modules.apihelper.client.components.remote import Remote
 from modules.playercards.fight_prop import EquipmentsStats
 from modules.playercards.helpers import ArtifactStatsTheory
 from utils.log import logger
@@ -47,9 +48,14 @@ class PlayerCards(Plugin):
         self.template_service = template_service
         self.wiki_service = wiki_service
         self.kitsune: Optional[str] = None
+        self.fight_prop_rule: Dict[str, Dict[str, float]] = {}
 
     async def initialize(self):
         await self.client.async_init()
+        await self._refresh()
+
+    async def _refresh(self):
+        self.fight_prop_rule = await Remote.get_fight_prop_rule_data()
 
     async def _load_history(self, uid) -> Optional[PlayerInfo]:
         data = await self.client.player_cards_file.load_history_info(uid)
@@ -173,6 +179,7 @@ class PlayerCards(Plugin):
             self.assets_service,
             self.wiki_service,
             self.client,
+            self.fight_prop_rule,
         ).render()  # pylint: disable=W0631
         await render_result.reply_photo(
             message,
@@ -293,7 +300,13 @@ class PlayerCards(Plugin):
         await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await RenderTemplate(
-            uid, characters, self.template_service, self.assets_service, self.wiki_service, self.client
+            uid,
+            characters,
+            self.template_service,
+            self.assets_service,
+            self.wiki_service,
+            self.client,
+            self.fight_prop_rule,
         ).render()  # pylint: disable=W0631
         render_result.filename = f"player_card_{uid}_{result}.png"
         await render_result.edit_media(message)
@@ -440,6 +453,7 @@ class RenderTemplate:
         assets_service: AssetsService,
         wiki_service: WikiService,
         client: PlayerCardsClient,
+        fight_prop_rule: Dict[str, Dict[str, float]],
     ):
         self.uid = uid
         self.template_service = template_service
@@ -447,6 +461,7 @@ class RenderTemplate:
         self.assets_service = assets_service
         self.wiki_service = wiki_service
         self.client = client
+        self.fight_prop_rule = fight_prop_rule
 
     async def render(self):
         images = await self.cache_images()
@@ -520,7 +535,7 @@ class RenderTemplate:
     def find_artifacts(self) -> List[Artifact]:
         """在 equipments 数组中找到圣遗物，并转换成带有分数的 model。equipments 数组包含圣遗物和武器"""
 
-        stats = ArtifactStatsTheory(idToRole(self.character.avatarId))
+        stats = ArtifactStatsTheory(idToRole(self.character.avatarId), self.fight_prop_rule)
 
         def substat_score(s: EquipmentsStats) -> float:
             return stats.theory(s)
