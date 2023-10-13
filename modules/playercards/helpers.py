@@ -15,6 +15,7 @@ class ArtifactStatsTheory:
             self.main_prop = [
                 RelicAffix.CriticalChanceBase,
                 RelicAffix.CriticalDamageBase,
+                RelicAffix.SpeedDelta,
                 RelicAffix.AttackAddedRatio,
             ]
 
