@@ -128,6 +128,54 @@ class PlayerActivityPlugins(Plugin):
             query_selector="#container",
         )
 
+    @handler.command("yitai_battle", block=False)
+    @handler.message(filters.Regex("^以太战线信息查询(.*)"), block=False)
+    async def yitai_battle_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+        user = update.effective_user
+        message = update.effective_message
+        logger.info("用户 %s[%s] 查询以太战线信息命令请求", user.full_name, user.id)
+        try:
+            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
+            async with self.helper.genshin(user.id) as client:
+                render_result = await self.yitai_battle_render(client, uid)
+        except AttributeError as exc:
+            logger.error(ACTIVITY_DATA_ERROR)
+            logger.exception(exc)
+            await message.reply_text(ACTIVITY_ATTR_ERROR)
+            return
+        except NotHaveData as e:
+            reply_message = await message.reply_text(e.MSG)
+            if filters.ChatType.GROUPS.filter(reply_message):
+                self.add_delete_message_job(message)
+                self.add_delete_message_job(reply_message)
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+
+    async def yitai_battle_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
+        if uid is None:
+            uid = client.player_id
+
+        act_data = await client.get_starrail_activity(uid)
+        try:
+            yitai_battle_data = act_data.yitai_battle
+            if not (yitai_battle_data.exists_data and yitai_battle_data.info.exists_data):
+                raise NotHaveData
+        except ValueError:
+            raise NotHaveData
+        data = {
+            "uid": mask_number(uid),
+            "data": yitai_battle_data.info,
+        }
+
+        return await self.template_service.render(
+            "starrail/activity/yitai.html",
+            data,
+            {"width": 960, "height": 1000},
+            full_page=True,
+            query_selector="#DIV_1",
+        )
+
     @handler.command("treasure_dungeon", block=False)
     @handler.message(filters.Regex("^地城探宝信息查询(.*)"), block=False)
     async def treasure_dungeon_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/yitai.css" rel="stylesheet">
+</head>
+<body>
+<div>
+    <div id="DIV_1">
+        <div id="DIV_2">
+            <p id="P_3">
+                以太战线
+            </p>
+            <div id="DIV_4">
+                {% set gender_bg = ['', 'gender_1.019e84ed.png', 'gender_2.1ccf5d85.png'] %}
+                {% set rank_bg = ['', 'rank_1.467cdd9b.png', 'rank_2.bb4cfb69.png', 'rank_3.e10030df.png', 'rank_4.e2a47f70.png', 'rank_5.5cd5c289.png', 'rank_6.1908893a.png'] %}
+                <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ gender_bg[data.basic.gender] }}"
+                     id="IMG_5" alt=''/>
+                <div id="DIV_6">
+                    <div id="DIV_7">
+                        <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ rank_bg[data.basic.rating_id] }}"
+                             id="IMG_8" alt=''/>
+                        <span id="SPAN_9">{{ data.basic.rating_name }} - {{ uid }}</span>
+                    </div>
+                    <div id="DIV_10">
+                        <p id="P_11" style="width: {{ data.basic.rating_cur / data.basic.rating_max * 100 }}%!important;">
+                        </p>
+                    </div>
+                </div>
+                <div id="DIV_12">
+                    <p id="P_13">
+                        {{ data.basic.collect_cur }}/{{ data.basic.collect_max }}
+                    </p>
+                    <p id="P_14">
+                        以太灵收集进度
+                    </p>
+                </div>
+            </div>
+            <div id="DIV_15">
+                <div id="DIV_16">
+                    <div id="DIV_17">
+                        <div id="DIV_18">
+                            <span id="SPAN_19">决胜乐园</span>
+                        </div>
+                        <div id="DIV_22">
+                        </div>
+                    </div>
+                </div>
+                <div id="DIV_23">
+                    <div id="DIV_24">
+                        <div id="DIV_25">
+                            <div id="DIV_26">
+                                <div id="DIV_27">
+                                    <div id="DIV_28">
+                                        {% if data.fairy_land.is_open %}
+                                        {% set land_bg = 'land.ec6f60ce.png' %}
+                                        {% else %}
+                                        {% set land_bg = 'land_lock.370dc35d.png' %}
+                                        {% endif %}
+                                        <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ land_bg }}"
+                                             alt="" id="IMG_29"/>
+                                        {% if data.fairy_land.is_open %}
+                                        <div id="DIV_201">
+                                            <p id="P_202">
+                                                已击败对手
+                                            </p>
+                                            {% set enemy = {108: 'enemy_108.f2f1a13a.png', 109: 'enemy_109.bca00e7a.png', 110: 'enemy_110.ae202ae9.png', 111: 'enemy_111.182fb3cb.png', 112: 'enemy_112.18b3f6b0.png', 113: 'enemy_113.d73aea7f.png'} %}
+                                            <div id="DIV_203">
+                                                {% for kill in data.fairy_land.kills %}
+                                                <div id="DIV_204">
+                                                    <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ enemy[kill] }}" alt="" id="IMG_205" />
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div id="DIV_30">
+                                            竞技场尚未开启
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div id="DIV_31">
+                                        {% set city = data.fairy_land.cities[0] %}
+                                        <div id="DIV_32">
+                                            <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/city_1.0cafc249.png"
+                                                 alt="" id="IMG_33"/>
+                                            <div id="DIV_34">
+                                                <p id="P_35">
+                                                    残响回廊
+                                                </p>
+                                                {% if city.has_challenge %}
+                                                <div id="DIV_301">
+                                                    {% for _ in range(city.stars_cur) %}
+                                                    <i class="star"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                {% else %}
+                                                <p id="P_36">
+                                                    暂无挑战数据
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% set city = data.fairy_land.cities[1] %}
+                                        <div id="DIV_37">
+                                            <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/city_2.91aacc34.png"
+                                                 alt="" id="IMG_38"/>
+                                            <div id="DIV_39">
+                                                <p id="P_40">
+                                                    流云渡
+                                                </p>
+                                                {% if city.has_challenge %}
+                                                <div id="DIV_301">
+                                                    {% for _ in range(city.stars_cur) %}
+                                                    <i class="star"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                {% else %}
+                                                <p id="P_36">
+                                                    暂无挑战数据
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% set city = data.fairy_land.cities[2] %}
+                                        <div id="DIV_42">
+                                            <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/city_3.deb99fba.png"
+                                                 alt="" id="IMG_43"/>
+                                            <div id="DIV_44">
+                                                <p id="P_45">
+                                                    空间站「黑塔」
+                                                </p>
+                                                {% if city.has_challenge %}
+                                                <div id="DIV_301">
+                                                    {% for _ in range(city.stars_cur) %}
+                                                    <i class="star"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                {% else %}
+                                                <p id="P_36">
+                                                    暂无挑战数据
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% set city = data.fairy_land.cities[3] %}
+                                        <div id="DIV_47">
+                                            <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/city_4.b8400d03.png"
+                                                 alt="" id="IMG_48"/>
+                                            <div id="DIV_49">
+                                                <p id="P_50">
+                                                    大矿区
+                                                </p>
+                                                {% if city.has_challenge %}
+                                                <div id="DIV_301">
+                                                    {% for _ in range(city.stars_cur) %}
+                                                    <i class="star"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                {% else %}
+                                                <p id="P_36">
+                                                    暂无挑战数据
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="DIV_52">
+                            <div id="DIV_53">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="height: 100px"></div>
+            <div id="DIV_15">
+                <div id="DIV_16">
+                    <div id="DIV_17">
+                        <div id="DIV_18">
+                            <span id="SPAN_19">超链接对决</span>
+                        </div>
+                        <div id="DIV_22">
+                        </div>
+                    </div>
+                </div>
+                <div id="DIV_23">
+                    <div id="DIV_24">
+                        <div id="DIV_101">
+                            {% for battle in data.link_battle %}
+                            <div id="DIV_102">
+                                <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ rank_bg[battle.rank] }}"
+                                     alt="" id="IMG_103"/> <span id="SPAN_104">{{ battle.rank_name }}</span> <span
+                                    id="SPAN_105">{{ battle.challenge_cur }}/{{ battle.challenge_max }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
