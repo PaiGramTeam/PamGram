@@ -88,6 +88,7 @@ class PlayerMuseumPlugins(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        self.track_event(update, "museum")
 
     @staticmethod
     async def get_rander_data(uid: int, basic: StarRailMuseumBasic, detail: StarRailMuseumDetail) -> Dict:

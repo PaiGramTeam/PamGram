@@ -66,9 +66,9 @@ class Avatar(BaseModel):
 
 
 class ChallengeInfo(BaseModel):
-    MazeGroupID: Optional[int]
-    MazeGroupIndex: Optional[int]
-    PreMazeGroupIndex: Optional[int]
+    scheduleGroupId: Optional[int]
+    noneScheduleMaxLevel: Optional[int]
+    scheduleMaxLevel: Optional[int]
 
 
 class RecordInfo(BaseModel):

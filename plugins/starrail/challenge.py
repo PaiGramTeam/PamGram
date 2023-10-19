@@ -166,6 +166,7 @@ class ChallengePlugin(Plugin):
             await reply_text.delete()
 
         logger.info("用户 %s[%s] [bold]混沌回忆挑战数据[/bold]: 成功发送图片", user.full_name, user.id, extra={"markup": True})
+        self.track_event(update, "challenge")
 
     @staticmethod
     def get_floor_data(abyss_data, floor: int):

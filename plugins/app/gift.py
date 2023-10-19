@@ -87,3 +87,5 @@ class GiftCodePlugin(Plugin):
         reply = await message.reply_html(await self.get_gift_code_message(), reply_markup=keyboard)
         self.add_delete_message_job(message)
         self.add_delete_message_job(reply)
+        self.track_event(update, "gift")
+        slice

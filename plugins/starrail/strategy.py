@@ -83,3 +83,4 @@ class StrategyPlugin(Plugin):
                     photo_file_id=photo_file_id,
                 )
                 await self.search_service.add_entry(entry)
+        self.track_event(update, "strategy")

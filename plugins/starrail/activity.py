@@ -95,6 +95,7 @@ class PlayerActivityPlugins(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        self.track_event(update, "fantastic_story")
 
     async def get_fantastic_story_rander_data(self, uid: int, data: StarRailFantasticStory) -> Dict:
         if not data.exists_data:
@@ -151,6 +152,7 @@ class PlayerActivityPlugins(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        self.track_event(update, "yitai_battle")
 
     async def yitai_battle_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -204,6 +206,7 @@ class PlayerActivityPlugins(Plugin):
             message, allow_sending_without_reply=True, write_timeout=60
         )
         logger.info("用户 %s[%s] [bold]地城探宝信息数据[/bold]: 成功发送图片", user.full_name, user.id, extra={"markup": True})
+        self.track_event(update, "treasure_dungeon")
 
     async def treasure_dungeon_render(self, client: "StarRailClient", uid: Optional[int] = None) -> List[RenderResult]:
         if uid is None:
@@ -266,6 +269,7 @@ class PlayerActivityPlugins(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        self.track_event(update, "copper_man")
 
     async def copper_man_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:

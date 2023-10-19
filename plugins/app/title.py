@@ -40,3 +40,4 @@ class TitlePlugin(Plugin):
         reply = await message.reply_text("设置成功。")
         self.add_delete_message_job(message)
         self.add_delete_message_job(reply)
+        self.track_event(update, "title")

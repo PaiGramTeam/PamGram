@@ -115,6 +115,7 @@ class PlayerRoguePlugins(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        self.track_event(update, "rogue")
 
     async def get_rander_data(self, uid: int, data: StarRailRogue, pre: bool) -> Dict:
         record_raw = data.last_record if pre else data.current_record
@@ -175,6 +176,7 @@ class PlayerRoguePlugins(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        self.track_event(update, "rogue_locust")
 
     async def rogue_locust_render(self, source: StarRailRogueLocust, uid: int) -> RenderResult:
         try:

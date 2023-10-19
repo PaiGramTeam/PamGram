@@ -178,6 +178,7 @@ class WishLogPlugin(Plugin.Conversation):
         await message.reply_chat_action(ChatAction.TYPING)
         text = await self._refresh_user_data(user, authkey=authkey)
         await reply.edit_text(text)
+        self.track_event(update, "wish_log_import")
         return ConversationHandler.END
 
     @conversation.entry_point
@@ -211,6 +212,7 @@ class WishLogPlugin(Plugin.Conversation):
             await message.reply_text("跃迁记录已删除" if status else "跃迁记录删除失败")
             return ConversationHandler.END
         await message.reply_text("已取消")
+        self.track_event(update, "wish_log_delete")
         return ConversationHandler.END
 
     @handler.command(command="warp_log_force_delete", block=False, admin=True)
@@ -250,6 +252,7 @@ class WishLogPlugin(Plugin.Conversation):
             path = await self.gacha_log.gacha_log_to_srgf(str(user.id), str(player_id))
             await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT)
             await message.reply_document(document=open(path, "rb+"), caption="跃迁记录导出文件 - SRGF V1.0")
+            self.track_event(update, "warp_log_export")
         except GachaLogNotFound:
             logger.info("未找到用户 %s[%s] 的跃迁记录", user.full_name, user.id)
             buttons = [
@@ -306,6 +309,7 @@ class WishLogPlugin(Plugin.Conversation):
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]
             await message.reply_text("彦卿没有找到你此卡池的跃迁记录，快来点击按钮私聊彦卿导入吧~", reply_markup=InlineKeyboardMarkup(buttons))
+        self.track_event(update, "warp_log")
 
     @handler.command(command="warp_count", block=False)
     @handler.message(filters=filters.Regex("^跃迁统计?(光锥|角色|常驻|新手)$"), block=False)
@@ -360,3 +364,4 @@ class WishLogPlugin(Plugin.Conversation):
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]
             await message.reply_text("彦卿没有找到你此卡池的跃迁记录，快来私聊彦卿导入吧~", reply_markup=InlineKeyboardMarkup(buttons))
+        self.track_event(update, "warp_count")
