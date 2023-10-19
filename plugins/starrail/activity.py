@@ -80,7 +80,7 @@ class PlayerActivityPlugins(Plugin):
         logger.info("用户 %s[%s] 查询评书奇谭信息命令请求", user.full_name, user.id)
         try:
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin(user.id) as client:
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
                 render_result = await self.fantastic_story_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -136,7 +136,7 @@ class PlayerActivityPlugins(Plugin):
         logger.info("用户 %s[%s] 查询以太战线信息命令请求", user.full_name, user.id)
         try:
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin(user.id) as client:
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
                 render_result = await self.yitai_battle_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -184,7 +184,7 @@ class PlayerActivityPlugins(Plugin):
         logger.info("用户 %s[%s] 查询地城探宝信息命令请求", user.full_name, user.id)
         try:
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin(user.id) as client:
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
                 render_result = await self.treasure_dungeon_render(client, uid)
                 if render_result is None:
                     raise NotHaveData
@@ -251,7 +251,7 @@ class PlayerActivityPlugins(Plugin):
         logger.info("用户 %s[%s] 查询金人巷信息命令请求", user.full_name, user.id)
         try:
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin(user.id) as client:
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
                 render_result = await self.copper_man_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)

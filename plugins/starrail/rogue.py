@@ -12,7 +12,7 @@ from core.plugin import Plugin, handler
 from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
-from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError
+from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
 from utils.uid import mask_number
 
@@ -91,19 +91,8 @@ class PlayerRoguePlugins(Plugin):
         logger.info("用户 %s[%s] 查询模拟宇宙信息命令请求", user.full_name, user.id)
         try:
             uid, pre = await self.get_uid(user.id, context.args, message.reply_to_message)
-            try:
-                async with self.helper.genshin(user.id) as client:
-                    if client.player_id != uid:
-                        raise CookiesNotFoundError(uid)
-                    render_result = await self.render(client, pre, uid)
-            except CookiesNotFoundError:
-                async with self.helper.public_genshin(user.id) as client:
-                    render_result = await self.render(client, pre, uid)
-        except SimnetBadRequest as exc:
-            if exc.retcode == 1034:
-                await message.reply_text("出错了呜呜呜 ~ 请稍后重试")
-                return
-            raise exc
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+                render_result = await self.render(client, pre, uid)
         except TooManyRequestPublicCookies:
             await message.reply_text("用户查询次数过多 请稍后重试")
             return
