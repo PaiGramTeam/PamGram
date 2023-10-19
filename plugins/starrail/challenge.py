@@ -6,7 +6,6 @@ from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 
 from arkowrapper import ArkoWrapper
 from pytz import timezone
-from simnet.errors import BadRequest as SimnetBadRequest
 from telegram import Message, Update
 from telegram.constants import ChatAction, ParseMode
 from telegram.ext import CallbackContext, filters
@@ -16,7 +15,7 @@ from core.plugin import Plugin, handler
 from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.template.models import RenderGroupResult, RenderResult
 from core.services.template.services import TemplateService
-from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError
+from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
 from utils.uid import mask_number
 

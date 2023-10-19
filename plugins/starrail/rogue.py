@@ -12,7 +12,7 @@ from core.plugin import Plugin, handler
 from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
-from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError
+from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
 from utils.uid import mask_number
 

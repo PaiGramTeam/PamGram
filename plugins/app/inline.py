@@ -15,8 +15,8 @@ from telegram.constants import ParseMode
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
 
-from core.plugin import Plugin, handler
 from core.dependence.assets import AssetsService
+from core.plugin import Plugin, handler
 from core.services.search.services import SearchServices
 from core.services.wiki.services import WikiService
 from utils.log import logger
