@@ -66,9 +66,7 @@ class Mixpanel:
         record = {"$token": self.token, "$time": self._now()}
         # sourcery skip: dict-assign-update-to-union
         record.update(message)
-        return await self.api_call(
-            "people", self.json_dumps(record, cls=self._serializer)
-        )
+        return await self.api_call("people", self.json_dumps(record, cls=self._serializer))
 
     async def track(self, distinct_id: str, event_name: str, properties: dict):
         all_properties = {
@@ -86,9 +84,7 @@ class Mixpanel:
             "event": event_name,
             "properties": all_properties,
         }
-        return await self.api_call(
-            "events", self.json_dumps(event, cls=self._serializer)
-        )
+        return await self.api_call("events", self.json_dumps(event, cls=self._serializer))
 
     async def track_user(self, update: Update):
         user = update.effective_user
