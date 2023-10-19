@@ -68,22 +68,10 @@ class PlayerMuseumPlugins(Plugin):
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] 查询博物馆信息命令请求", user.full_name, user.id)
-        public = False
         try:
             uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            try:
-                async with self.helper.genshin(user.id) as client:
-                    if client.player_id != uid:
-                        raise CookiesNotFoundError(uid)
-                    render_result = await self.render(client, uid)
-            except CookiesNotFoundError:
-                public = True
-                async with self.helper.public_genshin(user.id) as client:
-                    render_result = await self.render(client, uid)
-        except SimnetBadRequest as exc:
-            if exc.retcode == 1034 and public:
-                raise CookiesNotFoundError(user.id) from exc
-            raise exc
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+                render_result = await self.render(client, uid)
         except TooManyRequestPublicCookies:
             await message.reply_text("用户查询次数过多 请稍后重试")
             return
