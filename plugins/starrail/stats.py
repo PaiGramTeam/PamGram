@@ -60,6 +60,7 @@ class PlayerStatsPlugins(Plugin):
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] 查询游戏用户命令请求", user.full_name, user.id)
+        public = False
         try:
             uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
             try:
@@ -68,12 +69,12 @@ class PlayerStatsPlugins(Plugin):
                         raise CookiesNotFoundError(uid)
                     render_result = await self.render(client, uid)
             except CookiesNotFoundError:
+                public = True
                 async with self.helper.public_genshin(user.id) as client:
                     render_result = await self.render(client, uid)
         except SimnetBadRequest as exc:
-            if exc.retcode == 1034:
-                await message.reply_text("出错了呜呜呜 ~ 请稍后重试")
-                return
+            if exc.retcode == 1034 and public:
+                raise CookiesNotFoundError(user.id) from exc
             raise exc
         except TooManyRequestPublicCookies:
             await message.reply_text("用户查询次数过多 请稍后重试")

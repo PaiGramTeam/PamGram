@@ -133,6 +133,7 @@ class ChallengePlugin(Plugin):
             _reply_msg = await message.reply_text(f"开拓者 (<code>{uid}</code>) {content}", parse_mode=ParseMode.HTML)
 
         reply_text: Optional[Message] = None
+        public = False
 
         try:
             try:
@@ -144,6 +145,7 @@ class ChallengePlugin(Plugin):
                     await message.reply_chat_action(ChatAction.TYPING)
                     images = await self.get_rendered_pic(client, uid, floor, total, previous)
             except CookiesNotFoundError:
+                public = True
                 async with self.helper.public_genshin(user.id) as client:
                     if total:
                         reply_text = await message.reply_text("彦卿需要时间整理混沌回忆数据，还请耐心等待哦~")
@@ -162,9 +164,8 @@ class ChallengePlugin(Plugin):
             await reply_message_func("还没有挑战本层呢，咕咕咕~")
             return
         except SimnetBadRequest as exc:
-            if exc.retcode == 1034 and client.player_id != uid:
-                await message.reply_text("出错了呜呜呜 ~ 请稍后重试 ~ 米游社风控太严力")
-                return
+            if exc.retcode == 1034 and public:
+                raise CookiesNotFoundError(user.id) from exc
             raise exc
         if images is None:
             await reply_message_func(f"还没有第 {floor} 层的挑战数据")
