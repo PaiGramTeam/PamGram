@@ -176,6 +176,58 @@ class PlayerActivityPlugins(Plugin):
             query_selector="#DIV_1",
         )
 
+    @handler.command("endless_side", block=False)
+    @handler.message(filters.Regex("^无尽位面信息查询(.*)"), block=False)
+    async def endless_side_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+        user = update.effective_user
+        message = update.effective_message
+        logger.info("用户 %s[%s] 查询无尽位面信息命令请求", user.full_name, user.id)
+        try:
+            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+                render_result = await self.endless_side_render(client, uid)
+        except AttributeError as exc:
+            logger.error(ACTIVITY_DATA_ERROR)
+            logger.exception(exc)
+            await message.reply_text(ACTIVITY_ATTR_ERROR)
+            return
+        except NotHaveData as e:
+            reply_message = await message.reply_text(e.MSG)
+            if filters.ChatType.GROUPS.filter(reply_message):
+                self.add_delete_message_job(message)
+                self.add_delete_message_job(reply_message)
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+
+    async def endless_side_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
+        if uid is None:
+            uid = client.player_id
+
+        act_data = await client.get_starrail_activity(uid)
+        try:
+            endless_side_data = act_data.endless_side
+            if not (
+                endless_side_data.exists_data and endless_side_data.info.exists_data and endless_side_data.info.records
+            ):
+                raise NotHaveData
+            if not endless_side_data.info.records[0].finished:
+                raise NotHaveData
+        except ValueError:
+            raise NotHaveData
+        data = {
+            "uid": mask_number(uid),
+            "info": endless_side_data.info,
+        }
+
+        return await self.template_service.render(
+            "starrail/activity/endless_side.html",
+            data,
+            {"width": 960, "height": 1000},
+            full_page=True,
+            query_selector="#endless_side",
+        )
+
     @handler.command("treasure_dungeon", block=False)
     @handler.message(filters.Regex("^地城探宝信息查询(.*)"), block=False)
     async def treasure_dungeon_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:

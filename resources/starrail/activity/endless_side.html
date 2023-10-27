@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/pc_f95b4488.css" rel="stylesheet">
+    <link href="css/c_hsr_act_Endless_28cca4fd.css" rel="stylesheet">
+</head>
+<body>
+<div style="width: 960px;" id="endless_side">
+    <div data-v-287f8100="" data-v-8ee8631e="" class="endless">
+        <p data-v-287f8100="" class="title">无尽位面 - {{ uid }}</p>
+        <div data-v-287f8100="" class="summary">
+            <p data-v-287f8100="" class="summary-p1">累计最高试炼点数 :</p>
+            <p data-v-287f8100="" class="summary-p2">{{ info.total_score }}</p>
+        </div>
+        <div data-v-287f8100="" class="items">
+            {% for record in info.records %}
+            <div data-v-04e81689="" data-v-287f8100="" class="block">
+                <img data-v-04e81689="" src="images/endless_side/card_bg_{{ loop.index0 }}.png" alt="" class="bg">
+                <p data-v-04e81689="" class="title">{{ record.name }}</p>
+                <img data-v-04e81689="" src="images/endless_side/level_{{ loop.index0 }}.png" alt="" class="icon">
+                {% if record.finished %}
+                <div data-v-04e81689="" class="mid-info">
+                    <div data-v-04e81689="" class="mid-info-line">
+                        <span data-v-04e81689="" class="mid-info-line-left">最终试炼</span>
+                        <span data-v-04e81689="" class="mid-info-line-right">{{ record.level }}</span>
+                    </div>
+                    <div data-v-04e81689="" class="mid-info-line">
+                        <span data-v-04e81689="" class="mid-info-line-left">试炼点数</span>
+                        <span data-v-04e81689="" class="mid-info-line-right">{{ record.point }}</span>
+                    </div>
+                </div>
+                <img data-v-04e81689="" src="images/endless_side/rank_{{ record.rank }}.png" alt="" class="rank">
+                <div data-v-04e81689="" class="btm">
+                    <div data-v-04e81689="" class="inner">
+                        <p data-v-04e81689="" class="role-title">已下载角色</p>
+                        <div data-v-04e81689="" class="roles">
+                            {% for avatar in record.avatars %}
+                            <div data-v-04e81689="" class="role">
+                                <img data-v-04e81689="" src="{{ avatar.icon }}" alt="">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div data-v-04e81689="" class="inner-btm">
+                            <div data-v-04e81689="" class="ib ib-top">
+                                <img data-v-04e81689="" src="images/endless_side/{{ record.base_buff_id }}.png" alt=""
+                                     class="buff-icon">
+                                <span data-v-04e81689="">{{ record.base_buff_name }}</span>
+                            </div>
+                            <div data-v-04e81689="" class="ib ib-mid">
+                                获得祝福 <span data-v-04e81689="">{{ record.buff_cnt }}</span>
+                            </div>
+                            <div data-v-04e81689="" class="ib ib-btm">
+                                获得奇物 <span data-v-04e81689="">{{ record.miracle_cnt }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div data-v-04e81689="" class="empty">尚未挑战最终试炼</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+</html>
