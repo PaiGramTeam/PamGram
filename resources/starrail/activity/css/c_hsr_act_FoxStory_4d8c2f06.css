@@ -1,0 +1,982 @@
+/*! Copyright Â© 2011 - 2023 miHoYo. All Rights Reserved */
+.figure-line[data-v-1b240865] {
+    position: relative;
+    height: 100%;
+    width: 0
+}
+
+.figure-line .line[data-v-1b240865] {
+    width: 6px;
+    height: auto;
+    position: absolute;
+    bottom: -3px;
+    left: calc(50% - 3px)
+}
+
+.figure-line .line.size--l[data-v-1b240865] {
+    width: 10px;
+    bottom: -5px;
+    left: calc(50% - 5px)
+}
+
+.figure-line .label[data-v-1b240865] {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: column;
+    flex-flow: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.figure-line .label .label__item[data-v-1b240865] {
+    color: #c8e2e8;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 14px;
+    white-space: nowrap;
+    font-family: RPG_CN_Condensed
+}
+
+.figure-line .label .label__item.size--l[data-v-1b240865] {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 700
+}
+
+.figure-line .label .label__item[data-v-1b240865]:not(:first-child) {
+    margin-top: 4px;
+    color: #6fbed1;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 12px
+}
+
+.figure-line .label .label__item:not(:first-child).size--l[data-v-1b240865] {
+    font-size: 14px;
+    line-height: 20px
+}
+
+.fans-figure[data-v-7734411a] {
+    height: 100%;
+    padding: 20px 20px 0
+}
+
+.fans-figure .wrapper[data-v-7734411a] {
+    overflow: hidden;
+    margin-top: 36px;
+    height: calc(100% - 36px);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: column;
+    flex-flow: column;
+    -webkit-box-align: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    -webkit-box-pack: end;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
+    padding-bottom: 63px
+}
+
+.fans-figure .main-wrapper[data-v-7734411a] {
+    height: auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: stretch;
+    -ms-flex-pack: stretch;
+    justify-content: stretch;
+    -webkit-box-align: end;
+    -ms-flex-align: end;
+    align-items: flex-end;
+    position: relative;
+    width: 90%;
+    -ms-flex-item-align: start;
+    align-self: flex-start
+}
+
+.fans-figure .main[data-v-7734411a] {
+    position: relative;
+    bottom: -1px;
+    left: 0;
+    z-index: 3;
+    width: 100%
+}
+
+.fans-figure .main .figure[data-v-7734411a] {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 0;
+    padding-bottom: 46.05%;
+    background: no-repeat bottom/100% 100%;
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/figure@pc.03d62328.png);
+    -webkit-clip-path: inset(0 100% 0 0);
+    clip-path: inset(0 100% 0 0)
+}
+
+.fans-figure .main .figure.visible[data-v-7734411a] {
+    -webkit-clip-path: inset(0 var(--clip-right) 0 0);
+    clip-path: inset(0 var(--clip-right) 0 0);
+    -webkit-transition: -webkit-clip-path .4s cubic-bezier(.68, .16, .43, .81);
+    transition: -webkit-clip-path .4s cubic-bezier(.68, .16, .43, .81);
+    -o-transition: clip-path .4s cubic-bezier(.68, .16, .43, .81);
+    transition: clip-path .4s cubic-bezier(.68, .16, .43, .81);
+    transition: clip-path .4s cubic-bezier(.68, .16, .43, .81), -webkit-clip-path .4s cubic-bezier(.68, .16, .43, .81)
+}
+
+.fans-figure .main .progress-cursor[data-v-7734411a] {
+    position: absolute;
+    bottom: 0
+}
+
+.fans-figure .main .progress-cursor[data-v-7734411a]:before {
+    content: "";
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #8eedf1;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    opacity: .3
+}
+
+.fans-figure .main .progress-cursor .cursor-label[data-v-7734411a] {
+    z-index: 10;
+    position: absolute;
+    bottom: calc(12px + 100%);
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    min-width: 58px;
+    height: 26px;
+    padding: 0 8px 4px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    color: var(--general-grey-black-1, #000);
+    font-family: RPG_CN_Condensed;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    white-space: nowrap;
+    background: no-repeat 50%/contain url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/bubble.547e3518.png);
+    opacity: 0
+}
+
+.fans-figure .main .progress-cursor .cursor-label.visible[data-v-7734411a] {
+    opacity: 1;
+    -webkit-transition: opacity .4s .4s;
+    -o-transition: opacity .4s .4s;
+    transition: opacity .4s .4s
+}
+
+.fans-figure .main .progress-cursor .cursor-label .cursor-label-bg[data-v-7734411a] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 22px;
+    border-radius: 11px;
+    background: #ecf4f7
+}
+
+.fans-figure .main .progress-cursor .cursor-label .cursor-label-bg .cursor-label-arrow[data-v-7734411a] {
+    position: absolute;
+    width: 10px;
+    height: 7px;
+    top: calc(100% - 2px);
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.fans-figure .main .progress-cursor .cursor-label .cursor-label-txt[data-v-7734411a] {
+    position: relative;
+    z-index: 1
+}
+
+.fans-figure .main .progress-cursor .cursor-dot[data-v-7734411a] {
+    z-index: 5;
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    -webkit-transform: scale(1.2);
+    -ms-transform: scale(1.2);
+    transform: scale(1.2)
+}
+
+.fans-figure .main .progress-cursor .cursor-dot .cursor-dot-center[data-v-7734411a] {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #8dedf0;
+    background: #191f28
+}
+
+.fans-figure .main .progress-cursor .cursor-line[data-v-7734411a] {
+    z-index: 4;
+    position: absolute;
+    height: calc(100% - 8px);
+    top: 8px;
+    width: 0;
+    left: -1px;
+    border: 1px dashed #8dedf1;
+    border-top: none;
+    border-bottom: none;
+    opacity: 0
+}
+
+.fans-figure .main .progress-cursor .cursor-line.visible[data-v-7734411a] {
+    opacity: 1;
+    -webkit-transition: opacity .2s .4s;
+    -o-transition: opacity .2s .4s;
+    transition: opacity .2s .4s
+}
+
+.fans-figure .base-line[data-v-7734411a] {
+    height: 2px;
+    background: #4f5862
+}
+
+.fans-figure .line-marks[data-v-7734411a] {
+    height: 0
+}
+
+.fans-figure .line-marks[data-v-7734411a], .fans-figure .medal-container[data-v-7734411a] {
+    width: 100%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: distribute;
+    justify-content: space-around
+}
+
+.fans-figure .medal-container[data-v-7734411a] {
+    z-index: 5;
+    position: relative
+}
+
+.fans-figure .medal-container .medal[data-v-7734411a] {
+    position: relative;
+    width: 0;
+    height: 0;
+    bottom: 11px;
+    -webkit-transform: scale(1.6667);
+    -ms-transform: scale(1.6667);
+    transform: scale(1.6667);
+    -webkit-transform-origin: bottom;
+    -ms-transform-origin: bottom;
+    transform-origin: bottom
+}
+
+.fans-figure .medal-container .medal[data-v-7734411a]:before {
+    content: "";
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    left: -18px;
+    bottom: 0;
+    background: no-repeat 50%/contain
+}
+
+.fans-figure .medal-container .medal.medal--gold[data-v-7734411a]:before {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/medal-gold.a05b697c.png)
+}
+
+.fans-figure .medal-container .medal.medal--silver[data-v-7734411a]:before {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/medal-silver.8a363781.png)
+}
+
+.fans-figure .medal-container .medal.medal--got[data-v-7734411a]:after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    left: -5px;
+    bottom: 0;
+    background: no-repeat 50%/contain url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/medal--got.e1ef0eba.png)
+}
+
+.ghost-hunting[data-v-e688361a] {
+    padding: 0 40px
+}
+
+.ghost-hunting .profile[data-v-e688361a] {
+    margin-top: 28px;
+    width: 100%;
+    height: 72px;
+    position: relative;
+    overflow: visible
+}
+
+.ghost-hunting .profile .profile-bg[data-v-e688361a] {
+    position: absolute;
+    left: 0;
+    top: -18px;
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/profile-bg@pc.e1dd7f28.png) no-repeat 0/100% 100%;
+    width: 883px;
+    height: 98px
+}
+
+.ghost-hunting .profile .profile-fg[data-v-e688361a] {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+    padding: 12px 16px
+}
+
+.ghost-hunting .profile .profile-fg .avatar[data-v-e688361a] {
+    width: 48px;
+    height: 48px;
+    background: no-repeat 50%/contain url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/avatar.02b1ef6d.png);
+    position: relative
+}
+
+.ghost-hunting .profile .profile-fg .avatar[data-v-e688361a]:after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/avatar-icon-0.1011f1e2.png) no-repeat 50%/contain
+}
+
+.ghost-hunting .profile .profile-fg .avatar--stage-1[data-v-e688361a]:after {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/avatar-icon-1.04170de5.png)
+}
+
+.ghost-hunting .profile .profile-fg .avatar--stage-2[data-v-e688361a]:after {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/avatar-icon-2.323bef5b.png)
+}
+
+.ghost-hunting .profile .profile-fg .info[data-v-e688361a] {
+    margin-left: 16px;
+    max-width: 580px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.ghost-hunting .profile .profile-fg .info .nickname[data-v-e688361a] {
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    white-space: nowrap;
+    min-width: 0;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    color: #c5e8ef;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 28px
+}
+
+.ghost-hunting .profile .profile-fg .info .info-divider[data-v-e688361a] {
+    margin: 0 24px;
+    width: 1px;
+    height: 12px;
+    background: rgba(180, 215, 223, .6)
+}
+
+.ghost-hunting .profile .profile-fg .info .fans[data-v-e688361a] {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.ghost-hunting .profile .profile-fg .info .fans .fans-label[data-v-e688361a] {
+    color: #c5e8ef;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px
+}
+
+.ghost-hunting .profile .profile-fg .info .fans .fans-num[data-v-e688361a] {
+    margin-left: 8px;
+    color: #e4f8fc;
+    font-family: RPG_CN_Condensed;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 24px
+}
+
+.ghost-hunting .profile .profile-fg .subscription[data-v-e688361a] {
+    position: absolute;
+    right: 94px;
+    top: 22px;
+    height: 28px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    border-radius: 2px;
+    border: 1px solid #125d6e;
+    background: #073c54;
+    padding: 0 8px;
+    color: #c5e8ef;
+    font-size: 14px;
+    line-height: 20px
+}
+
+.ghost-hunting .profile .profile-fg .fans-level[data-v-e688361a] {
+    font-family: RPG_CN_Condensed;
+    width: 28px;
+    position: absolute;
+    top: 31px;
+    right: 27px;
+    color: #e6f3f5;
+    overflow: visible;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px
+}
+
+.ghost-hunting .chart[data-v-e688361a] {
+    margin: 28px 0 40px;
+    width: 880px;
+    height: 586px;
+    border: 1px solid rgba(25, 153, 165, .39);
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(22, 25, 31, .81)), to(rgba(35, 48, 61, .81)));
+    background: -webkit-linear-gradient(top, rgba(22, 25, 31, .81), rgba(35, 48, 61, .81));
+    background: -o-linear-gradient(top, rgba(22, 25, 31, .81) 0, rgba(35, 48, 61, .81) 100%);
+    background: linear-gradient(180deg, rgba(22, 25, 31, .81), rgba(35, 48, 61, .81));
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    position: relative
+}
+
+.ghost-hunting .chart .popularity[data-v-e688361a] {
+    position: absolute;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    color: #c8e2e8;
+    top: 20px;
+    left: 20px
+}
+
+.ghost-hunting .chart .popularity[data-v-e688361a]:before {
+    content: "";
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    width: 4px;
+    height: 18px;
+    background: #61f0f3
+}
+
+.ghost-hunting .chart .popularity .popularity-label[data-v-e688361a] {
+    margin-left: 8px;
+    color: #c8e2e8;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px
+}
+
+.ghost-hunting .chart .popularity .popularity-num[data-v-e688361a] {
+    font-family: RPG_CN_Condensed;
+    margin-left: 8px;
+    color: #c8e2e8;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 14px
+}
+
+.ghost-hunting .footer[data-v-e688361a] {
+    margin-top: 16px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.ghost-hunting .footer .strategy-button[data-v-e688361a] {
+    cursor: pointer;
+    width: 309px;
+    height: 30px;
+    padding: 0 16px;
+    background: no-repeat 50%/contain url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/strategy-btn-bg.5af572e6.png);
+    color: hsla(0, 0%, 100%, .85);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 30px
+}
+
+.challenge[data-v-82c5a256] {
+    width: 880px;
+    padding: 12px 20px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: column;
+    flex-flow: column;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    background: rgba(41, 92, 110, .41);
+    position: relative
+}
+
+.challenge .relative[data-v-82c5a256] {
+    position: relative
+}
+
+.challenge[data-v-82c5a256]:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-image-source: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/card-side@pc.1922918f.png);
+    border-image-slice: 15.5555555556% 1.5909090909% fill;
+    border-image-width: 14px;
+    border-width: 14px;
+    pointer-events: none
+}
+
+.challenge--empty[data-v-82c5a256] {
+    height: 102px
+}
+
+.challenge--sp[data-v-82c5a256]:before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    bottom: 2px;
+    left: 4px;
+    background: no-repeat 50%/cover url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/card-bg-sp@pc.8dee89cc.png)
+}
+
+.challenge .challenge__header[data-v-82c5a256] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between
+}
+
+.challenge .challenge__header .challenge__title[data-v-82c5a256] {
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: rgba(204, 255, 250, .9);
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px
+}
+
+.challenge .challenge__header .challenge__fire[data-v-82c5a256] {
+    margin-left: 16px;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.challenge .challenge__header .challenge__fire__icon[data-v-82c5a256] {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    background: no-repeat 50%/contain url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/ghost-fire--stroke.ee492bf0.png)
+}
+
+.challenge .challenge__header .challenge__fire__icon--active[data-v-82c5a256] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/ghost-fire--fill.90dae6c8.png)
+}
+
+.challenge .challenge__header .challenge__fire__icon[data-v-82c5a256]:not(:first-child) {
+    margin-left: 8px
+}
+
+.challenge .challenge__divider[data-v-82c5a256] {
+    width: 100%;
+    height: 10px;
+    background: no-repeat 50%/100% 100% url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/divider@pc.bb16995a.png);
+    margin: 8px 0
+}
+
+.challenge .challenge__stages[data-v-82c5a256] {
+    display: grid;
+    grid-template-columns:repeat(4, 1fr);
+    grid-template-rows:1;
+    gap: 12px;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between
+}
+
+.challenge .challenge__stages .challenge__stage[data-v-82c5a256] {
+    min-width: 0;
+    overflow: hidden;
+    padding: 8px 16px;
+    background: rgba(63, 109, 125, .2);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px)
+}
+
+.challenge .challenge__stages .challenge__stage__label[data-v-82c5a256] {
+    color: #aefcf4;
+    font-size: 12px;
+    line-height: 18px;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis
+}
+
+.challenge .challenge__stages .challenge__stage__stars[data-v-82c5a256] {
+    width: 52px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between
+}
+
+.challenge .challenge__stages .challenge__stage__star[data-v-82c5a256] {
+    width: 16px;
+    height: 16px;
+    background: no-repeat 50%/contain url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/memory-star--stroke.e3e6133b.png)
+}
+
+.challenge .challenge__stages .challenge__stage__star--active[data-v-82c5a256] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/memory-star--fill.657727e8.png)
+}
+
+.challenge .challenge__stages .challenge__stage__empty[data-v-82c5a256] {
+    color: rgba(173, 252, 244, .5);
+    font-size: 14px;
+    line-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis
+}
+
+.challenge .challenge__empty[data-v-82c5a256] {
+    color: rgba(173, 252, 244, .5);
+    font-size: 14px;
+    line-height: 20px
+}
+
+.subduing-collection[data-v-0aa49ec3] {
+    color: #88ffe5
+}
+
+.subduing-collection .collection-cnt[data-v-0aa49ec3] {
+    -webkit-box-shadow: 0 0 4px 0 #74c4a6;
+    box-shadow: 0 0 4px 0 #74c4a6;
+    background: rgba(15, 43, 56, .8);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: column;
+    flex-flow: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: relative;
+    min-height: 40px;
+    width: 328px;
+    margin: 78px 72px;
+    padding: 12px 20px
+}
+
+.subduing-collection .collection-cnt[data-v-0aa49ec3]:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-image-source: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/cnt-bg.b6cf7d2e.png);
+    border-image-slice: 22.2222222222% 10.5960264901% fill;
+    border-image-width: 16px;
+    border-width: 16px
+}
+
+.subduing-collection .collection-cnt .cnt-label[data-v-0aa49ec3] {
+    position: relative;
+    color: #88ffe5;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px
+}
+
+.subduing-collection .collection-cnt .cnt-value[data-v-0aa49ec3] {
+    position: relative;
+    color: #88ffe5;
+    font-weight: 600;
+    font-family: RPG_CN_Condensed;
+    margin-top: 8px;
+    font-size: 20px;
+    line-height: 20px
+}
+
+.subduing-collection .challenges[data-v-0aa49ec3] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: column;
+    flex-flow: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.subduing-collection .challenges .challenge-card[data-v-0aa49ec3] {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto
+}
+
+.subduing-collection .challenges .challenge-card[data-v-0aa49ec3]:not(:first-child) {
+    margin-top: 16px
+}
+
+.fox-story[data-v-3d759804] {
+    position: relative;
+    border-radius: 0 32px 0 0;
+    padding: 40px 0 33px;
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/ghost-hunting-bg@pc.a0d95f61.png) no-repeat top/100% auto, url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/subduing-collection-bg@pc.b8815a7b.png) no-repeat bottom/100% auto, linear-gradient(180deg, #091523, #11323d)
+
+}
+
+.fox-story--subduing[data-v-3d759804] {
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/subduing-collection-bg@pc.b8815a7b.png) no-repeat top/100% auto, -webkit-gradient(linear, left top, left bottom, from(#091523), to(#11323d));
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/subduing-collection-bg@pc.b8815a7b.png) no-repeat top/100% auto, -webkit-linear-gradient(top, #091523, #11323d);
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/subduing-collection-bg@pc.b8815a7b.png) no-repeat top/100% auto, -o-linear-gradient(top, #091523 0, #11323d 100%);
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/subduing-collection-bg@pc.b8815a7b.png) no-repeat top/100% auto, linear-gradient(180deg, #091523, #11323d)
+}
+
+.fox-story--empty[data-v-3d759804] {
+    padding-top: 0
+}
+
+.fox-story[data-v-3d759804]:before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    border-radius: 0 32px 0 0;
+    border: 1px solid hsla(0, 0%, 100%, .2)
+}
+
+.fox-story .activity__body[data-v-3d759804] {
+    width: 960px;
+    overflow: hidden
+}
+
+.fox-story .activity__body .tabs[data-v-3d759804] .van-tabs__wrap {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    height: auto !important;
+    margin-left: 40px
+}
+
+.fox-story .activity__body .tabs[data-v-3d759804] .van-tabs__nav {
+    padding-bottom: 0 !important;
+    background: transparent
+}
+
+.fox-story .activity__body .tabs[data-v-3d759804] .van-tabs__line {
+    display: none !important
+}
+
+.fox-story .activity__body .tabs[data-v-3d759804] .van-tab {
+    margin-right: 32px;
+    padding: 0 !important;
+    -webkit-box-flex: 0 !important;
+    -ms-flex: 0 0 auto !important;
+    flex: 0 0 auto !important;
+    cursor: pointer;
+    color: rgba(168, 209, 210, .4);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+    -webkit-transition: color .1s, opacity .1s;
+    -o-transition: color .1s, opacity .1s;
+    transition: color .1s, opacity .1s
+}
+
+.fox-story .activity__body .tabs[data-v-3d759804] .van-tab:not(.van-tab--active):hover {
+    color: rgba(196, 230, 255, .4)
+}
+
+.fox-story .activity__body .tabs[data-v-3d759804] .van-tab--active {
+    z-index: 2;
+    color: #7cd4d6
+}
+
+.fox-story .activity__empty[data-v-3d759804] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: column;
+    flex-flow: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    height: 796px
+}
+
+.fox-story .activity__empty .no-content[data-v-3d759804] {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    height: auto
+}
+
+.fox-story .activity__empty .no-content[data-v-3d759804] .icon {
+    width: 120px;
+    height: 120px
+}
+
+.fox-story .activity__empty .no-content[data-v-3d759804] .text {
+    color: hsla(0, 0%, 100%, .65) !important;
+    font-size: 12px !important;
+    line-height: 14px;
+    margin-top: 4px !important
+}
+
+.fox-story .activity__empty[data-v-3d759804]:after {
+    -webkit-box-flex: 2;
+    -ms-flex: 2;
+    flex: 2
+}
+
+.fox-story .activity__footer[data-v-3d759804] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin-top: 20px
+}
+
+.fox-story .activity__footer .activity__link[data-v-3d759804] {
+    cursor: pointer;
+    width: 309px;
+    height: 30px;
+    padding: 0 16px;
+    background: no-repeat 50%/contain url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/strategy-btn-bg.5af572e6.png);
+    color: hsla(0, 0%, 100%, .85);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 30px
+}

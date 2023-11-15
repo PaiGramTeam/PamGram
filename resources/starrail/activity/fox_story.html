@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/pc_f95b4488.css" rel="stylesheet">
+    <link href="css/c_hsr_act_FoxStory_4d8c2f06.css" rel="stylesheet">
+</head>
+<body>
+<div style="width: 1920px;" id="fox_story">
+    <div style="display: flex; justify-content: space-between;">
+        <div data-v-3d759804="" data-v-3dedffc2="" class="fox-story">
+        <div data-v-3d759804="" class="activity__body">
+            <div data-v-3d759804="" class="tabs van-tabs van-tabs--line">
+                <div style="height: 30px"></div>
+                <div class="van-tabs__wrap">
+                    <div role="tablist" class="van-tabs__nav van-tabs__nav--line">
+                        <div role="tab" class="van-tab van-tab--active" aria-selected="true">
+                            <span class="van-tab__text van-tab__text--ellipsis">
+                                狐斋志异  -  {{ uid }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% set team = data.team %}
+                <div class="van-tabs__content van-tabs__content--animated">
+                    <div class="van-tabs__track"
+                         style="transform: translate3d(0%, 0px, 0px); transition-duration: 0.3s;">
+                        <div data-v-3d759804="" role="tabpanel" class="van-tab__pane-wrapper">
+                            <div class="van-tab__pane">
+                                <div data-v-e688361a="" data-v-3d759804="" class="ghost-hunting">
+                                    <div data-v-e688361a="" class="profile">
+                                        <div data-v-e688361a="" class="profile-bg"></div>
+                                        <div data-v-e688361a="" class="profile-fg">
+                                            <div data-v-e688361a="" class="avatar avatar--stage-1"></div>
+                                            <div data-v-e688361a="" class="info">
+                                                <div data-v-e688361a="" class="nickname">小桂子Guinevere</div>
+                                                <div data-v-e688361a="" class="info-divider"></div>
+                                                <div data-v-e688361a="" class="fans">
+                                                    <div data-v-e688361a="" class="fans-label">粉丝</div>
+                                                    <div data-v-e688361a="" class="fans-num">{{ team.fans }}</div>
+                                                </div>
+                                            </div>
+                                            <div data-v-e688361a="" class="subscription">订阅等级</div>
+                                            <div data-v-e688361a="" class="fans-level">{{ team.level }}</div>
+                                        </div>
+                                    </div>
+                                    <div style="height: 50px"></div>
+                                    <div data-v-e688361a="" class="chart">
+                                        <div data-v-e688361a="" class="popularity">
+                                            <div data-v-e688361a="" class="popularity-label">人气阶段</div>
+                                            <div data-v-e688361a="" class="popularity-num">{{ team.index_arrived }}级</div>
+                                        </div>
+                                        <div data-v-7734411a="" data-v-e688361a="" class="fans-figure">
+                                            <div data-v-7734411a="" class="wrapper">
+                                                <div data-v-7734411a="" class="main-wrapper">
+                                                    <div data-v-7734411a="" class="main">
+                                                        <div data-v-7734411a="" class="figure visible"
+                                                             style="--clip-right: {{ 100 - line[0] }}%;"></div>
+                                                        {% if line[1] %}
+                                                        <div data-v-7734411a="" class="progress-cursor"
+                                                             style="left: {{ line[0] }}%; height: {{ line[1] }}%;">
+                                                            <div data-v-7734411a="" class="cursor-label visible">
+                                                                <div data-v-7734411a="" class="cursor-label-bg">
+                                                                    <svg data-v-7734411a="" viewBox="0 0 10 7"
+                                                                         fill="none" class="cursor-label-arrow">
+                                                                        <path data-v-7734411a=""
+                                                                              d="M4.18627 5.86077L0 0H10L5.81373 5.86077C5.41491 6.41912 4.58509 6.41912 4.18627 5.86077Z"
+                                                                              fill="#ECF4F7"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div data-v-7734411a="" class="cursor-label-txt">
+                                                                    {{ team.fans_str }}
+                                                                </div>
+                                                            </div>
+                                                            <div data-v-7734411a="" class="cursor-dot">
+                                                                <div data-v-7734411a="" class="cursor-dot-center"></div>
+                                                            </div>
+                                                            <div data-v-7734411a="" class="cursor-line visible"></div>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div data-v-7734411a="" class="base-line"></div>
+                                                <div data-v-7734411a="" class="line-marks">
+                                                    {% for l in team.fans_range %}
+                                                    <div data-v-1b240865="" data-v-7734411a=""
+                                                         class="figure-line size--l">
+                                                        <img data-v-1b240865="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/line.32deff82.png" class="line size--l">
+                                                        <div data-v-1b240865="" class="label size--l">
+                                                            <div data-v-1b240865="" class="label__item size--l">
+                                                                {{ loop.index }}级
+                                                            </div>
+                                                            <div data-v-1b240865="" class="label__item size--l">
+                                                                {% if l > 10000 %}
+                                                                {{ l // 10000 }}万
+                                                                {% else %}
+                                                                {{ l }}
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                                <div data-v-7734411a="" class="medal-container">
+                                                    {% set first_get = "" %}
+                                                    {% set second_get = "" %}
+                                                    {% if team.real_index_arrived >= 2 %}
+                                                    {% set first_get = "medal--got" %}
+                                                    {% endif %}
+                                                    {% if team.real_index_arrived >= 4 %}
+                                                    {% set second_get = "medal--got" %}
+                                                    {% endif %}
+                                                    <div data-v-7734411a="" class="medal medal--"></div>
+                                                    <div data-v-7734411a="" class="medal medal--"></div>
+                                                    <div data-v-7734411a="" class="medal medal--silver {{ first_get }}"></div>
+                                                    <div data-v-7734411a="" class="medal medal--"></div>
+                                                    <div data-v-7734411a="" class="medal medal--gold {{ second_get }}"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div data-v-3d759804="" data-v-3dedffc2="" class="fox-story fox-story--subduing">
+        <div data-v-3d759804="" class="activity__body">
+            <div data-v-3d759804="" class="tabs van-tabs van-tabs--line">
+                <div class="van-tabs__wrap">
+                    <div role="tablist" class="van-tabs__nav van-tabs__nav--line">
+                        <div role="tab" class="van-tab van-tab--active" aria-selected="true">
+                            <span class="van-tab__text van-tab__text--ellipsis">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="van-tabs__content van-tabs__content--animated">
+                    <div class="van-tabs__track"
+                         style="transform: translate3d(0%, 0px, 0px); transition-duration: 0.3s;">
+                        <div data-v-3d759804="" role="tabpanel"
+                             class="van-tab__pane-wrapper van-tab__pane-wrapper--inactive" aria-hidden="true">
+                            <div class="van-tab__pane">
+                                <div data-v-0aa49ec3="" data-v-3d759804="" class="subduing-collection">
+                                    <div data-v-0aa49ec3="" class="collection-cnt">
+                                        <div data-v-0aa49ec3="" class="cnt-label">驱邪术收集</div>
+                                        <div data-v-0aa49ec3="" class="cnt-value">
+                                            {{ data.subdue_collect_cur }}/{{ data.subdue_collect_max }}
+                                        </div>
+                                    </div>
+                                    <div data-v-0aa49ec3="" class="challenges">
+                                        {% for subdue in data.subdues %}
+                                        {% set sp = "" %}
+                                        {% if loop.index == 5 %}
+                                        {% set sp = "challenge--sp" %}
+                                        {% endif %}
+                                        <div data-v-82c5a256="" data-v-0aa49ec3="" class="challenge challenge-card {{ sp }}">
+                                            <div data-v-82c5a256="" class="challenge__header relative">
+                                                <div data-v-82c5a256="" class="challenge__name">{{ subdue.name_mi18n }}</div>
+                                                <div data-v-82c5a256="" class="challenge__fire">
+                                                    {% for n in range(4) %}
+                                                    {% set active = "" %}
+                                                    {% if n < subdue.fire_cnt %}
+                                                    {% set active = "challenge__fire__icon--active" %}
+                                                    {% endif %}
+                                                    <div data-v-82c5a256=""
+                                                         class="challenge__fire__icon {{ active }}"></div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div data-v-82c5a256="" class="challenge__divider relative"></div>
+                                            <div data-v-82c5a256="" class="challenge__stages relative">
+                                                {% set n_index = loop.index %}
+                                                {% for difficulty in subdue.difficulties %}
+                                                <div data-v-82c5a256="" class="challenge__stage">
+                                                    <div data-v-82c5a256="" class="challenge__stage__label">难度 {{ loop.index }}</div>
+                                                    {% if difficulty.has_challenge %}
+                                                    <div data-v-82c5a256="" class="challenge__stage__stars">
+                                                        {% set stars = difficulty.stars %}
+                                                        {% if n_index == 5 %}
+                                                        {% set stars = difficulty.stars_sp %}
+                                                        {% endif %}
+                                                        {% for n in stars %}
+                                                        {% set active = "" %}
+                                                        {% if n %}
+                                                        {% set active = "challenge__stage__star--active" %}
+                                                        {% endif %}
+                                                        <div data-v-82c5a256=""
+                                                             class="challenge__stage__star {{ active }}"></div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% else %}
+                                                    <div data-v-82c5a256="" class="challenge__stage__empty">
+                                                        暂无挑战数据
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
