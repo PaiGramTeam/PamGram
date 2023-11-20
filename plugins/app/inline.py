@@ -82,15 +82,6 @@ class Inline(Plugin):
                         if character.startswith(key) or character.endswith(key):
                             self.characters_list.append({"name": character, "icon": value})
                             break
-            # 角色培养素材
-            for character in self.wiki_service.raider.all_role_material_raiders:
-                if character in datas:
-                    self.characters_material_list.append({"name": character, "icon": datas[character]})
-                else:
-                    for key, value in datas.items():
-                        if character.startswith(key) or character.endswith(key):
-                            self.characters_material_list.append({"name": character, "icon": value})
-                            break
             # 角色攻略
             for character in self.wiki_service.raider.all_guide_for_role_raiders:
                 if character in datas:
