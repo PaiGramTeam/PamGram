@@ -62,6 +62,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("sign_all", "全部账号重新签到"),
             BotCommand("send_log", "发送日志"),
             BotCommand("update", "更新"),
+            BotCommand("set_command", "重设命令"),
         ]
         await context.bot.set_my_commands(commands=group_command)
         await context.bot.set_my_commands(commands=group_command + user_command, scope=BotCommandScopeAllPrivateChats())
