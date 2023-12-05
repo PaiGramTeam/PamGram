@@ -60,7 +60,7 @@ roles = {
     1217: ["藿藿", "huohuo"],
     1302: ["银枝", "argenti"],
 }
-not_real_roles = [1215, 1302]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
