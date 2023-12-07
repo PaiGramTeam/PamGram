@@ -576,6 +576,62 @@ class PlayerActivityPlugins(Plugin):
             query_selector="#fox_story",
         )
 
+    @handler.command("boxing_show", block=False)
+    @handler.message(filters.Regex("^斗技表演赛信息查询(.*)"), block=False)
+    async def boxing_show_command_start(self, update: Update, context: CallbackContext) -> None:
+        user = update.effective_user
+        message = update.effective_message
+        logger.info("用户 %s[%s] 查询斗技表演赛信息命令请求", user.full_name, user.id)
+        try:
+            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+                render_result = await self.boxing_show_render(client, uid)
+        except AttributeError as exc:
+            logger.error(ACTIVITY_DATA_ERROR)
+            logger.exception(exc)
+            await message.reply_text(ACTIVITY_ATTR_ERROR)
+            return
+        except NotHaveData as e:
+            reply_message = await message.reply_text(e.MSG)
+            if filters.ChatType.GROUPS.filter(reply_message):
+                self.add_delete_message_job(message)
+                self.add_delete_message_job(reply_message)
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+
+    async def boxing_show_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
+        if uid is None:
+            uid = client.player_id
+
+        act_data = await client.get_starrail_activity(uid)
+        try:
+            boxing_show_data = act_data.boxing_show
+            if not (boxing_show_data.exists_data and boxing_show_data.info.exists_data and boxing_show_data.info.list):
+                raise NotHaveData
+            if not boxing_show_data.info.list[0].has_challenge:
+                raise NotHaveData
+            box_data = boxing_show_data.info.list
+        except ValueError:
+            raise NotHaveData
+        avatar_icons = {}
+        for info in box_data:
+            for avatar in info.avatars_used_activity:
+                avatar_icons[avatar.id] = self.assets.avatar.icon(avatar.id).as_uri()
+        data = {
+            "uid": mask_number(uid),
+            "data": boxing_show_data.info.list,
+            "avatar_icons": avatar_icons,
+        }
+
+        return await self.template_service.render(
+            "starrail/activity/boxing_show.html",
+            data,
+            {"width": 960, "height": 1000},
+            full_page=True,
+            query_selector="#boxing_show",
+        )
+
     @handler.command("treasure_dungeon", block=False)
     @handler.message(filters.Regex("^地城探宝信息查询(.*)"), block=False)
     async def treasure_dungeon_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:

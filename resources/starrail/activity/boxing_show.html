@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/pc_f95b4488.css" rel="stylesheet">
+    <link href="css/c_hsr_act_BoxBattle_78ede0f4.css" rel="stylesheet">
+    <link href="css/c_hsr_role-medium_341dcf55.css" rel="stylesheet">
+</head>
+<body>
+<div style="width: 960px;" id="boxing_show">
+    <div data-v-391669a4="" data-v-3dedffc2="" class="battle">
+        <div data-v-391669a4="" class="battle-container">
+            <div data-v-391669a4="" class="battle-container-top">
+                <span data-v-391669a4="" class="time">
+                    磐岩镇斗技表演赛 &nbsp;&nbsp;&nbsp;&nbsp; UID: {{ uid }}
+                </span>
+            </div>
+            <div data-v-391669a4="" class="blocks">
+                {% set badges = ["badge_3.2a9179f6", "badge_2.71d8481e", "badge_1.131659cd", "badge_3.2a9179f6", "badge_2.71d8481e", "badge_1.131659cd", "badge_3.2a9179f6"] %}
+                {% set buffs = ["buff-6.99ba4655", "buff-1.dc2fb6c8", "buff-5.72d0789f", "buff-7.57d44ceb", "buff-2.b371ab10", "buff-4.3247f059", "buff-3.2a41819d"] %}
+                {% for info in data %}
+                <div data-v-bac2d04e="" data-v-391669a4="" class="block">
+                    <div data-v-bac2d04e="" class="top">
+                        <div data-v-bac2d04e="" class="top-left">
+                            <img data-v-bac2d04e="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ badges[loop.index0] }}.png" alt="" class="badge">
+                            <img data-v-bac2d04e="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ buffs[loop.index0] }}.png" alt="" class="top-buff">
+                        </div>
+                        <div data-v-bac2d04e="" class="top-right">
+                            <div data-v-bac2d04e="" class="mid">
+                                <p data-v-bac2d04e="" class="name">
+                                    {{ info.name_mi18n }}
+                                </p>
+                                {% if info.has_challenge %}
+                                <div data-v-bac2d04e="" class="mid-btm">
+                                    <p data-v-bac2d04e="" class="round">
+                                    轮次数：<span data-v-bac2d04e="">{{ info.round }}</span>
+                                    </p>
+                                </div>
+                                {% else %}
+                                <div data-v-bac2d04e="" class="empty">
+                                    暂无挑战数据
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% if info.has_challenge %}
+                            <div data-v-bac2d04e="" class="avatars">
+                                {% for avatar in info.avatars_used_activity %}
+                                <div data-v-d07e5c4c="" data-v-bac2d04e="" class="hsr-role-medium normal">
+                                    <div data-v-d07e5c4c="" class="hsr-role-medium-pos">
+                                        <div data-v-d07e5c4c="" class="inner role-rarity-{{ avatar.rarity }}">
+                                            <img data-v-d07e5c4c="" class="avatar" src="{{ avatar_icons[avatar.id] }}">
+                                            <div data-v-d07e5c4c="" class="level">{{ avatar.level }}级</div>
+                                            {% if avatar.rank %}
+                                            <div data-v-d07e5c4c="" class="fate-level">
+                                                {{ avatar.rank }}
+                                            </div>
+                                            {% endif %}
+                                            <i data-v-d07e5c4c="" class="select-index" style="display: none;"></i>
+                                        </div>
+                                        {% if avatar.is_trial %}
+                                        <div data-v-d07e5c4c="" class="trial">试用</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if info.has_challenge %}
+                    <div data-v-bac2d04e="" class="btm">
+                        <div data-v-bac2d04e="" class="toggle">
+                            <span data-v-bac2d04e="">选择增益：</span>
+                            <span data-v-bac2d04e="">{{ info.buffs }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

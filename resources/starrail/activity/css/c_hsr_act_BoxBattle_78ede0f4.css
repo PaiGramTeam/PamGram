@@ -1,0 +1,405 @@
+/*! Copyright Â© 2011 - 2023 miHoYo. All Rights Reserved */
+.top[data-v-bac2d04e] {
+    height: 108px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 15px 32px 15px 28px;
+    background: no-repeat top/contain;
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/card_bg@pc.ee0a22a4.png)
+}
+
+.top-left[data-v-bac2d04e] {
+    position: relative;
+    width: 104px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    padding-right: 26px
+}
+
+.top-left[data-v-bac2d04e]:after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 78px;
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/split_ver.8ca3b5c4.png) no-repeat 50%/contain;
+    right: 0;
+    top: 0
+}
+
+.badge[data-v-bac2d04e] {
+    width: 100%;
+    height: auto
+}
+
+.perfect[data-v-bac2d04e] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    color: #fef5d0;
+    text-align: center;
+    border-radius: 0 8px 0 0;
+    border: 1px solid #a15451;
+    background: #8e3834;
+    padding: 1px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+    background: #8e3834 url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/perfect.20384159.png) no-repeat 100%/contain
+}
+
+.top-buff[data-v-bac2d04e] {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 46px;
+    left: 55px
+}
+
+.top-right[data-v-bac2d04e] {
+    margin-left: 0;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    padding-left: 16px
+}
+
+.empty[data-v-bac2d04e] {
+    color: rgba(66, 35, 32, .5);
+    text-align: left;
+    font-size: 16px;
+    font-weight: 500
+}
+
+.name[data-v-bac2d04e] {
+    color: #8a382a;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 26px;
+    margin-bottom: 12px
+}
+
+.mid[data-v-bac2d04e] {
+    width: 376px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0
+}
+
+.mid-btm[data-v-bac2d04e] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.round[data-v-bac2d04e] {
+    color: #484848;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 18px;
+    margin-right: 24px
+}
+
+.round span[data-v-bac2d04e] {
+    margin-left: 4px;
+    color: #484848;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .1px;
+    font-family: RPG_CN_Condensed
+}
+
+.avatars[data-v-bac2d04e] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    margin-left: 32px
+}
+
+.avatars .hsr-role-medium[data-v-bac2d04e] {
+    margin-left: 12px
+}
+
+.avatars .hsr-role-medium[data-v-bac2d04e]:first-child {
+    margin-left: 0
+}
+
+.avatars .hsr-role-medium[data-v-bac2d04e] .trial {
+    padding: 2px 8px;
+    border-radius: 24px;
+    background: #ffd966;
+    color: rgba(0, 0, 0, .9);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    right: 0;
+    top: 0;
+    white-space: nowrap
+}
+
+.btm[data-v-bac2d04e] {
+    border: 1px solid hsla(22, 60%, 84%, .41);
+    background: rgba(101, 42, 32, .53);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    position: relative
+}
+
+.btm[data-v-bac2d04e]:before {
+    content: "";
+    position: absolute;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    top: 1px;
+    left: 1px;
+    border: .5px solid hsla(0, 0%, 100%, .11);
+    pointer-events: none;
+    border-radius: 0
+}
+
+.toggle[data-v-bac2d04e] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.toggle img[data-v-bac2d04e] {
+    width: 16px;
+    height: 16px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    -webkit-transition: -webkit-transform .3s ease;
+    transition: -webkit-transform .3s ease;
+    -o-transition: transform .3s ease;
+    transition: transform .3s ease;
+    transition: transform .3s ease, -webkit-transform .3s ease
+}
+
+.toggle img[rotate][data-v-bac2d04e] {
+    -webkit-transform: rotate(-180deg);
+    -ms-transform: rotate(-180deg);
+    transform: rotate(-180deg)
+}
+
+.toggle span[data-v-bac2d04e] {
+    margin-left: 2px;
+    color: #e6d3c0;
+    font-size: 12px;
+    line-height: 16px;
+    padding: 8px 0
+}
+
+.toggle-zone[data-v-bac2d04e] {
+    margin: 16px 32px 8px
+}
+
+.buff-box[data-v-bac2d04e] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex
+}
+
+.buff-box[data-v-bac2d04e]:not(:last-child) {
+    position: relative;
+    padding-bottom: 42px
+}
+
+.buff-box[data-v-bac2d04e]:not(:last-child):after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 10px;
+    background: no-repeat 50%/contain;
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/split@pc.5a621a11.png);
+    left: 0;
+    bottom: 16px
+}
+
+.buff[data-v-bac2d04e] {
+    width: 40px;
+    height: 40px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    margin-right: 16px
+}
+
+.buff-title[data-v-bac2d04e] {
+    color: hsla(0, 0%, 100%, .9);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px
+}
+
+.buff-desc[data-v-bac2d04e] {
+    color: hsla(0, 0%, 100%, .65);
+    font-size: 12px;
+    line-height: 16px;
+    margin-top: 8px
+}
+
+.battle[data-v-391669a4] {
+    display: flow-root;
+    min-height: 579px;
+    border-radius: 0 32px 0 0;
+    background: #1b1b20 no-repeat top/100% auto;
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/bg@pc.2f50197a.png);
+    position: relative
+}
+
+.battle[data-v-391669a4]:before {
+    content: "";
+    position: absolute;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    top: 2px;
+    left: 2px;
+    border: 1px solid hsla(0, 0%, 100%, .2);
+    pointer-events: none;
+    border-radius: 0 32px 0 0
+}
+
+.empty-block[data-v-391669a4] {
+    margin: 220px auto 0;
+    height: auto
+}
+
+.empty-block[data-v-391669a4] .icon {
+    width: 120px;
+    height: 120px
+}
+
+.empty-block[data-v-391669a4] .text {
+    color: hsla(0, 0%, 100%, .65) !important;
+    font-size: 12px !important;
+    line-height: 14px;
+    margin-top: 4px !important
+}
+
+.btn[data-v-391669a4] {
+    position: absolute;
+    text-align: center;
+    color: #282828;
+    font-size: 14px;
+    line-height: 20px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    height: 32px;
+    margin: 24px auto 27px;
+    padding: 0 142px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    border-radius: 20px;
+    background-color: #fff;
+    cursor: pointer;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    bottom: 24px
+}
+
+.btn span[data-v-391669a4] {
+    width: 100%;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap
+}
+
+.btn[data-v-391669a4]:after, .btn[data-v-391669a4]:before {
+    content: "";
+    position: absolute;
+    pointer-events: none
+}
+
+.btn[data-v-391669a4]:before {
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border-radius: inherit;
+    border: 1px solid rgba(0, 0, 0, .16)
+}
+
+.btn[data-v-391669a4]:after {
+    background-color: rgba(0, 0, 0, .16);
+    width: 1px;
+    height: 1px;
+    border-radius: 50%;
+    -webkit-box-shadow: 0 0 0 2px #fff;
+    box-shadow: 0 0 0 2px #fff;
+    left: 32px;
+    top: 2px
+}
+
+.battle-container[data-v-391669a4] {
+    padding: 40px
+}
+
+.battle-container-top[data-v-391669a4] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between
+}
+
+.link[data-v-391669a4], .time[data-v-391669a4] {
+    color: #f9e8d3;
+    font-size: 16px;
+    line-height: 16px
+}
+
+.link[data-v-391669a4] {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    padding-right: 14px;
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/arrow.c2ffc550.png) no-repeat 100%/12px;
+    margin-top: 0;
+    cursor: pointer
+}
+
+.blocks[data-v-391669a4] {
+    margin-top: 16px
+}
+
+.block[data-v-391669a4]:not(:last-child) {
+    margin-bottom: 16px
+}

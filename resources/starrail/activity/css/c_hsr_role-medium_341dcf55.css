@@ -1,0 +1,321 @@
+/*! Copyright © 2011 - 2023 miHoYo. All Rights Reserved */
+.hsr-role-medium[data-v-d07e5c4c] {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    font-size: 0;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.hsr-role-medium-pos[data-v-d07e5c4c] {
+    position: relative;
+    width: 100px;
+    height: 116px
+}
+
+.hsr-role-medium .avatar[data-v-d07e5c4c] {
+    width: 100%;
+    height: calc(100% - 2px);
+    -o-object-fit: cover;
+    object-fit: cover;
+    -o-object-position: top;
+    object-position: top
+}
+
+.hsr-role-medium .level[data-v-d07e5c4c] {
+    position: absolute;
+    width: 100%;
+    height: 18px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: Microsoft YaHei, sans-serif;
+    color: hsla(0, 0%, 100%, .85);
+    line-height: 1;
+    background: #030b0e;
+    left: 0;
+    bottom: 2px
+}
+
+.hsr-role-medium.middle .hsr-role-medium-pos[data-v-d07e5c4c] {
+    width: 90px;
+    height: 104px
+}
+
+.hsr-role-medium.middle .inner[data-v-d07e5c4c] {
+    border-top-right-radius: 17px
+}
+
+.hsr-role-medium.middle .level[data-v-d07e5c4c] {
+    font-size: 14px;
+    height: 16px
+}
+
+.hsr-role-medium.middle .fate-level[data-v-d07e5c4c] {
+    width: 22px;
+    height: 26px;
+    font-size: 16px
+}
+
+.hsr-role-medium.middle .name[data-v-d07e5c4c] {
+    width: 90px
+}
+
+.hsr-role-medium.normal .hsr-role-medium-pos[data-v-d07e5c4c] {
+    width: 62px;
+    height: 72px
+}
+
+.hsr-role-medium.normal .inner[data-v-d07e5c4c] {
+    border-top-right-radius: 12px
+}
+
+.hsr-role-medium.normal .select-box[data-v-d07e5c4c] {
+    border-top-right-radius: 17px
+}
+
+.hsr-role-medium.normal .level[data-v-d07e5c4c] {
+    font-size: 12px;
+    line-height: 12px;
+    height: 12px
+}
+
+.hsr-role-medium.normal .fate-level[data-v-d07e5c4c] {
+    width: 16px;
+    height: 20px;
+    font-size: 14px
+}
+
+.hsr-role-medium.normal .element[data-v-d07e5c4c] {
+    font-size: 14px;
+    top: 4px;
+    left: 4px
+}
+
+.hsr-role-medium.small .hsr-role-medium-pos[data-v-d07e5c4c] {
+    width: 56px;
+    height: 70px
+}
+
+.hsr-role-medium.small .inner[data-v-d07e5c4c] {
+    border-top-right-radius: 17px
+}
+
+.hsr-role-medium.small .level[data-v-d07e5c4c] {
+    font-size: 12px;
+    line-height: 12px;
+    height: 14px
+}
+
+.hsr-role-medium.small .element[data-v-d07e5c4c] {
+    font-size: 14px;
+    top: 3px;
+    left: 3px
+}
+
+.hsr-role-medium.small .fate-level[data-v-d07e5c4c] {
+    width: 14px;
+    height: 18px;
+    font-size: 12px
+}
+
+.inner[data-v-d07e5c4c] {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 0 19px 0 0;
+    overflow: hidden;
+    background: transparent url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/character_r_1.52480cf3.png) no-repeat top/cover
+}
+
+.role-rarity-1[data-v-d07e5c4c] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/character_r_1.52480cf3.png)
+}
+
+.role-rarity-2[data-v-d07e5c4c] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/character_r_2.a172d549.png)
+}
+
+.role-rarity-3[data-v-d07e5c4c] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/character_r_3.bdfa75d1.png)
+}
+
+.role-rarity-4[data-v-d07e5c4c] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/character_r_4.24f329b7.png)
+}
+
+.role-rarity-5[data-v-d07e5c4c] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/character_r_5.99d42eb7.png)
+}
+
+.element[data-v-d07e5c4c] {
+    position: absolute;
+    font-size: 20px;
+    width: 1em;
+    height: 1em;
+    top: 7px;
+    left: 7px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, .4)
+}
+
+.name[data-v-d07e5c4c] {
+    width: 100px;
+    font-size: 12px;
+    font-weight: 400;
+    color: hsla(0, 0%, 100%, .65);
+    margin-top: 4px;
+    text-align: center;
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.fate-level[data-v-d07e5c4c] {
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 28px;
+    background: rgba(0, 0, 0, .5);
+    border-radius: 0 0 0 8px;
+    text-align: center;
+    font-size: 18px;
+    font-family: Microsoft YaHei, sans-serif;
+    font-weight: 400;
+    line-height: 1
+}
+
+.fate-level[data-v-d07e5c4c], .select-index[data-v-d07e5c4c] {
+    position: absolute;
+    color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.select-index[data-v-d07e5c4c] {
+    top: 4px;
+    right: 4px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    font-size: 14px;
+    font-weight: 500;
+    font-style: normal;
+    width: 20px;
+    height: 20px;
+    background-color: hsla(0, 0%, 100%, .3);
+    border: 2px solid #fff;
+    border-radius: 50%
+}
+
+.select-index.hasNumber[data-v-d07e5c4c] {
+    background-color: #f69502
+}
+
+.select-box[data-v-d07e5c4c] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border: 2px solid #ffc870;
+    border-top-right-radius: 12px;
+    pointer-events: none
+}
+
+.select-box[data-v-d07e5c4c]:after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/select_arrow.f50d2b0c.png) no-repeat 50%/contain;
+    -webkit-animation: arrowRun-d07e5c4c ease-in-out .4s alternate infinite;
+    animation: arrowRun-d07e5c4c ease-in-out .4s alternate infinite;
+    left: 50%;
+    -webkit-transform: translate(-50%, -100%);
+    -ms-transform: translate(-50%, -100%);
+    transform: translate(-50%, -100%)
+}
+
+.trial[data-v-d07e5c4c] {
+    position: absolute;
+    padding: 1px 4px;
+    background: #ffc870;
+    border-radius: 6px 10px 10px 0;
+    font-size: 20px;
+    color: #000;
+    top: -8px;
+    right: -17px;
+    -webkit-transform-origin: top right;
+    -ms-transform-origin: top right;
+    transform-origin: top right;
+    -webkit-transform: scale(.5);
+    -ms-transform: scale(.5);
+    transform: scale(.5);
+    z-index: 1
+}
+
+.hsr-role-medium-pos[data-v-d07e5c4c] {
+    margin: auto
+}
+
+.hsr-role-medium.hover-wrapper .hsr-role-medium-pos[data-v-d07e5c4c] {
+    cursor: pointer;
+    -webkit-transition: .1s ease-in;
+    -o-transition: .1s ease-in;
+    transition: .1s ease-in
+}
+
+.select-index[data-v-d07e5c4c] {
+    width: 24px;
+    height: 24px;
+    top: 6px;
+    right: 6px;
+    font-size: 13px
+}
+
+@-webkit-keyframes arrowRun-d07e5c4c {
+    0% {
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%)
+    }
+}
+
+@keyframes arrowRun-d07e5c4c {
+    0% {
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%)
+    }
+}
+
+.hsr-role-medium-popper {
+    padding: 0 !important
+}
+
+.hsr-role-medium-popper .activity-pop-text {
+    display: none
+}
