@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Optional
+from typing import Optional, TYPE_CHECKING, List
 
 from simnet.models.starrail.wish import StarRailBannerType
 from telegram import Document, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
@@ -23,6 +23,7 @@ from modules.gacha_log.error import (
 )
 from modules.gacha_log.helpers import from_url_get_authkey
 from modules.gacha_log.log import GachaLog
+from modules.gacha_log.migrate import GachaLogMigrate
 from plugins.tools.genshin import PlayerNotFoundError
 from utils.log import logger
 
@@ -31,6 +32,11 @@ try:
 
 except ImportError:
     import json as jsonlib
+
+
+if TYPE_CHECKING:
+    from telegram import Update, Message, User, Document
+    from gram_core.services.players.models import Player
 
 INPUT_URL, INPUT_FILE, CONFIRM_DELETE = range(10100, 10103)
 
@@ -360,3 +366,9 @@ class WishLogPlugin(Plugin.Conversation):
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]
             await message.reply_text("彦卿没有找到你此卡池的跃迁记录，快来私聊彦卿导入吧~", reply_markup=InlineKeyboardMarkup(buttons))
+
+    @staticmethod
+    async def get_migrate_data(
+        old_user_id: int, new_user_id: int, old_players: List["Player"]
+    ) -> Optional[GachaLogMigrate]:
+        return await GachaLogMigrate.create(old_user_id, new_user_id, old_players)
