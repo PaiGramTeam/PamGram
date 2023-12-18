@@ -123,6 +123,8 @@ class Inline(Plugin):
                         input_message_content=InputTextMessageContent(i[0]),
                     )
                 )
+        elif args[0] == "cookies_export":
+            return
         else:
             if args[0] in ["查看角色攻略列表并查询", "查看角色图鉴列表并查询", "查看光锥列表并查询", "查看遗器套装列表并查询", "查看角色培养素材列表并查询"]:
                 temp_data = {
