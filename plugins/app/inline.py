@@ -46,10 +46,15 @@ class Inline(Plugin):
         async def task_light_cone():
             logger.info("Inline 模块正在获取光锥列表")
             light_cone_datas: Dict[str, str] = {}
+            light_cone_datas_name: Dict[str, str] = {}
             for light_cone in self.asset_service.light_cone.data:
                 light_cone_datas[light_cone.name] = light_cone.icon_
+                light_cone_datas_name[str(light_cone.id)] = light_cone.name
             # 光锥列表
-            for light_cone in self.wiki_service.raider.all_light_cone_raiders:
+            for lid in self.wiki_service.raider.all_light_cone_raiders:
+                if lid not in light_cone_datas_name:
+                    continue
+                light_cone = light_cone_datas_name[lid]
                 if light_cone in light_cone_datas:
                     self.light_cone_list.append({"name": light_cone, "icon": light_cone_datas[light_cone]})
                 else:
@@ -59,9 +64,14 @@ class Inline(Plugin):
         async def task_relics():
             logger.info("Inline 模块正在获取遗器列表")
             relics_datas: Dict[str, str] = {}
+            relics_datas_name: Dict[str, str] = {}
             for relics in self.wiki_service.relic.all_relics:
                 relics_datas[relics.name] = relics.icon
-            for relics in self.wiki_service.raider.all_relic_raiders:
+                relics_datas_name[str(relics.id)] = relics.name
+            for rid in self.wiki_service.raider.all_relic_raiders:
+                if rid not in relics_datas_name:
+                    continue
+                relics = relics_datas_name[rid]
                 if relics in relics_datas:
                     self.relics_list.append({"name": relics, "icon": relics_datas[relics]})
                 else:
@@ -71,10 +81,20 @@ class Inline(Plugin):
         async def task_characters():
             logger.info("Inline 模块正在获取角色列表")
             datas: Dict[str, str] = {}
+            datas_name: Dict[str, str] = {}
             for character in self.asset_service.avatar.data:
                 datas[character.name] = character.square or character.normal
+                datas_name[str(character.id)] = character.name
+
+            def get_character(_cid: str) -> str:
+                if _cid in datas_name:
+                    return datas_name[_cid]
+
             # 角色攻略
-            for character in self.wiki_service.raider.all_role_raiders:
+            for cid in self.wiki_service.raider.all_role_raiders:
+                character = get_character(cid)
+                if not character:
+                    continue
                 if character in datas:
                     self.characters_list.append({"name": character, "icon": datas[character]})
                 else:
@@ -83,7 +103,10 @@ class Inline(Plugin):
                             self.characters_list.append({"name": character, "icon": value})
                             break
             # 角色攻略
-            for character in self.wiki_service.raider.all_guide_for_role_raiders:
+            for cid in self.wiki_service.raider.all_guide_for_role_raiders:
+                character = get_character(cid)
+                if not character:
+                    continue
                 if character in datas:
                     self.characters_guide_list.append({"name": character, "icon": datas[character]})
                 else:
