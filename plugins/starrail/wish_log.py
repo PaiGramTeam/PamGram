@@ -36,6 +36,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from telegram import Update, Message, User, Document
+    from telegram.ext import ContextTypes
     from gram_core.services.players.models import Player
 
 INPUT_URL, INPUT_FILE, CONFIRM_DELETE = range(10100, 10103)
@@ -143,7 +144,8 @@ class WishLogPlugin(Plugin.Conversation):
     @conversation.entry_point
     @handler.command(command="warp_log_import", filters=filters.ChatType.PRIVATE, block=False)
     @handler.message(filters=filters.Regex("^导入跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
-    async def command_start(self, update: Update, context: CallbackContext) -> int:
+    @handler.command(command="start", filters=filters.Regex("gacha_log_import$"), block=False)
+    async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         user = update.effective_user
         args = self.get_args(context)
