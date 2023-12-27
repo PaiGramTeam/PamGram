@@ -65,16 +65,9 @@ class Avatar(BaseModel):
     property: Optional[List[Property]]
 
 
-class ChallengeInfo(BaseModel):
-    MazeGroupID: Optional[int]
-    MazeGroupIndex: Optional[int]
-    PreMazeGroupIndex: Optional[int]
-
-
 class RecordInfo(BaseModel):
     achievementCount: Optional[int] = 0
     avatarCount: Optional[int] = 0
-    challengeInfo: ChallengeInfo
     equipmentCount: Optional[int] = 0
     maxRogueChallengeScore: Optional[int] = 0
 
