@@ -7,7 +7,7 @@ from core.services.game.services import GameCacheService
 from core.services.search.models import StrategyEntry
 from core.services.search.services import SearchServices
 from core.services.wiki.services import WikiService
-from metadata.shortname import lightConeToTag, lightConeToName
+from metadata.shortname import lightConeToTag, lightConeToName, lightConeToId
 from utils.log import logger
 
 
@@ -41,7 +41,8 @@ class LightConePlugin(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         light_cone_name = lightConeToName(light_cone_name)
-        file_path = self.wiki_service.raider.raider_light_cone_path / f"{light_cone_name}.png"
+        light_cone_id = lightConeToId(light_cone_name)
+        file_path = self.wiki_service.raider.raider_light_cone_path / f"{light_cone_id}.png"
         if not file_path.exists():
             reply_message = await message.reply_text(
                 f"没有找到 {light_cone_name} 的光锥图鉴", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)

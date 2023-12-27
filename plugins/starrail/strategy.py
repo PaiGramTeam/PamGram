@@ -7,7 +7,7 @@ from core.services.game.services import GameCacheService
 from core.services.search.models import StrategyEntry
 from core.services.search.services import SearchServices
 from core.services.wiki.services import WikiService
-from metadata.shortname import roleToName, roleToTag
+from metadata.shortname import roleToName, roleToTag, roleToId
 from utils.log import logger
 
 
@@ -41,7 +41,8 @@ class StrategyPlugin(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         character_name = roleToName(character_name)
-        file_path = self.wiki_service.raider.raider_guide_for_role_path / f"{character_name}.png"
+        character_id = roleToId(character_name)
+        file_path = self.wiki_service.raider.raider_guide_for_role_path / f"{character_id}.png"
         if not file_path.exists():
             reply_message = await message.reply_text(
                 f"没有找到 {character_name} 的攻略", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)

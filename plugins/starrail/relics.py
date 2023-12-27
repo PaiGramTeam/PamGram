@@ -39,8 +39,9 @@ class RelicsPlugin(Plugin):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
             return
-        file_path = self.wiki_service.raider.raider_relic_path / f"{relics_name}.png"
-        if not file_path.exists():
+        relic = self.wiki_service.relic.get_by_name(relics_name)
+        file_path = self.wiki_service.raider.raider_relic_path / (f"{relic.id}.png" if relic else "")
+        if not (relic and file_path.exists()):
             reply_message = await message.reply_text(
                 f"没有找到 {relics_name} 的遗器图鉴", reply_markup=InlineKeyboardMarkup(self.KEYBOARD)
             )
