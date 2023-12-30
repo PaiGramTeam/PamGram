@@ -52,6 +52,9 @@ class SetCommandPlugin(Plugin):
             BotCommand("copper_man", "金人巷信息查询"),
             BotCommand("yitai_battle", "以太战线信息查询"),
             BotCommand("endless_side", "无尽位面信息查询"),
+            BotCommand("fox_story", "狐斋志异信息查询"),
+            BotCommand("boxing_show", "斗技表演赛信息查询"),
+            BotCommand("space_zoo", "异宠拾遗信息查询"),
             BotCommand("cookies_import", "从其他 BOT 导入账号信息"),
             BotCommand("cookies_export", "导出账号信息给其他 BOT"),
         ]

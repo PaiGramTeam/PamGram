@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/c_hsr_act_SpaceZoo_7ec2768b.css" rel="stylesheet">
+    <style>
+        #titleDiv {
+            text-align: center;
+            height: 50px;
+            line-height: 50px;
+            background-image: url('https://act.hoyolab.com/app/community-game-records-sea/rpg/images/activity_title_bg_pc.150f56ff.png');
+        }
+    </style>
+</head>
+<body>
+<div style="width: 960px;" id="spaceZoo">
+    <div id="titleDiv">
+        <span style="color: white">异宠拾遗 &nbsp;&nbsp;&nbsp;&nbsp; UID: {{ uid }}</span>
+    </div>
+    <div data-v-06359302="" data-v-4cf6d55a="" class="space-zoo">
+        <div data-v-06359302="" class="top">
+            <div data-v-06359302="" class="name">研究等级</div>
+            <div data-v-06359302="" class="level">{{ info.level }}</div>
+        </div>
+        <div data-v-06359302="" class="summary">
+            <div data-v-06359302="" class="summary-title">稀有造物</div>
+            <div data-v-06359302="" class="summary-btm">
+                <div data-v-06359302="" class="summary-subtitle">收集进度</div>
+                <div data-v-06359302="" class="summary-progress">{{ info.cur_xyzw }}/{{ info.max_xyzw }}</div>
+            </div>
+        </div>
+        {% set badges = ["type_3.b3733680", "type_2.2d09b275", "type_45.cf79a7f3", "type_6.da55d1e9", "type_1.9120cf02"] %}
+        {% for i in range(0, 5) %}
+        <div data-v-06359302="" index="{{ loop.index0 }}" class="feature">
+            <img data-v-06359302="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/{{ badges[loop.index0] }}.png" class="feature-bg">
+            <span data-v-06359302="" class="feature-progress">{{ features[loop.index0].cur }}/{{ features[loop.index0].max }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

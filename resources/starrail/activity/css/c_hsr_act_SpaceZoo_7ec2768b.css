@@ -1,0 +1,181 @@
+/*! Copyright Â© 2011 - 2023 miHoYo. All Rights Reserved */
+.space-zoo[data-v-06359302] {
+    width: 960px;
+    height: 521px;
+    overflow: hidden;
+    background: no-repeat top/contain;
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/block-bg@pc.b5180fba.png);
+    position: relative
+}
+
+.space-zoo[data-v-06359302]:before {
+    content: "";
+    position: absolute;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    top: 2px;
+    left: 2px;
+    border: 1px solid rgba(84, 164, 183, .48);
+    pointer-events: none;
+}
+
+.space-zoo[empty][data-v-06359302] {
+    background-image: url(https://act.hoyolab.com/app/community-game-records-sea/rpg/images/empty_bg@pc.4fd4912f.png)
+}
+
+.empty-block[data-v-06359302] {
+    margin-top: 161px
+}
+
+.empty-block[data-v-06359302] img {
+    width: 160px !important;
+    height: 160px !important
+}
+
+.empty-block[data-v-06359302] .text {
+    font-size: 12px !important;
+    margin-top: 4px !important;
+    color: hsla(0, 0%, 100%, .65) !important
+}
+
+.top[data-v-06359302] {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    height: 70px;
+    margin: 44px 66px 0;
+    width: 293px
+}
+
+.name[data-v-06359302] {
+    margin-left: 16px;
+    color: #d0f4ff;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    max-width: 128px
+}
+
+.level[data-v-06359302] {
+    width: 39px;
+    height: 39px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin-right: 63px;
+    color: #26f8ff;
+    font-size: 20px;
+    font-weight: 600;
+    font-family: RPG_CN_Condensed
+}
+
+.summary[data-v-06359302] {
+    position: absolute;
+    top: 399px;
+    left: 327px;
+    width: 309px;
+    color: #d0f4ff;
+    text-align: center
+}
+
+.summary-title[data-v-06359302] {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 18px
+}
+
+.summary-btm[data-v-06359302] {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    min-width: 125px;
+    margin: 8px auto 0;
+    padding: 4px 8px;
+    border-radius: 2px;
+    border-right: 1px solid rgba(95, 183, 214, .83);
+    border-left: 1px solid rgba(95, 183, 214, .83);
+    background: rgba(95, 183, 214, .36)
+}
+
+.summary-subtitle[data-v-06359302] {
+    font-size: 12px;
+    line-height: 16px
+}
+
+.summary-progress[data-v-06359302] {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    font-family: RPG_CN_Condensed
+}
+
+.feature[data-v-06359302] {
+    position: absolute;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.feature-bg[data-v-06359302] {
+    width: 100px;
+    height: 100px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0
+}
+
+.feature-progress[data-v-06359302] {
+    margin-top: 0;
+    color: #d0f4ff;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 15.789px;
+    font-family: RPG_CN_Condensed
+}
+
+.feature[index="0"][data-v-06359302] {
+    top: 166px;
+    right: 716px
+}
+
+.feature[index="1"][data-v-06359302] {
+    top: 52px;
+    right: 240px
+}
+
+.feature[index="2"][data-v-06359302] {
+    top: 183px;
+    right: 121px
+}
+
+.feature[index="3"][data-v-06359302] {
+    top: 334px;
+    right: 676px
+}
+
+.feature[index="4"][data-v-06359302] {
+    top: 339px;
+    right: 192px
+}

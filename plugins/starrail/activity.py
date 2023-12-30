@@ -632,6 +632,62 @@ class PlayerActivityPlugins(Plugin):
             query_selector="#boxing_show",
         )
 
+    @handler.command("space_zoo", block=False)
+    @handler.message(filters.Regex("^异宠拾遗信息查询(.*)"), block=False)
+    async def space_zoo_command_start(self, update: Update, context: CallbackContext) -> None:
+        user = update.effective_user
+        message = update.effective_message
+        logger.info("用户 %s[%s] 查询异宠拾遗信息命令请求", user.full_name, user.id)
+        try:
+            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+                render_result = await self.space_zoo_render(client, uid)
+        except AttributeError as exc:
+            logger.error(ACTIVITY_DATA_ERROR)
+            logger.exception(exc)
+            await message.reply_text(ACTIVITY_ATTR_ERROR)
+            return
+        except NotHaveData as e:
+            reply_message = await message.reply_text(e.MSG)
+            if filters.ChatType.GROUPS.filter(reply_message):
+                self.add_delete_message_job(message)
+                self.add_delete_message_job(reply_message)
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+
+    async def space_zoo_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
+        if uid is None:
+            uid = client.player_id
+
+        act_data = await client.get_starrail_activity(uid)
+        try:
+            space_zoo_data = act_data.space_zoo
+            if not space_zoo_data.exists_data:
+                raise NotHaveData
+        except ValueError:
+            raise NotHaveData
+        features_map: Dict[int, Dict[str, int]] = {i: {"cur": 0, "max": 0} for i in range(5)}
+        features_map2: Dict[str, int] = {"酥壳": 0, "内馅": 1, "装饰": 2, "眼睛": 3, "花纹": 4}
+        for feature in space_zoo_data.info.features:
+            feature_index = features_map2.get(feature.name_mi18n)
+            if feature_index is not None:
+                features_map[feature_index]["cur"] += feature.cur
+                features_map[feature_index]["max"] += feature.max
+        data = {
+            "uid": mask_number(uid),
+            "info": space_zoo_data.info,
+            "features": list(features_map.values()),
+        }
+
+        return await self.template_service.render(
+            "starrail/activity/space_zoo.html",
+            data,
+            {"width": 960, "height": 1000},
+            full_page=True,
+            query_selector="#spaceZoo",
+        )
+
     @handler.command("treasure_dungeon", block=False)
     @handler.message(filters.Regex("^地城探宝信息查询(.*)"), block=False)
     async def treasure_dungeon_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
