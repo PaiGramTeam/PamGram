@@ -51,6 +51,10 @@ class AbyssUnlocked(Exception):
     """根本没动"""
 
 
+class AbyssFastPassed(Exception):
+    """快速通过，无数据"""
+
+
 class ChallengePlugin(Plugin):
     """混沌回忆数据查询"""
 
@@ -111,8 +115,8 @@ class ChallengePlugin(Plugin):
         # 解析参数
         floor, total, previous = get_args(message.text)
 
-        if floor > 10 or floor < 0:
-            reply_msg = await message.reply_text("混沌回忆层数输入错误，请重新输入。支持的参数为： 1-10 或 all")
+        if floor > 12 or floor < 0:
+            reply_msg = await message.reply_text("混沌回忆层数输入错误，请重新输入。支持的参数为： 1-12 或 all")
             if filters.ChatType.GROUPS.filter(message):
                 self.add_delete_message_job(reply_msg)
                 self.add_delete_message_job(message)
@@ -148,6 +152,9 @@ class ChallengePlugin(Plugin):
         except AbyssUnlocked:  # 若混沌回忆未解锁
             await reply_message_func("还未解锁混沌回忆哦~")
             return
+        except AbyssFastPassed:  # 若混沌回忆已快速通过
+            await reply_message_func("本层已被快速通过，无详细数据~")
+            return
         except IndexError:  # 若混沌回忆为挑战此层
             await reply_message_func("还没有挑战本层呢，咕咕咕~")
             return
@@ -175,6 +182,8 @@ class ChallengePlugin(Plugin):
             floor_data = None
         if not floor_data:
             raise AbyssUnlocked()
+        if floor_data.is_fast or floor_data.round_num == 0:
+            raise AbyssFastPassed()
         render_data = {
             "floor": floor_data,
             "floor_time": floor_data.node_1.challenge_time.datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -243,6 +252,8 @@ class ChallengePlugin(Plugin):
                 8: "#1D2A5D",
                 9: "#292B58",
                 10: "#382024",
+                11: "#252550",
+                12: "#1D2A4A",
             },
         }
         if total:
@@ -268,7 +279,10 @@ class ChallengePlugin(Plugin):
             avatars = await client.get_starrail_characters(uid, lang="zh-cn")
             floors = abyss_data.floors[::-1]
             for i, f in enumerate(floors):
-                render_inputs.append(floor_task(i + 1))
+                try:
+                    render_inputs.append(floor_task(i + 1))
+                except AbyssFastPassed:
+                    pass
 
             render_group_inputs = list(map(lambda x: x[1], sorted(render_inputs, key=lambda x: x[0])))
 
@@ -286,6 +300,8 @@ class ChallengePlugin(Plugin):
             floor_data = None
         if not floor_data:
             raise AbyssUnlocked()
+        if floor_data.is_fast or floor_data.round_num == 0:
+            raise AbyssFastPassed()
         avatars = await client.get_starrail_characters(uid, lang="zh-cn")
         render_data.update(self.get_floor_data(abyss_data, floor))
         render_data["avatar_data"] = self.get_avatar_data(avatars, render_data["floor_nodes"])
