@@ -43,6 +43,9 @@
                 </div>
                 <div class="star">
                     <span>{{ floor.star_num }}</span>
+                    <div>
+                        总分：{{ floor.score }}
+                    </div>
                 </div>
             </div>
             <div class="hr"></div>
@@ -80,6 +83,12 @@
                         {% endfor %}
                         {% if loop.length > 1 %}
                             <div class="battle-info">{{ ['上', '下'][loop.index - 1] }}半</div>
+                        {% endif %}
+                        <div>
+                            积分：{{ node.score }}
+                        </div>
+                        {% if loop.index < loop.length %}
+                            <div class="hr"></div>
                         {% endif %}
                     </div>
                     {% endfor %}

@@ -19,7 +19,7 @@
 <body>
 <div class="container">
     <div class="overview">
-        <div class="title">混沌回忆挑战回顾</div>
+        <div class="title">{{ title }}挑战回顾</div>
         <div class="summarize">
             <div>
                 <div>UID: {{ uid }}</div>
@@ -28,12 +28,12 @@
                 </div>
             </div>
             <div>
-                <div>时间: {{ time }}</div>
+                <div>本期开始: {{ start_time }}</div>
                 <div>最深抵达: {{ max_floor }}</div>
             </div>
             <div>
+                <div>本期结束: {{ end_time }}</div>
                 <div>战斗次数: {{ total_battles }}</div>
-                <div></div>
             </div>
         </div>
     </div>
