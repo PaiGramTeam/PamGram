@@ -100,6 +100,10 @@ body {
     background-image: url("./background/star.png");
 }
 
+.star > span {
+    margin-left: 10px;
+}
+
 .star > div {
     margin-left: 10px;
 }
@@ -364,4 +368,32 @@ body {
 
 .score {
     font-size: medium;
+}
+
+.buffs {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.buffs > .buff-item {
+    background-color: hsla(0,0%,100%,.08);
+    display: flex;
+    color: #d9d9d9;
+}
+
+.buffs > .buff-item > .buff-item-icon {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    margin-right: 2.13333vw;
+    background-color: rgba(0,0,0,.7);
+    border-radius: 50%;
+    border: 1px solid hsla(0,0%,100%,.7);
+}
+
+.buffs > .buff-item > p > .buff-item-name {
+    color: #f9c87e;
 }

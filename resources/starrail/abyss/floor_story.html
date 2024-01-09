@@ -89,6 +89,15 @@
                             </div>
                         {% endif %}
                     </div>
+                    <div class="buffs">
+                        <div class="buff-item">
+                            <img src="{{ node.buff.icon }}" alt="buff-item" class="buff-item-icon">
+                            <p>
+                                <span class="buff-item-name">{{ node.buff.name_mi18n }}：</span>
+                                <span class="buff-item-desc">{{ node.buff.desc_mi18n }}</span>
+                            </p>
+                        </div>
+                    </div>
                     {% if loop.index < loop.length %}
                     <div class="hr"></div>
                     {% endif %}
