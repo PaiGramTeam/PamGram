@@ -24,6 +24,12 @@ body {
     filter: drop-shadow(2px 2px 5px rgb(0 0 0 /70%));
 }
 
+.container2 {
+    width: 900px;
+    position: relative;
+    filter: drop-shadow(2px 2px 5px rgb(0 0 0 /70%));
+}
+
 .title {
     text-align: center;
     font-size: 27px;
@@ -94,7 +100,7 @@ body {
     background-image: url("./background/star.png");
 }
 
-.star > span {
+.star > div {
     margin-left: 10px;
 }
 
@@ -311,7 +317,7 @@ body {
 .battle > .character {
     flex: 2;
     max-width: 120px;
-    height: 160px;
+    height: 170px;
 }
 
 .battle > .battle-info {
@@ -354,4 +360,8 @@ body {
 .battle > .character > .caption {
     font-size: 20px;
     margin-top: 2px;
+}
+
+.score {
+    font-size: medium;
 }
