@@ -24,6 +24,12 @@ body {
     filter: drop-shadow(2px 2px 5px rgb(0 0 0 /70%));
 }
 
+.container2 {
+    width: 850px;
+    position: relative;
+    filter: drop-shadow(2px 2px 5px rgb(0 0 0 /70%));
+}
+
 .title {
     text-align: center;
     font-size: 27px;
@@ -96,6 +102,14 @@ body {
 
 .star > span {
     margin-left: 10px;
+}
+
+.star > div {
+    margin-left: 10px;
+}
+
+.star > div > div {
+    text-align: center;
 }
 
 .most-played {
@@ -311,7 +325,7 @@ body {
 .battle > .character {
     flex: 2;
     max-width: 120px;
-    height: 160px;
+    height: 170px;
 }
 
 .battle > .battle-info {
@@ -354,4 +368,38 @@ body {
 .battle > .character > .caption {
     font-size: 20px;
     margin-top: 2px;
+}
+
+.score {
+    font-size: medium;
+}
+
+.buffs {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.buffs > .buff-item {
+    background-color: hsla(0,0%,100%,.08);
+    display: flex;
+    color: #d9d9d9;
+}
+
+.buffs > .buff-item > .buff-item-icon {
+    display: flex;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    margin-top: 7px;
+    margin-right: 10px;
+    margin-left: 20px;
+    background-color: rgba(0,0,0,.7);
+    border-radius: 50%;
+    border: 1px solid hsla(0,0%,100%,.7);
+}
+
+.buffs > .buff-item > p > .buff-item-name {
+    color: #f9c87e;
 }

@@ -25,7 +25,7 @@
     </style>
 </head>
 <body>
-<div class="container">
+<div class="container2">
     <div class="floors">
         <div
                 class="floor"
@@ -42,7 +42,10 @@
                     </div>
                 </div>
                 <div class="star">
-                    <span>{{ floor.star_num }}</span>
+                    <div>
+                        <div>{{ floor.star_num }}</div>
+                        <div class="score">总分：{{ floor.score }}</div>
+                    </div>
                 </div>
             </div>
             <div class="hr"></div>
@@ -79,9 +82,25 @@
                             </div>
                         {% endfor %}
                         {% if loop.length > 1 %}
-                            <div class="battle-info">{{ ['上', '下'][loop.index - 1] }}半</div>
+                            <div class="battle-info">
+                                <div>{{ ['上', '下'][loop.index - 1] }}半</div>
+                                <br/>
+                                <div class="score">积分：{{ node.score }}</div>
+                            </div>
                         {% endif %}
                     </div>
+                    <div class="buffs">
+                        <div class="buff-item">
+                            <img src="{{ node.buff.icon }}" alt="buff-item" class="buff-item-icon">
+                            <p>
+                                <span class="buff-item-name">{{ node.buff.name_mi18n }}：</span>
+                                <span class="buff-item-desc">{{ node.buff.desc_mi18n }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    {% if loop.index < loop.length %}
+                    <div class="hr"></div>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>

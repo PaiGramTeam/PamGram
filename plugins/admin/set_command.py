@@ -44,6 +44,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("strategy", "角色攻略查询"),
             BotCommand("material", "角色培养素材查询"),
             BotCommand("challenge", "混沌回忆信息查询"),
+            BotCommand("challenge_story", "虚构叙事信息查询"),
             BotCommand("rogue", "模拟宇宙信息查询"),
             BotCommand("rogue_locust", "寰宇蝗灾信息查询"),
             BotCommand("museum", "冬城博物珍奇簿信息查询"),

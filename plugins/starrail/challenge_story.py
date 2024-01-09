@@ -1,4 +1,4 @@
-"""混沌回忆数据查询"""
+"""虚构叙事数据查询"""
 import asyncio
 import re
 from functools import lru_cache
@@ -30,9 +30,9 @@ if TYPE_CHECKING:
 
 
 TZ = timezone("Asia/Shanghai")
-cmd_pattern = r"(?i)^/challenge(?:@[\w]+)?\s*((?:\d+)|(?:all))?\s*(pre)?"
-msg_pattern = r"^混沌回忆数据((?:查询)|(?:总览))(上期)?\D?(\d*)?.*?$"
-MAX_FLOOR = 12
+cmd_pattern = r"(?i)^/challenge_story(?:@[\w]+)?\s*((?:\d+)|(?:all))?\s*(pre)?"
+msg_pattern = r"^虚构叙事数据((?:查询)|(?:总览))(上期)?\D?(\d*)?.*?$"
+MAX_FLOOR = 4
 
 
 @lru_cache
@@ -58,8 +58,8 @@ class AbyssFastPassed(Exception):
     """快速通过，无数据"""
 
 
-class ChallengePlugin(Plugin):
-    """混沌回忆数据查询"""
+class ChallengeStoryPlugin(Plugin):
+    """虚构叙事数据查询"""
 
     def __init__(
         self,
@@ -93,7 +93,7 @@ class ChallengePlugin(Plugin):
                     uid = player_info.player_id
         return uid
 
-    @handler.command("challenge", block=False)
+    @handler.command("challenge_story", block=False)
     @handler.message(filters.Regex(msg_pattern), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         user = update.effective_user
@@ -103,29 +103,29 @@ class ChallengePlugin(Plugin):
         # 若查询帮助
         if (message.text.startswith("/") and "help" in message.text) or "帮助" in message.text:
             await message.reply_text(
-                "<b>混沌回忆数据</b>功能使用帮助（中括号表示可选参数）\n\n"
-                "指令格式：\n<code>/challenge + [层数/all] + [pre]</code>\n（<code>pre</code>表示上期）\n\n"
-                "文本格式：\n<code>混沌回忆数据 + 查询/总览 + [上期] + [层数]</code> \n\n"
+                "<b>虚构叙事数据</b>功能使用帮助（中括号表示可选参数）\n\n"
+                "指令格式：\n<code>/challenge_story + [层数/all] + [pre]</code>\n（<code>pre</code>表示上期）\n\n"
+                "文本格式：\n<code>虚构叙事数据 + 查询/总览 + [上期] + [层数]</code> \n\n"
                 "例如以下指令都正确：\n"
-                "<code>/challenge</code>\n<code>/challenge 1 pre</code>\n<code>/challenge all pre</code>\n"
-                "<code>混沌回忆数据查询</code>\n<code>混沌回忆数据查询上期第1层</code>\n<code>混沌回忆数据总览上期</code>",
+                "<code>/challenge_story</code>\n<code>/challenge_story 1 pre</code>\n<code>/challenge_story all pre</code>\n"
+                "<code>虚构叙事数据查询</code>\n<code>虚构叙事数据查询上期第1层</code>\n<code>虚构叙事数据总览上期</code>",
                 parse_mode=ParseMode.HTML,
             )
-            logger.info("用户 %s[%s] 查询[bold]混沌回忆数据[/bold]帮助", user.full_name, user.id, extra={"markup": True})
+            logger.info("用户 %s[%s] 查询[bold]虚构叙事数据[/bold]帮助", user.full_name, user.id, extra={"markup": True})
             return
 
         # 解析参数
         floor, total, previous = get_args(message.text)
 
         if floor > MAX_FLOOR or floor < 0:
-            reply_msg = await message.reply_text(f"混沌回忆层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all")
+            reply_msg = await message.reply_text(f"虚构叙事层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all")
             if filters.ChatType.GROUPS.filter(message):
                 self.add_delete_message_job(reply_msg)
                 self.add_delete_message_job(message)
             return
 
         logger.info(
-            "用户 %s[%s] [bold]混沌回忆挑战数据[/bold]请求: uid=%s floor=%s total=%s previous=%s",
+            "用户 %s[%s] [bold]虚构叙事挑战数据[/bold]请求: uid=%s floor=%s total=%s previous=%s",
             user.full_name,
             user.id,
             uid,
@@ -143,7 +143,7 @@ class ChallengePlugin(Plugin):
         try:
             async with self.helper.genshin_or_public(user.id, uid=uid) as client:
                 if total:
-                    reply_text = await message.reply_text("彦卿需要时间整理混沌回忆数据，还请耐心等待哦~")
+                    reply_text = await message.reply_text("彦卿需要时间整理虚构叙事数据，还请耐心等待哦~")
                 await message.reply_chat_action(ChatAction.TYPING)
                 images = await self.get_rendered_pic(client, uid, floor, total, previous)
         except TooManyRequestPublicCookies:
@@ -152,13 +152,13 @@ class ChallengePlugin(Plugin):
                 self.add_delete_message_job(reply_message)
                 self.add_delete_message_job(message)
             return
-        except AbyssUnlocked:  # 若混沌回忆未解锁
-            await reply_message_func("还未解锁混沌回忆哦~")
+        except AbyssUnlocked:  # 若虚构叙事未解锁
+            await reply_message_func("还未解锁虚构叙事哦~")
             return
-        except AbyssFastPassed:  # 若混沌回忆已快速通过
+        except AbyssFastPassed:  # 若虚构叙事已快速通过
             await reply_message_func("本层已被快速通过，无详细数据~")
             return
-        except IndexError:  # 若混沌回忆为挑战此层
+        except IndexError:  # 若虚构叙事为挑战此层
             await reply_message_func("还没有挑战本层呢，咕咕咕~")
             return
         if images is None:
@@ -175,7 +175,7 @@ class ChallengePlugin(Plugin):
         if reply_text is not None:
             await reply_text.delete()
 
-        logger.info("用户 %s[%s] [bold]混沌回忆挑战数据[/bold]: 成功发送图片", user.full_name, user.id, extra={"markup": True})
+        logger.info("用户 %s[%s] [bold]虚构叙事挑战数据[/bold]: 成功发送图片", user.full_name, user.id, extra={"markup": True})
 
     @staticmethod
     def get_floor_data(abyss_data, floor: int):
@@ -231,15 +231,18 @@ class ChallengePlugin(Plugin):
             bytes格式的图片
         """
 
-        abyss_data = await client.get_starrail_challenge(uid, previous=previous, lang="zh-cn")
+        abyss_data = await client.get_starrail_challenge_story(uid, previous=previous, lang="zh-cn")
         if not abyss_data.has_data:
             raise AbyssUnlocked()
-        start_time = abyss_data.begin_time.datetime.astimezone(TZ).strftime("%m月%d日 %H:%M")
-        end_time = abyss_data.end_time.datetime.astimezone(TZ).strftime("%m月%d日 %H:%M")
+        if not abyss_data.groups:
+            raise AbyssUnlocked()
+        season = abyss_data.groups[0]
+        start_time = season.begin_time.datetime.astimezone(TZ).strftime("%m月%d日 %H:%M")
+        end_time = season.end_time.datetime.astimezone(TZ).strftime("%m月%d日 %H:%M")
         total_stars = f"{abyss_data.total_stars}"
 
         render_data = {
-            "title": "混沌回忆",
+            "title": "虚构叙事",
             "start_time": start_time,
             "end_time": end_time,
             "stars": total_stars,
@@ -269,7 +272,7 @@ class ChallengePlugin(Plugin):
                 return (
                     floor_index,
                     self.template_service.render(
-                        "starrail/abyss/floor.html",
+                        "starrail/abyss/floor_story.html",
                         {
                             **render_data,
                             **_abyss_data,
@@ -283,7 +286,7 @@ class ChallengePlugin(Plugin):
             render_inputs = []
             avatars = await client.get_starrail_characters(uid, lang="zh-cn")
             floors = abyss_data.floors[::-1]
-            for i, f in enumerate(floors):
+            for i in range(len(floors)):
                 try:
                     render_inputs.append(floor_task(i + 1))
                 except AbyssFastPassed:
@@ -312,6 +315,6 @@ class ChallengePlugin(Plugin):
         render_data["avatar_data"] = self.get_avatar_data(avatars, render_data["floor_nodes"])
         return [
             await self.template_service.render(
-                "starrail/abyss/floor.html", render_data, viewport={"width": 690, "height": 500}
+                "starrail/abyss/floor_story.html", render_data, viewport={"width": 690, "height": 500}
             )
         ]
