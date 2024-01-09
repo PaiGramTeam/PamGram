@@ -25,7 +25,7 @@ body {
 }
 
 .container2 {
-    width: 900px;
+    width: 850px;
     position: relative;
     filter: drop-shadow(2px 2px 5px rgb(0 0 0 /70%));
 }
@@ -106,6 +106,10 @@ body {
 
 .star > div {
     margin-left: 10px;
+}
+
+.star > div > div {
+    text-align: center;
 }
 
 .most-played {
@@ -384,11 +388,13 @@ body {
 .buffs > .buff-item > .buff-item-icon {
     display: flex;
     align-items: center;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     -ms-flex-negative: 0;
     flex-shrink: 0;
-    margin-right: 2.13333vw;
+    margin-top: 7px;
+    margin-right: 10px;
+    margin-left: 20px;
     background-color: rgba(0,0,0,.7);
     border-radius: 50%;
     border: 1px solid hsla(0,0%,100%,.7);
