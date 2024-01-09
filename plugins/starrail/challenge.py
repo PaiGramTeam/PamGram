@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 TZ = timezone("Asia/Shanghai")
 cmd_pattern = r"(?i)^/challenge(?:@[\w]+)?\s*((?:\d+)|(?:all))?\s*(pre)?"
 msg_pattern = r"^混沌回忆数据((?:查询)|(?:总览))(上期)?\D?(\d*)?.*?$"
+MAX_FLOOR = 12
 
 
 @lru_cache
@@ -75,9 +76,8 @@ class ChallengePlugin(Plugin):
         uid, user_id_ = None, user_id
         if args:
             for i in args:
-                if i is not None:
-                    if i.isdigit() and len(i) == 9:
-                        uid = int(i)
+                if i is not None and i.isdigit() and len(i) == 9:
+                    uid = int(i)
         if reply:
             try:
                 user_id_ = reply.from_user.id
@@ -117,8 +117,8 @@ class ChallengePlugin(Plugin):
         # 解析参数
         floor, total, previous = get_args(message.text)
 
-        if floor > 12 or floor < 0:
-            reply_msg = await message.reply_text("混沌回忆层数输入错误，请重新输入。支持的参数为： 1-12 或 all")
+        if floor > MAX_FLOOR or floor < 0:
+            reply_msg = await message.reply_text(f"混沌回忆层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all")
             if filters.ChatType.GROUPS.filter(message):
                 self.add_delete_message_job(reply_msg)
                 self.add_delete_message_job(message)
