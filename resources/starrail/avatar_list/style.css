@@ -1,7 +1,20 @@
+:root {
+    --white: rgb(246 248 249);
+    --bg-color: rgb(233 229 220);
+    --h-color: rgb(203 189 162);
+    --red: rgb(255 86 33/ 80%);
+    --pink: rgb(215 57 203/80%);
+    --purple: rgb(159 68 211/80%);
+    --blue: rgb(98 168 233/ 80%);
+    --cyan: rgb(4 150 255/80%);
+    --green: rgb(67 185 124/ 80%);
+    --grey: rgb(189 191 190);
+}
+
 /* 上半 */
 .container {
-  width: 680px !important;
-  max-width: 680px !important;
+  width: 1000px !important;
+  max-width: 1000px !important;
 }
 
 .header {
@@ -111,4 +124,38 @@
 
 .notice {
   background-image: linear-gradient(135deg, #9452a5 10%, #fff5c3 100%);
+}
+
+.talent {
+    background-size: contain, 1.6em;
+    background-repeat: no-repeat;
+    background-position: center center;
+    text-shadow: 1px 1px 2px rgb(0 0 0 /20%);
+    z-index: -1 !important;
+    border-right-width: 0 !important;
+    border-left-width: 0 !important;
+}
+
+.talent-level-first {
+    background-color: rgb(189, 191, 190) !important;
+}
+
+.talent-level-1 {
+    background-color: rgb(189, 191, 190);
+}
+
+.talent-level-2 {
+    background-color: var(--green);
+}
+
+.talent-level-3 {
+    background-color: var(--blue);
+}
+
+.talent-level-4 {
+    background-color: rgb(190, 160, 250);
+}
+
+.talent-level-max {
+    background-image: linear-gradient(90deg, rgba(251, 129, 124, 0.8) 0%, rgba(255, 93, 85, 0.65) 50%, rgba(251, 129, 124, 0.8) 100%), url("../../img/241.png") !important;
 }

@@ -25,6 +25,10 @@
           <th colspan="2">角色</th>
           <th>等级</th>
           <th>星魂</th>
+          <th>普攻</th>
+          <th>战技</th>
+          <th>爆发</th>
+          <th>天赋</th>
           <th colspan="4">光锥</th>
         </tr>
       </thead>
@@ -57,6 +61,31 @@
               <span class="number role inline-block">{{ constellation }}</span>
               <div class="role bg"></div>
             </td>
+            {% for skill in avatar_data.skills %}
+              {% set talent_style = 'talent' %}
+              {% set skill_level = skill.level %}
+
+              {% if skill_level < 4 %}
+                {% set talent_style = talent_style + ' talent-level-first' %}
+              {% endif %}
+
+              {% if skill.max_level == skill.level %}
+                {% set talent_style = talent_style + ' talent-level-max' %}
+              {% endif %}
+
+              {% if skill.max_level != skill.level %}
+                {% if skill_level < 4 %}
+              {% set talent_style = talent_style + ' talent-level-1' %}
+                {% elif skill_level < 6 %}
+                  {% set talent_style = talent_style + ' talent-level-2' %}
+                {% elif skill_level < 9 %}
+                  {% set talent_style = talent_style + ' talent-level-3' %}
+                {% else %}
+                  {% set talent_style = talent_style + ' talent-level-4' %}
+                {% endif %}
+              {% endif %}
+              <td class="{{ talent_style }}">{{ skill.level }}</td>
+            {% endfor %}
             {% if equipment != none %}
               <td class="weapon-{{ equip_star }}-star text-left pl-3">
                 {% if equipment.level < 10 %}

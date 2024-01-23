@@ -8,12 +8,11 @@ from typing import TYPE_CHECKING, Union
 from pydantic import ValidationError
 from simnet import StarRailClient, Region
 from simnet.errors import BadRequest as SimnetBadRequest, InvalidCookies, NetworkError, CookieException, NeedChallenge
-from simnet.models.genshin.calculator import CalculatorCharacterDetails
-from simnet.models.genshin.chronicle.characters import Character
+from simnet.models.starrail.calculator import StarrailCalculatorCharacterDetails, StarrailCalculatorCharacter
 from simnet.utils.player import recognize_game_biz
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import StaleDataError
-from sqlmodel import BigInteger, Column, DateTime, Field, Index, Integer, SQLModel, String, delete, func, select
+from sqlmodel import BigInteger, Column, DateTime, Field, Index, Integer, SQLModel, TEXT, delete, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from telegram.ext import ContextTypes
 
@@ -44,7 +43,7 @@ class CharacterDetailsSQLModel(SQLModel, table=True):
     id: Optional[int] = Field(default=None, sa_column=Column(Integer, primary_key=True, autoincrement=True))
     player_id: int = Field(sa_column=Column(BigInteger()))
     character_id: int = Field(sa_column=Column(BigInteger()))
-    data: Optional[str] = Field(sa_column=Column(String(length=4096)))
+    data: Optional[str] = Field(sa_column=Column(TEXT()))
     time_updated: Optional[datetime] = Field(sa_column=Column(DateTime, onupdate=func.now()))  # pylint: disable=E1102
 
 
@@ -87,13 +86,13 @@ class CharacterDetails(Plugin):
         self,
         uid: int,
         character_id: int,
-    ) -> Optional["CalculatorCharacterDetails"]:
+    ) -> Optional["StarrailCalculatorCharacterDetails"]:
         name = self.get_qname(uid, character_id)
         data = await self.redis.get(name)
         if data is None:
             return None
         json_data = str(data, encoding="utf-8")
-        return CalculatorCharacterDetails.parse_raw(json_data)
+        return StarrailCalculatorCharacterDetails.parse_raw(json_data)
 
     async def set_character_details(self, player_id: int, character_id: int, data: str):
         randint = random.randint(1, 30)  # nosec
@@ -135,7 +134,7 @@ class CharacterDetails(Plugin):
         self,
         uid: int,
         character_id: int,
-    ) -> Optional["CalculatorCharacterDetails"]:
+    ) -> Optional["StarrailCalculatorCharacterDetails"]:
         async with AsyncSession(self.database.engine) as session:
             statement = (
                 select(CharacterDetailsSQLModel)
@@ -146,7 +145,7 @@ class CharacterDetails(Plugin):
             data = results.first()
             if data is not None:
                 try:
-                    return CalculatorCharacterDetails.parse_raw(data.data)
+                    return StarrailCalculatorCharacterDetails.parse_raw(data.data)
                 except ValidationError as exc:
                     logger.error("解析数据出现异常 ValidationError", exc_info=exc)
                     await session.delete(data)
@@ -158,11 +157,11 @@ class CharacterDetails(Plugin):
         return None
 
     async def get_character_details(
-        self, client: "StarRailClient", character: "Union[int,Character]"
-    ) -> Optional["CalculatorCharacterDetails"]:
+        self, client: "StarRailClient", character: "Union[int, StarrailCalculatorCharacter]"
+    ) -> Optional["StarrailCalculatorCharacterDetails"]:
         """缓存 character_details 并定时对其进行数据存储 当遇到 Too Many Requests 可以获取以前的数据"""
         uid = client.player_id
-        if isinstance(character, Character):
+        if isinstance(character, StarrailCalculatorCharacter):
             character_id = character.id
         else:
             character_id = character
@@ -176,7 +175,7 @@ class CharacterDetails(Plugin):
                 if "Too Many Requests" in exc.message:
                     return await self.get_character_details_for_mysql(uid, character_id)
                 raise exc
-            asyncio.create_task(self.set_character_details(uid, character_id, detail.json(by_alias=True)))
+            await asyncio.create_task(self.set_character_details(uid, character_id, detail.json(by_alias=True)))
             return detail
         try:
             return await client.get_character_details(character_id)
