@@ -70,7 +70,9 @@ class AvatarListPlugin(Plugin):
         self.helper = helper
         self.character_details = character_details
 
-    async def get_avatar_data(self, character_id: int, client: "StarRailClient") -> Optional["StarrailCalculatorCharacterDetails"]:
+    async def get_avatar_data(
+        self, character_id: int, client: "StarRailClient"
+    ) -> Optional["StarrailCalculatorCharacterDetails"]:
         return await self.character_details.get_character_details(client, character_id)
 
     @staticmethod
@@ -91,7 +93,9 @@ class AvatarListPlugin(Plugin):
         light_cone = self.wiki_service.light_cone.get_by_name(name)
         return light_cone.rank if light_cone else 3
 
-    async def get_avatars_details(self, characters: List["StarRailDetailCharacter"], client: "StarRailClient") -> Dict[int, "StarrailCalculatorCharacterDetails"]:
+    async def get_avatars_details(
+        self, characters: List["StarRailDetailCharacter"], client: "StarRailClient"
+    ) -> Dict[int, "StarrailCalculatorCharacterDetails"]:
         async def _task(cid):
             return await self.get_avatar_data(cid, client)
 
@@ -102,12 +106,11 @@ class AvatarListPlugin(Plugin):
     def get_skill_data(character: Optional["StarrailCalculatorCharacterDetails"]) -> List[SkillData]:
         if not character:
             return [SkillData(id=i, level=1, max_level=10) for i in range(1, 5)]
-        return [
-            SkillData(id=skill.id, level=skill.cur_level, max_level=skill.max_level)
-            for skill in character.skills
-        ]
+        return [SkillData(id=skill.id, level=skill.cur_level, max_level=skill.max_level) for skill in character.skills]
 
-    async def get_final_data(self, characters: List["StarRailDetailCharacter"], client: "StarRailClient") -> List[AvatarData]:
+    async def get_final_data(
+        self, characters: List["StarRailDetailCharacter"], client: "StarRailClient"
+    ) -> List[AvatarData]:
         details = await self.get_avatars_details(characters, client)
         data = []
         for character in characters:
