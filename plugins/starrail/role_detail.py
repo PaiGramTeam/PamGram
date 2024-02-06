@@ -1,16 +1,18 @@
-from typing import TYPE_CHECKING, Dict, Any, List, Tuple, Optional
+import math
+from typing import TYPE_CHECKING, Dict, Any, List, Tuple, Optional, Union
 
 from pydantic import BaseModel
 from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo, StarRailDetailCharacter, \
     RecommendProperty
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
 
 from core.plugin import Plugin, handler
 from core.services.template.services import TemplateService
 from gram_core.dependence.redisdb import RedisDB
-from metadata.shortname import roleToName
+from gram_core.services.template.models import RenderResult
+from metadata.shortname import roleToName, idToRole
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
 from utils.uid import mask_number
@@ -76,6 +78,7 @@ class RoleDetailPlugin(Plugin):
         self.qname = "plugins:role_detail"
         self.redis = redis.client
         self.expire = 15 * 60  # 15分钟
+        self.kitsune: Optional[str] = None
 
     async def set_characters_for_redis(
         self,
@@ -175,7 +178,7 @@ class RoleDetailPlugin(Plugin):
             data["skills_main"] = [i.dict() for i in char.skills_main]
             data["skills_single"] = [i.dict() for i in char.skills_single]
             return char, data
-        raise ValueError("未找到角色")
+        raise FileNotFoundError("未找到角色")
 
     @staticmethod
     def process_score(properties_map: Dict[int, "PropertyInfo"], recommend_property: "RecommendProperty") -> RelicScore:
@@ -214,6 +217,66 @@ class RoleDetailPlugin(Plugin):
             "score": score.dict(),
         }
 
+    @staticmethod
+    def gen_button(
+        data: "StarRailDetailCharacters",
+        user_id: Union[str, int],
+        uid: int,
+        page: int = 1,
+    ) -> List[List[InlineKeyboardButton]]:
+        """生成按钮"""
+        buttons = []
+
+        if data.avatar_list:
+            buttons = [
+                InlineKeyboardButton(
+                    idToRole(value.id),
+                    callback_data=f"get_role_detail|{user_id}|{uid}|{idToRole(value.id)}",
+                )
+                for value in data.avatar_list
+                if value.id
+            ]
+        all_buttons = [buttons[i : i + 4] for i in range(0, len(buttons), 4)]
+        send_buttons = all_buttons[(page - 1) * 3 : page * 3]
+        last_page = page - 1 if page > 1 else 0
+        all_page = math.ceil(len(all_buttons) / 3)
+        next_page = page + 1 if page < all_page and all_page > 1 else 0
+        last_button = []
+        if last_page:
+            last_button.append(
+                InlineKeyboardButton(
+                    "<< 上一页",
+                    callback_data=f"get_role_detail|{user_id}|{uid}|{last_page}",
+                )
+            )
+        if last_page or next_page:
+            last_button.append(
+                InlineKeyboardButton(
+                    f"{page}/{all_page}",
+                    callback_data=f"get_role_detail|{user_id}|{uid}|empty_data",
+                )
+            )
+        if next_page:
+            last_button.append(
+                InlineKeyboardButton(
+                    "下一页 >>",
+                    callback_data=f"get_role_detail|{user_id}|{uid}|{next_page}",
+                )
+            )
+        if last_button:
+            send_buttons.append(last_button)
+        return send_buttons
+
+    async def get_render_result(self, data: "StarRailDetailCharacters", nickname: str, ch_name: str, uid: int) -> "RenderResult":
+        final = self.parse_render_data(data, nickname, ch_name, uid)
+        return await self.template_service.render(
+            "starrail/role_detail/main.jinja2",
+            final,
+            {"width": 1920, "height": 1080},
+            full_page=True,
+            query_selector=".pc-role-detail-num",
+        )
+
     @handler.command(command="role_detail", block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         user = update.effective_user
@@ -224,24 +287,35 @@ class RoleDetailPlugin(Plugin):
             ch_name = roleToName(i)
             if ch_name:
                 break
-        logger.info("用户 %s[%s] 查询角色详细信息 ch_name[%s]", user.full_name, user.id, ch_name)
-        await message.reply_chat_action(ChatAction.TYPING)
+        logger.info(
+            "用户 %s[%s] 角色详细信息查询命令请求 || character_name[%s]",
+            user.full_name,
+            user.id,
+            ch_name,
+        )
         async with self.helper.genshin(user.id) as client:
             nickname, data = await self.get_characters(client)
-        try:
-            final = self.parse_render_data(data, nickname, ch_name, client.player_id)
-        except ValueError:
-            reply_message = await message.reply_text("未找到该角色")
-            if filters.ChatType.GROUPS.filter(reply_message):
-                self.add_delete_message_job(message)
-                self.add_delete_message_job(reply_message)
+        uid = client.player_id
+        if ch_name is None:
+            buttons = self.gen_button(data, user.id, uid)
+            if isinstance(self.kitsune, str):
+                photo = self.kitsune
+            else:
+                photo = open("resources/img/aaa.png", "rb")
+            reply_message = await message.reply_photo(
+                photo=photo,
+                caption=f"请选择你要查询的角色 - UID {uid}",
+                reply_markup=InlineKeyboardMarkup(buttons),
+            )
+            if reply_message.photo:
+                self.kitsune = reply_message.photo[-1].file_id
             return
+        for characters in data.avatar_list:
+            if idToRole(characters.id) == ch_name:
+                break
+        else:
+            await message.reply_text(f"未在游戏中找到 {ch_name} ，请检查角色是否存在，或者等待角色数据更新后重试")
+            return
+        render_result = await self.get_render_result(data, nickname, ch_name, client.player_id)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        render_result = await self.template_service.render(
-            "starrail/role_detail/main.jinja2",
-            final,
-            {"width": 1920, "height": 1080},
-            full_page=True,
-            query_selector=".pc-role-detail-num",
-        )
         await render_result.reply_photo(message, filename=f"{client.player_id}.png", allow_sending_without_reply=True)
