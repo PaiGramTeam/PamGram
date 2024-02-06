@@ -187,9 +187,7 @@ class RoleDetailPlugin(Plugin):
         return [i[1] for i in data_map1]
 
     @staticmethod
-    def process_char(
-        data: "StarRailDetailCharacters", ch_id: int
-    ) -> Tuple["StarRailDetailCharacter", Dict[str, Any]]:
+    def process_char(data: "StarRailDetailCharacters", ch_id: int) -> Tuple["StarRailDetailCharacter", Dict[str, Any]]:
         for char in data.avatar_list:
             if char.id != ch_id:
                 continue
