@@ -5,6 +5,7 @@
     <title>Title</title>
     <link href="../activity/css/pc_f95b4488.css" rel="stylesheet">
     <link href="css/r_pc_hsr_index~r_pc_ys_index_7732160a.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
 </head>
 <body>
 <div>
@@ -137,18 +138,21 @@
 {#                                        额外行迹#}
                                         <div data-v-1dab6d78="" class="c-hrd-sp-pc-lone">
                                             {% for skill in char.skills_single %}
+                                                {% if skill.is_activated %}
+                                                    {% set lock = "unlock=1" %}
+                                                {% else %}
+                                                    {% set lock = 'lock=1' %}
+                                                {% endif %}
                                             <div data-v-1dab6d78="" class="c-hrd-sp-pc-lone-item">
                                                 <div data-v-3a0d6e6d="" data-v-1dab6d78="" class="c-hrd-dhp">
                                                     <div data-v-3a0d6e6d="" disable-scale="true" class="c-hrd-dhp-ref">
                                                         <div data-v-db299a18="" data-v-3a0d6e6d="" type="S" size=""
                                                              class="c-hrd-sk-ic">
-                                                            <div data-v-db299a18="" type="S" size=""
+                                                            <div data-v-db299a18="" type="S" size="" {{ lock }}
                                                                  class="c-hrd-sk-ic-inner">
                                                                 <img data-v-db299a18=""
-                                                                     src="{{ skill.item_url }}"
+                                                                     src="{{ skill.item_url }}?x-oss-process=image%2Fresize%2Cw_64%2Fformat%2Cwebp"
                                                                      crossorigin="anonymous"
-                                                                     width="64"
-                                                                     height="64"
                                                                 >
                                                             </div>
                                                             <!----></div>
@@ -168,9 +172,9 @@
                                                     {% set type = "S" %}
                                                     {% endif %}
                                                     {% if skill.is_activated %}
-                                                    {% set lock = "" %}
+                                                    {% set lock = "unlock=1" %}
                                                     {% else %}
-                                                    {% set lock = 'lock="true"' %}
+                                                    {% set lock = 'lock=1' %}
                                                     {% endif %}
                                                 <div data-v-1dab6d78="" class="c-hrd-sp-pc-line-item">
                                                     <div data-v-3a0d6e6d="" data-v-1dab6d78="" class="c-hrd-dhp">
@@ -180,11 +184,10 @@
                                                                  class="c-hrd-sk-ic">
                                                                 <div data-v-db299a18="" type="{{ type }}" size="" {{ lock }}
                                                                      class="c-hrd-sk-ic-inner">
-                                                                    <img data-v-db299a18=""
-                                                                     src="{{ skill.item_url }}"
+                                                                   <img data-v-db299a18=""
+                                                                     src="{{ skill.item_url }}?x-oss-process=image%2Fresize%2Cw_64%2Fformat%2Cwebp"
                                                                      crossorigin="anonymous"
-                                                                     width="64"
-                                                                     height="64">
+                                                                   >
                                                                 </div> <!---->
                                                             </div>
                                                         </div>

@@ -1,0 +1,4 @@
+/* 图标变黑色 */
+.c-hrd-sk-ic-inner[unlock] > img {
+    filter: brightness(0);
+}
