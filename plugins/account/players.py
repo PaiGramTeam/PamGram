@@ -62,8 +62,11 @@ class PlayersManagesPlugin(Plugin):
             return
         buttons = []
         for player in players:
+            nickname = "未知"
             player_info = await self.player_info_service.get(player)
-            text = f"{player.player_id} {player_info.nickname}"
+            if player_info:
+                nickname = player_info.nickname
+            text = f"{player.player_id} {nickname}"
             buttons.append(
                 [
                     InlineKeyboardButton(
