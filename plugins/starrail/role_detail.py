@@ -2,21 +2,16 @@ import math
 from typing import TYPE_CHECKING, Dict, Any, List, Tuple, Optional, Union
 
 from pydantic import BaseModel
-from simnet.models.starrail.chronicle.characters import (
-    StarRailDetailCharacters,
-    PropertyInfo,
-    StarRailDetailCharacter,
-    RecommendProperty,
-)
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction
-from telegram.ext import CallbackContext, filters, ContextTypes
+from telegram.ext import filters
 
 from core.plugin import Plugin, handler
 from core.services.template.services import TemplateService
-from gram_core.config import config
-from gram_core.dependence.redisdb import RedisDB
-from gram_core.services.template.models import RenderResult
+from core.config import config
+from core.dependence.redisdb import RedisDB
+from core.services.template.models import RenderResult
 from metadata.shortname import roleToName, idToRole
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
@@ -24,7 +19,13 @@ from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
-
+    from simnet.models.starrail.chronicle.characters import (
+        PropertyInfo,
+        StarRailDetailCharacter,
+        RecommendProperty,
+    )
+    from telegram import Update
+    from telegram.ext import ContextTypes
 
 __all__ = ("RoleDetailPlugin",)
 
@@ -301,7 +302,8 @@ class RoleDetailPlugin(Plugin):
         )
 
     @handler.command(command="role_detail", block=False)
-    async def command_start(self, update: Update, context: "ContextTypes.DEFAULT_TYPE") -> None:
+    @handler.message(filters=filters.Regex("^角色详细信息查询(.*)"), block=False)
+    async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
         user = update.effective_user
         message = update.effective_message
         args = self.get_args(context)
@@ -316,6 +318,7 @@ class RoleDetailPlugin(Plugin):
             user.id,
             ch_name,
         )
+        await message.reply_chat_action(ChatAction.TYPING)
         async with self.helper.genshin(user.id) as client:
             nickname, data = await self.get_characters(client.player_id, client)
         uid = client.player_id
@@ -325,6 +328,7 @@ class RoleDetailPlugin(Plugin):
                 photo = self.kitsune
             else:
                 photo = open("resources/img/aaa.png", "rb")
+            await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
             reply_message = await message.reply_photo(
                 photo=photo,
                 caption=f"请选择你要查询的角色 - UID {uid}",
@@ -339,8 +343,8 @@ class RoleDetailPlugin(Plugin):
         else:
             await message.reply_text(f"未在游戏中找到 {ch_name} ，请检查角色是否存在，或者等待角色数据更新后重试")
             return
-        render_result = await self.get_render_result(data, nickname, ch_name, client.player_id)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        render_result = await self.get_render_result(data, nickname, ch_name, client.player_id)
         await render_result.reply_photo(message, filename=f"{client.player_id}.png", allow_sending_without_reply=True)
 
     @handler.callback_query(pattern=r"^get_role_detail\|", block=False)
