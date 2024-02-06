@@ -24,7 +24,7 @@
                             <div data-v-4f195d12="" class="c-hrd-ri-info">
                                 <div data-v-4f195d12="" class="c-hrd-ri-1"><p data-v-4f195d12="" class="c-hrd-ri-name">
                                     {{ char.name }}</p>
-                                    <p data-v-4f195d12="" class="c-hrd-ri-lv">{{ char.level }}级</p></div>
+                                    <p data-v-4f195d12="" class="c-hrd-ri-lv">{{ char.level }} 级</p></div>
                                 <div data-v-4f195d12="" class="c-hrd-ri-2">
                                     <div data-v-4f195d12="" class="c-hrd-ri-attr-icon">
                                         <img data-v-4f195d12=""
@@ -90,8 +90,8 @@
                                                                                          class="c-hrt-lct-lc-name">
                                         {{ equip.name }}</p>
                                         <div data-v-3ec9e6f6="" class="c-hrt-lct-lc-info-btm">
-                                            <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-lv">{{ equip.level }}级</span>
-                                            <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-rank">叠影 {{ equip.rank }}阶</span></div>
+                                            <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-lv">{{ equip.level }} 级</span>
+                                            <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-rank">叠影 {{ equip.rank }} 阶</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -270,8 +270,13 @@
                                 {% if relic.has_data %}
                                 <div data-v-02f45497="" data-v-11b31764="" class="c-hrdr-item"
                                      style="--817362f2: #73B0F4;">
-                                    <div data-v-02f45497="" rarity="{{ relic.rarity }}" class="c-hrdr-title"><span
-                                            data-v-02f45497=""> {{ relic.name }}</span> <!---->
+                                    <div data-v-02f45497="" rarity="{{ relic.rarity }}" class="c-hrdr-title">
+                                        <span data-v-02f45497=""> {{ relic.name }}</span>
+                                        {% if relic.level > 0 %}
+                                        <div data-v-02f45497="" class="c-hrdr-title-tag">
+                                            <span data-v-02f45497="">+{{ relic.level }}</span>
+                                        </div>
+                                        {% endif %}
                                         <div data-v-2e78cb19="" data-v-02f45497="" class="c-hrd-dcp c-hrdr-title-img">
                                             <div data-v-2e78cb19="" class="c-hrd-dcp-ref">
                                                 <img data-v-02f45497="" data-v-2e78cb19="" src="{{ relic.icon }}?x-oss-process=image%2Fformat%2Cwebp">
