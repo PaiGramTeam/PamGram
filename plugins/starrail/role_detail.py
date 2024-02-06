@@ -28,6 +28,16 @@ __all__ = ("RoleDetailPlugin",)
 class RoleDetailPlugin(Plugin):
     """角色详细信息查询"""
 
+    BASE_TYPE_EN = {
+        1: "Destruction",  # 毁灭
+        2: "Hunt",  # 巡猎
+        3: "Erudition",  # 智识
+        4: "Harmony",  # 同协
+        5: "Nihility",  # 虚无
+        6: "Preservation",  # 存护
+        7: "Abundance",  # 丰饶
+    }
+
     def __init__(
         self,
         helper: GenshinHelper,
@@ -94,6 +104,16 @@ class RoleDetailPlugin(Plugin):
         data_map1 = sorted(data_map.items(), key=lambda x: x[0])
         return [i[1] for i in data_map1]
 
+    @staticmethod
+    def process_char(data: "StarRailDetailCharacters", index: int) -> Dict[str, Any]:
+        char = data.avatar_list[index]
+        data = char.dict()
+        data["path"] = RoleDetailPlugin.BASE_TYPE_EN[char.base_type]
+        data["skills_map"] = [[j.dict() for j in i] for i in char.skills_map]
+        data["skills_main"] = [i.dict() for i in char.skills_main]
+        data["skills_single"] = [i.dict() for i in char.skills_single]
+        return data
+
     @handler.command(command="role_detail", block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         user = update.effective_user
@@ -104,12 +124,10 @@ class RoleDetailPlugin(Plugin):
         async with self.helper.genshin(user.id) as client:
             client: "StarRailClient"
             data = await client.get_starrail_characters()
-            char = data.avatar_list[3].dict()
-            char["skills_map"] = [[j.dict() for j in i] for i in data.avatar_list[3].skills_map]
-            char["skills_main"] = [i.dict() for i in data.avatar_list[3].skills_main]
-            char["skills_single"] = [i.dict() for i in data.avatar_list[3].skills_single]
-            properties = self.process_property(data, 3)
-            relics = self.process_relics(data, 3)
+            index = 3
+            char = self.process_char(data, index)
+            properties = self.process_property(data, index)
+            relics = self.process_relics(data, index)
             final = {"char": char, "properties": properties, "relics": relics}
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.template_service.render(

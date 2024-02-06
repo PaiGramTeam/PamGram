@@ -39,7 +39,7 @@ class PlayerRoguePlugins(Plugin):
         "「丰饶」": "Abundance",
         "「毁灭」": "Destruction",
         "「智识」": "Erudition",
-        "「协同」": "Harmony",
+        "「同协」": "Harmony",
         "「巡猎」": "Hunt",
         "「欢愉」": "Joy",
         "「记忆」": "Memory",
