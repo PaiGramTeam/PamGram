@@ -205,7 +205,10 @@
                     </div>
                     <div data-v-282e6297="" class="pc-rdnp-right">
                         <div data-v-282e6297="" class="pc-rdnp-title">
-                            <div data-v-282e6297="" class="pc-rdnp-title-left"><span data-v-282e6297=""> 角色属性</span>
+                            <div data-v-282e6297="" class="pc-rdnp-title-left">
+                                <span data-v-282e6297="">
+                                    {{ nickname }} - UID {{ uid }}
+                                </span>
                             </div>
                         </div>
                         <div data-v-03b70214="" data-v-282e6297="" class="c-hrdcs">
@@ -242,7 +245,13 @@
                             <div data-v-11b31764="" class="c-hrdrs-title"><!----> <span
                                     data-v-11b31764=""> 遗器属性</span>
                                 <div data-v-11b31764="" class="c-hrdrs-title-tip">
-                                    有效副属性由开拓者自定义
+                                    {% if score.is_custom %}
+                                        有效副属性由开拓者自定义
+                                    {% else %}
+                                        有效副属性预设由
+                                        <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/logo.005a58c8.png">
+                                        提供
+                                    {% endif %}
                                 </div> <!---->
                             </div>
                             <div data-v-11b31764="" class="c-hrdrs-overview">
@@ -251,11 +260,6 @@
                                     有效副属性命中统计
                                     </p>
                                     <div data-v-11b31764="" class="c-hrdrs-overview-left-3">
-                                        {% if score.ids | length > 5 %}
-                                            {% set show_name = false %}
-                                        {% else %}
-                                            {% set show_name = true %}
-                                        {% endif %}
                                         {% for sc in score.data %}
                                             {% if sc.count > 0 %}
                                                 {% set grey = "" %}

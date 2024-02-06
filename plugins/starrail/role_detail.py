@@ -1,19 +1,14 @@
 import os
-import re
-from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Dict, Any, List, Optional
+from typing import TYPE_CHECKING, Dict, Any, List
 
 from pydantic import BaseModel
-from simnet.errors import BadRequest as SimnetBadRequest, DataNotPublic
-from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo, RecommendProperty
-from simnet.models.starrail.diary import StarRailDiary
+from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo
 from telegram import Update
 from telegram.constants import ChatAction
-from telegram.ext import filters, CallbackContext
+from telegram.ext import CallbackContext
 
 from core.plugin import Plugin, handler
 from core.services.cookies import CookiesService
-from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
@@ -183,13 +178,21 @@ class RoleDetailPlugin(Plugin):
         await message.reply_chat_action(ChatAction.TYPING)
         async with self.helper.genshin(user.id) as client:
             client: "StarRailClient"
+            info = (await client.get_starrail_user()).info
             data = await client.get_starrail_characters()
             index = 3
             char = self.process_char(data, index)
             score = self.process_score(data, char["id"])
             properties = self.process_property(data, index, score)
             relics = self.process_relics(data, index, score)
-            final = {"char": char, "properties": properties, "relics": relics, "score": score.dict()}
+            final = {
+                "nickname": info.nickname,
+                "uid": mask_number(client.player_id),
+                "char": char,
+                "properties": properties,
+                "relics": relics,
+                "score": score.dict(),
+            }
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.template_service.render(
             "starrail/role_detail/main.jinja2",
