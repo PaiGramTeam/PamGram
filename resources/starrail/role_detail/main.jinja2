@@ -265,181 +265,43 @@
                                     <p data-v-11b31764="" class="c-hrdrs-overview-text">总计命中</p></div>
                             </div>
                             <div data-v-11b31764="" class="c-hrdrs-btm">
+                                {% for relic in relics %}
+                                {% if relic.has_data %}
                                 <div data-v-02f45497="" data-v-11b31764="" class="c-hrdr-item"
                                      style="--817362f2: #73B0F4;">
-                                    <div data-v-02f45497="" rarity="3" class="c-hrdr-title"><span
-                                            data-v-02f45497=""> 头部</span> <!---->
+                                    <div data-v-02f45497="" rarity="{{ relic.rarity }}" class="c-hrdr-title"><span
+                                            data-v-02f45497=""> {{ relic.name }}</span> <!---->
                                         <div data-v-2e78cb19="" data-v-02f45497="" class="c-hrd-dcp c-hrdr-title-img">
-                                            <div data-v-2e78cb19="" class="c-hrd-dcp-ref"><img data-v-02f45497=""
-                                                                                               data-v-2e78cb19=""
-                                                                                               src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/d7e7be18bba3ea145c3f40cc56c643c4.png?x-oss-process=image%2Fformat%2Cwebp">
+                                            <div data-v-2e78cb19="" class="c-hrd-dcp-ref">
+                                                <img data-v-02f45497="" data-v-2e78cb19="" src="{{ relic.icon }}?x-oss-process=image%2Fformat%2Cwebp">
                                             </div>
                                         </div>
                                     </div>
                                     <div data-v-02f45497="" class="c-hrdr-btm">
+                                        {% for prop in relic.properties %}
                                         <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/1d594298c19fd948fefbee25e36d8fab.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
                                             <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/1d594298c19fd948fefbee25e36d8fab.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">生命值</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">67</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">攻击力</span>
-                                            <div data-v-02f45497="" class="c-hrdr-strength"><img data-v-02f45497=""
-                                                                                                 src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/relic_times_icon.d8d07cb7.png">
-                                                <span data-v-02f45497="">1</span></div>
-                                            <span data-v-02f45497="" class="c-hrdr-num">2.5%</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                    </div>
-                                </div>
-                                <div data-v-02f45497="" data-v-11b31764="" class="c-hrdr-item"
-                                     style="--817362f2: #73B0F4;">
-                                    <div data-v-02f45497="" rarity="3" class="c-hrdr-title"><span
-                                            data-v-02f45497=""> 手部</span> <!---->
-                                        <div data-v-2e78cb19="" data-v-02f45497="" class="c-hrd-dcp c-hrdr-title-img">
-                                            <div data-v-2e78cb19="" class="c-hrd-dcp-ref"><img data-v-02f45497=""
-                                                                                               data-v-2e78cb19=""
-                                                                                               src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/40e4757e2f5cf1c6f4a0f52ec5708776.png?x-oss-process=image%2Fformat%2Cwebp">
+                                                 src="{{ prop.icon }}?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
+                                                 crossorigin="anonymous" class="c-hrdr-icon">
+                                            <span data-v-02f45497="" class="c-hrdr-name">{{ prop.name }}</span>
+                                            {% if prop.times > 1 %}
+                                            <div data-v-02f45497="" class="c-hrdr-strength">
+                                                <img data-v-02f45497="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/relic_times_icon.d8d07cb7.png">
+                                                <span data-v-02f45497="">{{ prop.times - 1 }}</span>
                                             </div>
+                                            {% endif %}
+                                            <span data-v-02f45497="" class="c-hrdr-num">{{ prop.value }}</span>
                                         </div>
-                                    </div>
-                                    <div data-v-02f45497="" class="c-hrdr-btm">
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">攻击力</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">33</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/1d594298c19fd948fefbee25e36d8fab.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/1d594298c19fd948fefbee25e36d8fab.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">生命值</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">22</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
+                                        {% endfor %}
                                     </div>
                                 </div>
-                                <div data-v-02f45497="" data-v-11b31764="" class="c-hrdr-item"
-                                     style="--817362f2: #73B0F4;">
-                                    <div data-v-02f45497="" rarity="3" class="c-hrdr-title"><span
-                                            data-v-02f45497=""> 躯干</span> <!---->
-                                        <div data-v-2e78cb19="" data-v-02f45497="" class="c-hrd-dcp c-hrdr-title-img">
-                                            <div data-v-2e78cb19="" class="c-hrd-dcp-ref"><img data-v-02f45497=""
-                                                                                               data-v-2e78cb19=""
-                                                                                               src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/16ef695ebc8c670c1cdce89e64dc6380.png?x-oss-process=image%2Fformat%2Cwebp">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div data-v-02f45497="" class="c-hrdr-btm">
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">攻击力</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">4.1%</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">攻击力</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">10</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                    </div>
+                                {% else %}
+                                <div data-v-11b31764="" class="c-hrdrs-btm-empty">
+                                    <img data-v-11b31764="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/empty-m.1db234d8.png">
+                                    <span data-v-11b31764="">暂未装备遗器</span>
                                 </div>
-                                <div data-v-02f45497="" data-v-11b31764="" class="c-hrdr-item"
-                                     style="--817362f2: #73B0F4;">
-                                    <div data-v-02f45497="" rarity="3" class="c-hrdr-title"><span
-                                            data-v-02f45497=""> 脚部</span> <!---->
-                                        <div data-v-2e78cb19="" data-v-02f45497="" class="c-hrd-dcp c-hrdr-title-img">
-                                            <div data-v-2e78cb19="" class="c-hrd-dcp-ref"><img data-v-02f45497=""
-                                                                                               data-v-2e78cb19=""
-                                                                                               src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/df5bff327b92aeaf28117a5f703f1c6d.png?x-oss-process=image%2Fformat%2Cwebp">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div data-v-02f45497="" class="c-hrdr-btm">
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">攻击力</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">4.1%</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/f720ffa1a239debbbd757d56874a9e03.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">攻击力</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">12</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
-                                            <canvas data-v-02f45497=""
-                                                    data-origin-src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/1d594298c19fd948fefbee25e36d8fab.png"
-                                                    data-filter="changeColor" data-color="255,200,112"
-                                                    class="c-hrdr-icon" width="32" height="32"
-                                                    style="display: none;"></canvas>
-                                            <img data-v-02f45497="" type="img"
-                                                 src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/1d594298c19fd948fefbee25e36d8fab.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon"> <span data-v-02f45497=""
-                                                                                                    class="c-hrdr-name">生命值</span>
-                                            <!----> <span data-v-02f45497="" class="c-hrdr-num">2.3%</span></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                        <div data-v-02f45497="" class="c-hrdr-btm-item"><!----></div>
-                                    </div>
-                                </div>
-                                <div data-v-11b31764="" class="c-hrdrs-btm-empty"><img data-v-11b31764=""
-                                                                                       src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/empty-m.1db234d8.png">
-                                    <span data-v-11b31764="">暂未装备遗器</span></div>
-                                <div data-v-11b31764="" class="c-hrdrs-btm-empty"><img data-v-11b31764=""
-                                                                                       src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/empty-m.1db234d8.png">
-                                    <span data-v-11b31764="">暂未装备遗器</span></div>
+                                {% endif %}
+                                {% endfor %}
                             </div>
                         </div>
                     </div>

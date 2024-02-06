@@ -1,7 +1,7 @@
 import os
 import re
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Dict, Any
+from typing import TYPE_CHECKING, Dict, Any, List
 
 from simnet.errors import BadRequest as SimnetBadRequest, DataNotPublic
 from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo
@@ -40,12 +40,17 @@ class RoleDetailPlugin(Plugin):
         self.helper = helper
 
     @staticmethod
-    def process_property(data: "StarRailDetailCharacters", index: int) -> Dict[str, Any]:
-        """处理角色属性"""
-        char = data.avatar_list[index].properties
+    def get_properties_map(data: "StarRailDetailCharacters") -> Dict[int, "PropertyInfo"]:
         properties_map: Dict[int, "PropertyInfo"] = {}
         for i in data.property_info:
             properties_map[i.property_type] = i
+        return properties_map
+
+    @staticmethod
+    def process_property(data: "StarRailDetailCharacters", index: int) -> List[List[Dict[str, Any]]]:
+        """处理角色属性"""
+        char = data.avatar_list[index].properties
+        properties_map = RoleDetailPlugin.get_properties_map(data)
         data = []
         for i in char:
             info = properties_map[i.property_type]
@@ -60,7 +65,34 @@ class RoleDetailPlugin(Plugin):
                 data2[0].append(i)
             else:
                 data2[1].append(i)
-        return {"properties": data2}
+        return data2
+
+    @staticmethod
+    def process_relics(data: "StarRailDetailCharacters", index: int) -> List[Dict[str, Any]]:
+        """处理角色遗物"""
+        properties_map = RoleDetailPlugin.get_properties_map(data)
+
+        def process_relic_prop(_data: Dict[str, Any]) -> None:
+            info = properties_map[_data["property_type"]]
+            _data["name"] = info.name
+            _data["icon"] = info.icon
+
+        relics = data.avatar_list[index].relics
+        ornaments = data.avatar_list[index].ornaments
+        properties_map = RoleDetailPlugin.get_properties_map(data)
+        data_map: Dict[int, Dict[str, Any]] = {}
+        for i in (relics + ornaments):
+            new_data = i.dict()
+            new_data["has_data"] = True
+            new_data["properties"].insert(0, new_data["main_property"])
+            for j in new_data["properties"]:
+                process_relic_prop(j)
+            data_map[i.pos] = new_data
+        for i in range(1, 7):
+            if i not in data_map:
+                data_map[i] = {"has_data": False}
+        data_map1 = sorted(data_map.items(), key=lambda x: x[0])
+        return [i[1] for i in data_map1]
 
     @handler.command(command="role_detail", block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
@@ -77,7 +109,8 @@ class RoleDetailPlugin(Plugin):
             char["skills_main"] = [i.dict() for i in data.avatar_list[3].skills_main]
             char["skills_single"] = [i.dict() for i in data.avatar_list[3].skills_single]
             properties = self.process_property(data, 3)
-            final = {"char": char, **properties}
+            relics = self.process_relics(data, 3)
+            final = {"char": char, "properties": properties, "relics": relics}
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.template_service.render(
             "starrail/role_detail/main.jinja2",
