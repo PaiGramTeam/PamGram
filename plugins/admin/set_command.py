@@ -38,6 +38,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("ledger", "查询当月开拓月历"),
             BotCommand("avatars", "查询角色练度"),
             BotCommand("player_card", "角色卡片"),
+            BotCommand("role_detail", "角色详细信息"),
             BotCommand("sign", "米游社星穹铁道每日签到"),
             BotCommand("light_cone", "光锥图鉴查询"),
             BotCommand("relics", "遗器套装查询"),

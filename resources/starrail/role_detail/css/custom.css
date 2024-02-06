@@ -1,0 +1,14 @@
+/* 图标变黑色 */
+.c-hrd-sk-ic-inner[unlock] > img {
+    filter: brightness(0);
+}
+.c-hrdcs-item[highlight] .c-hrdcs-icon{
+    filter: invert(21%) sepia(84%) saturate(7353%) hue-rotate(341deg) brightness(95%) contrast(115%);
+}
+.c-hrdr-icon[type=img][highlight] {
+    filter: invert(21%) sepia(84%) saturate(7353%) hue-rotate(341deg) brightness(95%) contrast(115%);
+}
+@font-face{
+    font-family: 'RPG_CN_Condensed';
+    src : url('../../../fonts/RPG_CN_Condensed.ttf');
+}

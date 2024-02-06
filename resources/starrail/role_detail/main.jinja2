@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/custom.css" rel="stylesheet">
+    <link type="text/css" href="../../styles/public.css" rel="stylesheet" />
+    <link href="../activity/css/pc_f95b4488.css" rel="stylesheet">
+    <link href="css/r_pc_hsr_index~r_pc_ys_index_7732160a.css" rel="stylesheet">
+</head>
+<body>
+<div style="transform: scale(1.5); margin: 350px;">
+    <div data-v-05dcb228="" class="pc-role-detail">
+        <div data-v-05dcb228="" class="">
+            <div data-v-05dcb228="" class="pc-role-detail-num">
+                <img data-v-05dcb228="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/main_stats.febe99b5.png" class="pc-role-detail-num-bg">
+                <div data-v-282e6297="" data-v-05dcb228="" class="pc-rdnp">
+                    <div data-v-282e6297="" class="pc-rdnp-left">
+                        <div data-v-4f195d12="" data-v-282e6297="" class="c-hrd-ri">
+                            <div data-v-4f195d12="" class="c-hrd-ri-bg"></div>
+                            <div data-v-4f195d12="" class="c-hrd-ri-img-wrapper">
+                                <img data-v-4f195d12="" src="{{ char.image }}?x-oss-process=image%2Fformat%2Cwebp" class="c-hrd-ri-img">
+                            </div>
+                            <div data-v-4f195d12="" class="c-hrd-ri-info">
+                                <div data-v-4f195d12="" class="c-hrd-ri-1"><p data-v-4f195d12="" class="c-hrd-ri-name">
+                                    {{ char.name }}</p>
+                                    <p data-v-4f195d12="" class="c-hrd-ri-lv">{{ char.level }} 级</p></div>
+                                <div data-v-4f195d12="" class="c-hrd-ri-2">
+                                    <div data-v-4f195d12="" class="c-hrd-ri-attr-icon">
+                                        <img data-v-4f195d12=""
+                                             src="../../img/element/{{ char.element }}.png">
+                                    </div>
+                                    <div data-v-4f195d12="" class="c-hrd-ri-attr-icon">
+                                        <img data-v-4f195d12=""
+                                             src="../../img/path/{{ char.path }}.png">
+                                    </div>
+                                </div>
+                                <div data-v-4f195d12="" class="c-hrd-ri-3">
+                                    {% for rank in char.ranks %}
+                                        {% if rank.is_unlocked %}
+                                            {% set lock = '' %}
+                                        {% else %}
+                                            {% set lock = 'lock=1' %}
+                                        {% endif %}
+                                    <div data-v-3a0d6e6d="" data-v-4f195d12="" class="c-hrd-dhp">
+                                        <div data-v-3a0d6e6d="" class="c-hrd-dhp-ref">
+                                            <div data-v-21fffaf5="" data-v-3a0d6e6d="" {{ lock }} size=""
+                                                 class="c-hrd-icon-rank">
+                                                <img data-v-21fffaf5=""
+                                                     src="{{ rank.icon }}?x-oss-process=image%2Fformat%2Cwebp"
+                                                     {{ lock }} class="c-hrd-icon-rank-img">
+                                                {% if not rank.is_unlocked %}
+                                                <i data-v-21fffaf5="" class="c-hrd-icon-rank-lock"></i>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div data-v-3ec9e6f6="" data-v-282e6297="" class="c-hrt-lct"><!---->
+                            <div data-v-3ec9e6f6="" class="c-hrt-lct-lc">
+                                <div data-v-3ec9e6f6="" class="c-hrt-lct-tb" name="光锥">
+                                    <svg data-v-3ec9e6f6="" width="1em" height="1em" viewBox="0 0 8 8" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.812 2.812C3.208 2.417 4 .833 4 .833s.792 1.584 1.187 1.98C5.583 3.207 7.167 4 7.167 4s-1.584.792-1.98 1.187C4.792 5.583 4 7.167 4 7.167s-.792-1.584-1.188-1.98C2.417 4.792.833 4 .833 4s1.584-.792 1.98-1.188z"
+                                              fill="#fff"></path>
+                                    </svg>
+                                    <span data-v-3ec9e6f6="">光锥</span>
+                                    <svg data-v-3ec9e6f6="" width="1em" height="1em" viewBox="0 0 8 8" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.812 2.812C3.208 2.417 4 .833 4 .833s.792 1.584 1.187 1.98C5.583 3.207 7.167 4 7.167 4s-1.584.792-1.98 1.187C4.792 5.583 4 7.167 4 7.167s-.792-1.584-1.188-1.98C2.417 4.792.833 4 .833 4s1.584-.792 1.98-1.188z"
+                                              fill="#fff"></path>
+                                    </svg>
+                                    <svg data-v-3ec9e6f6="" width="1em" height="1em" viewBox="0 0 8 8" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.812 2.812C3.208 2.417 4 .833 4 .833s.792 1.584 1.187 1.98C5.583 3.207 7.167 4 7.167 4s-1.584.792-1.98 1.187C4.792 5.583 4 7.167 4 7.167s-.792-1.584-1.188-1.98C2.417 4.792.833 4 .833 4s1.584-.792 1.98-1.188z"
+                                              fill="#fff"></path>
+                                    </svg>
+                                </div>
+                                {% set equip = char.equip %}
+                                <div data-v-3ec9e6f6="" class="c-hrt-lct-lc-btm">
+                                    {% if equip %}
+                                    <div data-v-2e78cb19="" data-v-3ec9e6f6="" class="c-hrd-dcp c-hrt-lct-lc-img">
+                                        <div data-v-2e78cb19="" class="c-hrd-dcp-ref">
+                                            <img data-v-3ec9e6f6="" data-v-2e78cb19="" src="{{ equip.icon }}?x-oss-process=image%2Fformat%2Cwebp">
+                                        </div>
+                                    </div>
+                                    <div data-v-3ec9e6f6="" class="c-hrt-lct-lc-info"><p data-v-3ec9e6f6="" rarity="3"
+                                                                                         class="c-hrt-lct-lc-name">
+                                        {{ equip.name }}</p>
+                                        <div data-v-3ec9e6f6="" class="c-hrt-lct-lc-info-btm">
+                                            <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-lv">{{ equip.level }} 级</span>
+                                            <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-rank">叠影 {{ equip.rank }} 阶</span></div>
+                                    </div>
+                                    {% else %}
+                                    <div data-v-3ec9e6f6="" class="c-hrt-lct-lc-empty">
+                                        <img data-v-3ec9e6f6="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/equip_empty.52dfdd93.png">
+                                        <span data-v-3ec9e6f6="">暂未装备光锥</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div data-v-3ec9e6f6="" class="c-hrt-lct-t">
+                                <div data-v-3ec9e6f6="" class="c-hrt-lct-tb" name="行迹">
+                                    <svg data-v-3ec9e6f6="" width="1em" height="1em" viewBox="0 0 8 8" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.812 2.812C3.208 2.417 4 .833 4 .833s.792 1.584 1.187 1.98C5.583 3.207 7.167 4 7.167 4s-1.584.792-1.98 1.187C4.792 5.583 4 7.167 4 7.167s-.792-1.584-1.188-1.98C2.417 4.792.833 4 .833 4s1.584-.792 1.98-1.188z"
+                                              fill="#fff"></path>
+                                    </svg>
+                                    <span data-v-3ec9e6f6="">行迹</span>
+                                    <svg data-v-3ec9e6f6="" width="1em" height="1em" viewBox="0 0 8 8" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.812 2.812C3.208 2.417 4 .833 4 .833s.792 1.584 1.187 1.98C5.583 3.207 7.167 4 7.167 4s-1.584.792-1.98 1.187C4.792 5.583 4 7.167 4 7.167s-.792-1.584-1.188-1.98C2.417 4.792.833 4 .833 4s1.584-.792 1.98-1.188z"
+                                              fill="#fff"></path>
+                                    </svg>
+                                    <svg data-v-3ec9e6f6="" width="1em" height="1em" viewBox="0 0 8 8" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.812 2.812C3.208 2.417 4 .833 4 .833s.792 1.584 1.187 1.98C5.583 3.207 7.167 4 7.167 4s-1.584.792-1.98 1.187C4.792 5.583 4 7.167 4 7.167s-.792-1.584-1.188-1.98C2.417 4.792.833 4 .833 4s1.584-.792 1.98-1.188z"
+                                              fill="#fff"></path>
+                                    </svg>
+                                </div>
+                                <div data-v-1dab6d78="" data-v-3ec9e6f6="" class="c-hrd-sp-pc">
+{#                                    四个主要行迹#}
+                                    <div data-v-1dab6d78="" class="c-hrd-sp-pc-L">
+                                        {% for skill in char.skills_main %}
+                                        <div data-v-1dab6d78="" class="c-hrd-sp-pc-L-item">
+                                            <div data-v-3a0d6e6d="" data-v-1dab6d78="" class="c-hrd-dhp">
+                                                <div data-v-3a0d6e6d="" disable-scale="true" class="c-hrd-dhp-ref">
+                                                    <div data-v-db299a18="" data-v-3a0d6e6d="" type="L" size=""
+                                                         class="c-hrd-sk-ic">
+                                                        <div data-v-db299a18="" type="L" size=""
+                                                             class="c-hrd-sk-ic-inner">
+                                                            <img data-v-db299a18="" src="{{ skill.item_url }}?x-oss-process=image%2Fresize%2Cw_64%2Fformat%2Cwebp"
+                                                                                            crossorigin="anonymous">
+                                                            <span data-v-db299a18="" size="">{{ skill.level }}</span>
+                                                        </div> <!---->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div data-v-1dab6d78="" class="c-hrd-sp-pc-right">
+{#                                        额外行迹#}
+                                        {% if char.skills_single %}
+                                        <div data-v-1dab6d78="" class="c-hrd-sp-pc-lone">
+                                            {% for skill in char.skills_single %}
+                                                {% if skill.is_activated %}
+                                                    {% set lock = "unlock=1" %}
+                                                {% else %}
+                                                    {% set lock = 'lock=1' %}
+                                                {% endif %}
+                                            <div data-v-1dab6d78="" class="c-hrd-sp-pc-lone-item">
+                                                <div data-v-3a0d6e6d="" data-v-1dab6d78="" class="c-hrd-dhp">
+                                                    <div data-v-3a0d6e6d="" disable-scale="true" class="c-hrd-dhp-ref">
+                                                        <div data-v-db299a18="" data-v-3a0d6e6d="" type="S" size=""
+                                                             class="c-hrd-sk-ic">
+                                                            <div data-v-db299a18="" type="S" size="" {{ lock }}
+                                                                 class="c-hrd-sk-ic-inner">
+                                                                <img data-v-db299a18=""
+                                                                     src="{{ skill.item_url }}?x-oss-process=image%2Fresize%2Cw_64%2Fformat%2Cwebp"
+                                                                     crossorigin="anonymous"
+                                                                >
+                                                            </div>
+                                                            <!----></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+{#                                        行迹在树上#}
+                                        <div data-v-1dab6d78="" class="c-hrd-sp-pc-lines">
+                                            {% for item in char.skills_map %}
+                                            <div data-v-1dab6d78="" class="c-hrd-sp-pc-line">
+                                                {% for skill in item %}
+                                                    {% if loop.index == 1 %}
+                                                    {% set type = "M" %}
+                                                    {% else %}
+                                                    {% set type = "S" %}
+                                                    {% endif %}
+                                                    {% if skill.is_activated %}
+                                                    {% set lock = "unlock=1" %}
+                                                    {% else %}
+                                                    {% set lock = 'lock=1' %}
+                                                    {% endif %}
+                                                <div data-v-1dab6d78="" class="c-hrd-sp-pc-line-item">
+                                                    <div data-v-3a0d6e6d="" data-v-1dab6d78="" class="c-hrd-dhp">
+                                                        <div data-v-3a0d6e6d="" disable-scale="true"
+                                                             class="c-hrd-dhp-ref">
+                                                            <div data-v-db299a18="" data-v-3a0d6e6d="" type="{{ type }}" size=""
+                                                                 class="c-hrd-sk-ic">
+                                                                <div data-v-db299a18="" type="{{ type }}" size="" {{ lock }}
+                                                                     class="c-hrd-sk-ic-inner">
+                                                                   <img data-v-db299a18=""
+                                                                     src="{{ skill.item_url }}?x-oss-process=image%2Fresize%2Cw_64%2Fformat%2Cwebp"
+                                                                     crossorigin="anonymous"
+                                                                   >
+                                                                </div> <!---->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-v-282e6297="" class="pc-rdnp-right">
+                        <div data-v-282e6297="" class="pc-rdnp-title">
+                            <div data-v-282e6297="" class="pc-rdnp-title-left">
+                                <span data-v-282e6297="">
+                                    {{ nickname }} - UID {{ uid }}
+                                </span>
+                            </div>
+                        </div>
+                        <div data-v-03b70214="" data-v-282e6297="" class="c-hrdcs">
+                            <div data-v-03b70214="" class="c-hrdcs-title"><!----> <span
+                                    data-v-03b70214=""> 角色属性</span></div>
+                            <div data-v-03b70214="" class="c-hrdcs-btm">
+                                {% for data in properties %}
+                                <div data-v-03b70214="" class="c-hrdcs-btm-half">
+                                    {% for item in data %}
+                                        {% if item.highlight %}
+                                            {% set highlight = "highlight=1" %}
+                                        {% else %}
+                                            {% set highlight = "" %}
+                                        {% endif %}
+                                    <div data-v-03b70214="" class="c-hrdcs-item" {{ highlight }}>
+                                        <img data-v-03b70214=""
+                                             src="{{ item.icon }}?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
+                                             crossorigin="anonymous" class="c-hrdcs-icon">
+                                        <span data-v-03b70214="" class="c-hrdcs-name">{{ item.name }}</span>
+                                        {% if item.show_add %}
+                                        <div data-v-03b70214="" class="c-hrdcs-extra">
+                                            <span data-v-03b70214="" class="c-hrdcs-base">{{ item.base }}</span>
+                                            <span data-v-03b70214="" class="c-hrdcs-add">+{{ item.add }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <span data-v-03b70214="" class="c-hrdcs-num">{{ item.final }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div data-v-11b31764="" data-v-282e6297="" class="c-hrdrs">
+                            <div data-v-11b31764="" class="c-hrdrs-title"><!----> <span
+                                    data-v-11b31764=""> 遗器属性</span>
+                                <div data-v-11b31764="" class="c-hrdrs-title-tip">
+                                    {% if score.is_custom %}
+                                        有效副属性由开拓者自定义
+                                    {% else %}
+                                        有效副属性预设由
+                                        <img src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/logo.005a58c8.png">
+                                        提供
+                                    {% endif %}
+                                </div> <!---->
+                            </div>
+                            <div data-v-11b31764="" class="c-hrdrs-overview">
+                                <div data-v-11b31764="" class="c-hrdrs-overview-left">
+                                    <p data-v-11b31764="" class="c-hrdrs-overview-left-1">
+                                    有效副属性命中统计
+                                    </p>
+                                    <div data-v-11b31764="" class="c-hrdrs-overview-left-3">
+                                        {% for sc in score.data %}
+                                            {% if sc.count > 0 %}
+                                                {% set grey = "" %}
+                                            {% else %}
+                                                {% set grey = "grey=1" %}
+                                            {% endif %}
+                                        <div data-v-11b31764="" class="c-hrdrs-tag">
+                                            <img data-v-11b31764=""
+                                                 src="{{ sc.icon }}?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
+                                                 crossorigin="anonymous">
+                                            <span data-v-11b31764="">{{ sc.name }}</span>
+                                            <i data-v-11b31764="" {{ grey }}>{{ sc.count }}</i>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div data-v-11b31764="" class="c-hrdrs-overview-right">
+                                    <div data-v-11b31764="" empty="true" class="c-hrdrs-overview-final">
+                                        <span data-v-11b31764="">{{ score.count }}</span>
+                                    </div>
+                                    <p data-v-11b31764="" class="c-hrdrs-overview-text">总计命中</p>
+                                </div>
+                            </div>
+                            <div data-v-11b31764="" class="c-hrdrs-btm">
+                                {% for relic in relics %}
+                                {% if relic.has_data %}
+                                <div data-v-02f45497="" data-v-11b31764="" class="c-hrdr-item"
+                                     style="--817362f2: #73B0F4;">
+                                    <div data-v-02f45497="" rarity="{{ relic.rarity }}" class="c-hrdr-title">
+                                        <span data-v-02f45497=""> {{ relic.name }}</span>
+                                        {% if relic.level > 0 %}
+                                        <div data-v-02f45497="" class="c-hrdr-title-tag">
+                                            <span data-v-02f45497="">+{{ relic.level }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div data-v-2e78cb19="" data-v-02f45497="" class="c-hrd-dcp c-hrdr-title-img">
+                                            <div data-v-2e78cb19="" class="c-hrd-dcp-ref">
+                                                <img data-v-02f45497="" data-v-2e78cb19="" src="{{ relic.icon }}?x-oss-process=image%2Fformat%2Cwebp">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div data-v-02f45497="" class="c-hrdr-btm">
+                                        {% for prop in relic.properties %}
+                                        <div data-v-02f45497="" class="c-hrdr-btm-item">
+                                            {% if prop.highlight %}
+                                                {% set highlight = "highlight=1" %}
+                                            {% else %}
+                                                {% set highlight = "" %}
+                                            {% endif %}
+                                            <img data-v-02f45497="" type="img"
+                                                 src="{{ prop.icon }}?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
+                                                 crossorigin="anonymous" class="c-hrdr-icon" {{ highlight }}>
+                                            <span data-v-02f45497="" class="c-hrdr-name" {{ highlight }}>{{ prop.name }}</span>
+                                            {% if prop.times > 1 %}
+                                            <div data-v-02f45497="" class="c-hrdr-strength">
+                                                <img data-v-02f45497="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/relic_times_icon.d8d07cb7.png">
+                                                <span data-v-02f45497="">{{ prop.times - 1 }}</span>
+                                            </div>
+                                            {% endif %}
+                                            <span data-v-02f45497="" class="c-hrdr-num" {{ highlight }}>{{ prop.value }}</span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div data-v-11b31764="" class="c-hrdrs-btm-empty">
+                                    <img data-v-11b31764="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/empty-m.1db234d8.png">
+                                    <span data-v-11b31764="">暂未装备遗器</span>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div data-v-c07cc1fc="" data-v-282e6297=""
+                         class="wiki-card-container pc-wiki-card-container wiki-card-container--desc"
+                         style="--7ab948de: 236.60000610351562px; --7ab948df: 654.4000015258789px;">
+                        <div data-v-c07cc1fc="" class="wiki-card-container__card-wrapper"><!----></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
