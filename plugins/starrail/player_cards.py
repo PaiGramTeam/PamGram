@@ -368,7 +368,7 @@ class PlayerCards(Plugin):
                 )
             except AssetsCouldNotFound:
                 logger.warning("角色 %s 的头像资源获取失败", cid)
-            if idx > 3:
+            if idx == 7:
                 break
         return {
             "uid": mask_number(data.uid),

@@ -61,7 +61,7 @@ class PlayerCardsFile:
         data: Dict,
         props: Dict,
     ) -> Dict:
-        assistAvatarDetail = "assistAvatarDetail"
+        assistAvatarList = "assistAvatarList"
         avatarId = "avatarId"
         avatarDetailList = "avatarDetailList"
         avatarList = "avatarList"
@@ -71,18 +71,17 @@ class PlayerCardsFile:
                 old_data = {}
             avatars = []
             avatar_ids = []
-            assist_avatar = data.get(assistAvatarDetail, None)
-            if assist_avatar:
-                avatars.append(assist_avatar)
-                avatar_ids.append(assist_avatar.get(avatarId, 0))
+            for avatar in data.get(assistAvatarList, []):
+                avatars.append(avatar)
+                avatar_ids.append(avatar.get(avatarId, 0))
             for avatar in data.get(avatarDetailList, []):
                 if avatar.get(avatarId, 0) in avatar_ids:
                     continue
                 avatars.append(avatar)
                 avatar_ids.append(avatar.get(avatarId, 0))
             data[avatarList] = avatars
-            if assistAvatarDetail in data:
-                del data[assistAvatarDetail]
+            if assistAvatarList in data:
+                del data[assistAvatarList]
             if avatarDetailList in data:
                 del data[avatarDetailList]
             for i in old_data.get(avatarList, []):
