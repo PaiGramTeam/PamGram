@@ -1,9 +1,10 @@
 import os
 import re
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Any
 
 from simnet.errors import BadRequest as SimnetBadRequest, DataNotPublic
+from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo
 from simnet.models.starrail.diary import StarRailDiary
 from telegram import Update
 from telegram.constants import ChatAction
@@ -38,6 +39,29 @@ class RoleDetailPlugin(Plugin):
         self.current_dir = os.getcwd()
         self.helper = helper
 
+    @staticmethod
+    def process_property(data: "StarRailDetailCharacters", index: int) -> Dict[str, Any]:
+        """处理角色属性"""
+        char = data.avatar_list[index].properties
+        properties_map: Dict[int, "PropertyInfo"] = {}
+        for i in data.property_info:
+            properties_map[i.property_type] = i
+        data = []
+        for i in char:
+            info = properties_map[i.property_type]
+            new_data = i.dict()
+            new_data["show_add"] = i.show_add
+            new_data["name"] = info.name
+            new_data["icon"] = info.icon
+            data.append(new_data)
+        data2 = [[], []]
+        for idx, i in enumerate(data):
+            if idx < 6:
+                data2[0].append(i)
+            else:
+                data2[1].append(i)
+        return {"properties": data2}
+
     @handler.command(command="role_detail", block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         user = update.effective_user
@@ -52,9 +76,14 @@ class RoleDetailPlugin(Plugin):
             char["skills_map"] = [[j.dict() for j in i] for i in data.avatar_list[3].skills_map]
             char["skills_main"] = [i.dict() for i in data.avatar_list[3].skills_main]
             char["skills_single"] = [i.dict() for i in data.avatar_list[3].skills_single]
-            final = {"char": char}
+            properties = self.process_property(data, 3)
+            final = {"char": char, **properties}
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.template_service.render(
-            "starrail/role_detail/main.jinja2", final, {"width": 960, "height": 770}, query_selector=".pc-role-detail-num",
+            "starrail/role_detail/main.jinja2",
+            final,
+            {"width": 1000, "height": 1200},
+            full_page=True,
+            query_selector=".pc-role-detail-num",
         )
         await render_result.reply_photo(message, filename=f"{client.player_id}.png", allow_sending_without_reply=True)
