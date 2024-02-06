@@ -81,6 +81,7 @@
                                 </div>
                                 {% set equip = char.equip %}
                                 <div data-v-3ec9e6f6="" class="c-hrt-lct-lc-btm">
+                                    {% if equip %}
                                     <div data-v-2e78cb19="" data-v-3ec9e6f6="" class="c-hrd-dcp c-hrt-lct-lc-img">
                                         <div data-v-2e78cb19="" class="c-hrd-dcp-ref">
                                             <img data-v-3ec9e6f6="" data-v-2e78cb19="" src="{{ equip.icon }}?x-oss-process=image%2Fformat%2Cwebp">
@@ -93,6 +94,12 @@
                                             <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-lv">{{ equip.level }} 级</span>
                                             <span data-v-3ec9e6f6="" class="c-hrt-lct-lc-rank">叠影 {{ equip.rank }} 阶</span></div>
                                     </div>
+                                    {% else %}
+                                    <div data-v-3ec9e6f6="" class="c-hrt-lct-lc-empty">
+                                        <img data-v-3ec9e6f6="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/equip_empty.52dfdd93.png">
+                                        <span data-v-3ec9e6f6="">暂未装备光锥</span>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div data-v-3ec9e6f6="" class="c-hrt-lct-t">
@@ -137,6 +144,7 @@
                                     </div>
                                     <div data-v-1dab6d78="" class="c-hrd-sp-pc-right">
 {#                                        额外行迹#}
+                                        {% if char.skills_single %}
                                         <div data-v-1dab6d78="" class="c-hrd-sp-pc-lone">
                                             {% for skill in char.skills_single %}
                                                 {% if skill.is_activated %}
@@ -162,6 +170,7 @@
                                             </div>
                                             {% endfor %}
                                         </div>
+                                        {% endif %}
 {#                                        行迹在树上#}
                                         <div data-v-1dab6d78="" class="c-hrd-sp-pc-lines">
                                             {% for item in char.skills_map %}
