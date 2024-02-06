@@ -1,5 +1,4 @@
-import os
-from typing import TYPE_CHECKING, Dict, Any, List, Tuple
+from typing import TYPE_CHECKING, Dict, Any, List, Tuple, Optional
 
 from pydantic import BaseModel
 from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo, StarRailDetailCharacter, \
@@ -9,8 +8,8 @@ from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters
 
 from core.plugin import Plugin, handler
-from core.services.cookies import CookiesService
 from core.services.template.services import TemplateService
+from gram_core.dependence.redisdb import RedisDB
 from metadata.shortname import roleToName
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
@@ -69,13 +68,45 @@ class RoleDetailPlugin(Plugin):
     def __init__(
         self,
         helper: GenshinHelper,
-        cookies_service: CookiesService,
         template_service: TemplateService,
+        redis: RedisDB,
     ):
         self.template_service = template_service
-        self.cookies_service = cookies_service
-        self.current_dir = os.getcwd()
         self.helper = helper
+        self.qname = "plugins:role_detail"
+        self.redis = redis.client
+        self.expire = 15 * 60  # 15分钟
+
+    async def set_characters_for_redis(
+        self,
+        uid: int,
+        nickname: str,
+        data: "StarRailDetailCharacters",
+    ) -> None:
+        nickname_k, data_k = f"{self.qname}:{uid}:nickname", f"{self.qname}:{uid}:data"
+        json_data = data.json(by_alias=True)
+        await self.redis.set(nickname_k, nickname, ex=self.expire)
+        await self.redis.set(data_k, json_data, ex=self.expire)
+
+    async def get_characters_for_redis(
+        self,
+        uid: int,
+    ) -> Tuple[Optional[str], Optional["StarRailDetailCharacters"]]:
+        nickname_k, data_k = f"{self.qname}:{uid}:nickname", f"{self.qname}:{uid}:data"
+        nickname_v, data_v = await self.redis.get(nickname_k), await self.redis.get(data_k)
+        if nickname_v is None or data_v is None:
+            return None, None
+        nickname = str(nickname_v, encoding="utf-8")
+        json_data = str(data_v, encoding="utf-8")
+        return nickname, StarRailDetailCharacters.parse_raw(json_data)
+
+    async def get_characters(self, client: "StarRailClient") -> Tuple[Optional[str], Optional["StarRailDetailCharacters"]]:
+        nickname, data = await self.get_characters_for_redis(client.player_id)
+        if nickname is None or data is None:
+            data = await client.get_starrail_characters()
+            nickname = (await client.get_starrail_user()).info.nickname
+            await self.set_characters_for_redis(client.player_id, nickname, data)
+        return nickname, data
 
     @staticmethod
     def get_properties_map(data: "StarRailDetailCharacters") -> Dict[int, "PropertyInfo"]:
@@ -196,11 +227,9 @@ class RoleDetailPlugin(Plugin):
         logger.info("用户 %s[%s] 查询角色详细信息 ch_name[%s]", user.full_name, user.id, ch_name)
         await message.reply_chat_action(ChatAction.TYPING)
         async with self.helper.genshin(user.id) as client:
-            client: "StarRailClient"
-            info = (await client.get_starrail_user()).info
-            data = await client.get_starrail_characters()
+            nickname, data = await self.get_characters(client)
         try:
-            final = self.parse_render_data(data, info.nickname, ch_name, client.player_id)
+            final = self.parse_render_data(data, nickname, ch_name, client.player_id)
         except ValueError:
             reply_message = await message.reply_text("未找到该角色")
             if filters.ChatType.GROUPS.filter(reply_message):
