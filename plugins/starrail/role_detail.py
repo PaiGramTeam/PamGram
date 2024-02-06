@@ -188,10 +188,10 @@ class RoleDetailPlugin(Plugin):
 
     @staticmethod
     def process_char(
-        data: "StarRailDetailCharacters", ch_name: str
+        data: "StarRailDetailCharacters", ch_id: int
     ) -> Tuple["StarRailDetailCharacter", Dict[str, Any]]:
         for char in data.avatar_list:
-            if char.name != ch_name:
+            if char.id != ch_id:
                 continue
             data = char.dict()
             data["path"] = RoleDetailPlugin.BASE_TYPE_EN[char.base_type]
@@ -223,9 +223,9 @@ class RoleDetailPlugin(Plugin):
             is_custom=recommend_property.is_custom_property_valid,
         )
 
-    def parse_render_data(self, data: "StarRailDetailCharacters", nickname: str, ch_name: str, uid: int):
+    def parse_render_data(self, data: "StarRailDetailCharacters", nickname: str, ch_id: int, uid: int):
         properties_map = RoleDetailPlugin.get_properties_map(data)
-        char, char_data = self.process_char(data, ch_name)
+        char, char_data = self.process_char(data, ch_id)
         recommend_property = data.get_recommend_property_by_cid(char.id)
         score = self.process_score(properties_map, recommend_property)
         properties = self.process_property(properties_map, char, score)
@@ -290,9 +290,9 @@ class RoleDetailPlugin(Plugin):
         return send_buttons
 
     async def get_render_result(
-        self, data: "StarRailDetailCharacters", nickname: str, ch_name: str, uid: int
+        self, data: "StarRailDetailCharacters", nickname: str, ch_id: int, uid: int
     ) -> "RenderResult":
-        final = self.parse_render_data(data, nickname, ch_name, uid)
+        final = self.parse_render_data(data, nickname, ch_id, uid)
         return await self.template_service.render(
             "starrail/role_detail/main.jinja2",
             final,
@@ -344,7 +344,7 @@ class RoleDetailPlugin(Plugin):
             await message.reply_text(f"未在游戏中找到 {ch_name} ，请检查角色是否存在，或者等待角色数据更新后重试")
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        render_result = await self.get_render_result(data, nickname, ch_name, client.player_id)
+        render_result = await self.get_render_result(data, nickname, characters.id, client.player_id)
         await render_result.reply_photo(message, filename=f"{client.player_id}.png", allow_sending_without_reply=True)
 
     @handler.callback_query(pattern=r"^get_role_detail\|", block=False)
@@ -415,6 +415,6 @@ class RoleDetailPlugin(Plugin):
             return
         await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        render_result = await self.get_render_result(data, nickname, result, uid)
+        render_result = await self.get_render_result(data, nickname, characters.id, uid)
         render_result.filename = f"role_detail_{uid}_{result}.png"
         await render_result.edit_media(message)
