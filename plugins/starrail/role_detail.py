@@ -11,7 +11,6 @@ from core.plugin import Plugin, handler
 from core.services.template.services import TemplateService
 from core.config import config
 from core.dependence.redisdb import RedisDB
-from core.services.template.models import RenderResult
 from metadata.shortname import roleToName, idToRole
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
     )
     from telegram import Update
     from telegram.ext import ContextTypes
+    from core.services.template.models import RenderResult
 
 __all__ = ("RoleDetailPlugin",)
 
