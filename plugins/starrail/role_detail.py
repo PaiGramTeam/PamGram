@@ -2,8 +2,12 @@ import math
 from typing import TYPE_CHECKING, Dict, Any, List, Tuple, Optional, Union
 
 from pydantic import BaseModel
-from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo, StarRailDetailCharacter, \
-    RecommendProperty
+from simnet.models.starrail.chronicle.characters import (
+    StarRailDetailCharacters,
+    PropertyInfo,
+    StarRailDetailCharacter,
+    RecommendProperty,
+)
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, filters, ContextTypes
@@ -108,7 +112,9 @@ class RoleDetailPlugin(Plugin):
         json_data = str(data_v, encoding="utf-8")
         return nickname, StarRailDetailCharacters.parse_raw(json_data)
 
-    async def get_characters(self, uid: int, client: "StarRailClient" = None) -> Tuple[Optional[str], Optional["StarRailDetailCharacters"]]:
+    async def get_characters(
+        self, uid: int, client: "StarRailClient" = None
+    ) -> Tuple[Optional[str], Optional["StarRailDetailCharacters"]]:
         nickname, data = await self.get_characters_for_redis(uid)
         if nickname is None or data is None:
             if not client:
@@ -126,7 +132,9 @@ class RoleDetailPlugin(Plugin):
         return properties_map
 
     @staticmethod
-    def process_property(properties_map: Dict[int, "PropertyInfo"], char: "StarRailDetailCharacter", score: RelicScore) -> List[List[Dict[str, Any]]]:
+    def process_property(
+        properties_map: Dict[int, "PropertyInfo"], char: "StarRailDetailCharacter", score: RelicScore
+    ) -> List[List[Dict[str, Any]]]:
         """处理角色属性"""
         data = []
         for i in char.properties:
@@ -146,8 +154,11 @@ class RoleDetailPlugin(Plugin):
         return data2
 
     @staticmethod
-    def process_relics(properties_map: Dict[int, "PropertyInfo"], char: "StarRailDetailCharacter", score: RelicScore) -> List[Dict[str, Any]]:
+    def process_relics(
+        properties_map: Dict[int, "PropertyInfo"], char: "StarRailDetailCharacter", score: RelicScore
+    ) -> List[Dict[str, Any]]:
         """处理角色遗物"""
+
         def process_relic_prop(_data: Dict[str, Any]) -> None:
             info = properties_map[_data["property_type"]]
             _data["highlight"] = info.property_type in score.ids
@@ -157,7 +168,7 @@ class RoleDetailPlugin(Plugin):
         relics = char.relics
         ornaments = char.ornaments
         data_map: Dict[int, Dict[str, Any]] = {}
-        for i in (relics + ornaments):
+        for i in relics + ornaments:
             new_data = i.dict()
             new_data["has_data"] = True
             new_data["properties"].insert(0, new_data["main_property"])
@@ -175,7 +186,9 @@ class RoleDetailPlugin(Plugin):
         return [i[1] for i in data_map1]
 
     @staticmethod
-    def process_char(data: "StarRailDetailCharacters", ch_name: str) -> Tuple["StarRailDetailCharacter", Dict[str, Any]]:
+    def process_char(
+        data: "StarRailDetailCharacters", ch_name: str
+    ) -> Tuple["StarRailDetailCharacter", Dict[str, Any]]:
         for char in data.avatar_list:
             if char.name != ch_name:
                 continue
@@ -203,7 +216,8 @@ class RoleDetailPlugin(Plugin):
                     name=properties_map[i].property_name_filter,
                     icon=properties_map[i].icon,
                     property_name_relic=properties_map[i].property_name_relic,
-                ) for i in ids
+                )
+                for i in ids
             ],
             is_custom=recommend_property.is_custom_property_valid,
         )
@@ -274,7 +288,9 @@ class RoleDetailPlugin(Plugin):
             send_buttons.append(last_button)
         return send_buttons
 
-    async def get_render_result(self, data: "StarRailDetailCharacters", nickname: str, ch_name: str, uid: int) -> "RenderResult":
+    async def get_render_result(
+        self, data: "StarRailDetailCharacters", nickname: str, ch_name: str, uid: int
+    ) -> "RenderResult":
         final = self.parse_render_data(data, nickname, ch_name, uid)
         return await self.template_service.render(
             "starrail/role_detail/main.jinja2",
