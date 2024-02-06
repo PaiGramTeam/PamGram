@@ -2,3 +2,7 @@
 .c-hrd-sk-ic-inner[unlock] > img {
     filter: brightness(0);
 }
+@font-face{
+    font-family: 'RPG_CN_Condensed';
+    src : url('../../../fonts/RPG_CN_Condensed.ttf');
+}

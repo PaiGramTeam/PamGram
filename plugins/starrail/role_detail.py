@@ -133,7 +133,7 @@ class RoleDetailPlugin(Plugin):
         render_result = await self.template_service.render(
             "starrail/role_detail/main.jinja2",
             final,
-            {"width": 1000, "height": 1200},
+            {"width": 1920, "height": 1080},
             full_page=True,
             query_selector=".pc-role-detail-num",
         )
