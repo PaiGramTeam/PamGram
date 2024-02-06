@@ -215,7 +215,12 @@
                                 {% for data in properties %}
                                 <div data-v-03b70214="" class="c-hrdcs-btm-half">
                                     {% for item in data %}
-                                    <div data-v-03b70214="" class="c-hrdcs-item">
+                                        {% if item.highlight %}
+                                            {% set highlight = "highlight=1" %}
+                                        {% else %}
+                                            {% set highlight = "" %}
+                                        {% endif %}
+                                    <div data-v-03b70214="" class="c-hrdcs-item" {{ highlight }}>
                                         <img data-v-03b70214=""
                                              src="{{ item.icon }}?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
                                              crossorigin="anonymous" class="c-hrdcs-icon">
@@ -236,34 +241,43 @@
                         <div data-v-11b31764="" data-v-282e6297="" class="c-hrdrs">
                             <div data-v-11b31764="" class="c-hrdrs-title"><!----> <span
                                     data-v-11b31764=""> 遗器属性</span>
-                                <div data-v-11b31764="" class="c-hrdrs-title-tip">有效副属性由开拓者自定义</div> <!---->
+                                <div data-v-11b31764="" class="c-hrdrs-title-tip">
+                                    有效副属性由开拓者自定义
+                                </div> <!---->
                             </div>
                             <div data-v-11b31764="" class="c-hrdrs-overview">
-                                <div data-v-11b31764="" class="c-hrdrs-overview-left"><p data-v-11b31764=""
-                                                                                         class="c-hrdrs-overview-left-1">
-                                    有效副属性命中统计</p> <!----> <!---->
+                                <div data-v-11b31764="" class="c-hrdrs-overview-left">
+                                    <p data-v-11b31764="" class="c-hrdrs-overview-left-1">
+                                    有效副属性命中统计
+                                    </p>
                                     <div data-v-11b31764="" class="c-hrdrs-overview-left-3">
-                                        <div data-v-11b31764="" class="c-hrdrs-tag"><img data-v-11b31764=""
-                                                                                         src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/2afd64d2c225ef63e8acf4f622bd1a1a.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                                                         crossorigin="anonymous"> <span
-                                                data-v-11b31764="">防御力</span> <i data-v-11b31764="" grey="true">0</i>
+                                        {% if score.ids | length > 5 %}
+                                            {% set show_name = false %}
+                                        {% else %}
+                                            {% set show_name = true %}
+                                        {% endif %}
+                                        {% for sc in score.data %}
+                                            {% if sc.count > 0 %}
+                                                {% set grey = "" %}
+                                            {% else %}
+                                                {% set grey = "grey=1" %}
+                                            {% endif %}
+                                        <div data-v-11b31764="" class="c-hrdrs-tag">
+                                            <img data-v-11b31764=""
+                                                 src="{{ sc.icon }}?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
+                                                 crossorigin="anonymous">
+                                            <span data-v-11b31764="">{{ sc.name }}</span>
+                                            <i data-v-11b31764="" {{ grey }}>{{ sc.count }}</i>
                                         </div>
-                                        <div data-v-11b31764="" class="c-hrdrs-tag"><img data-v-11b31764=""
-                                                                                         src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/772dbbb78e30b6a7941a421685cc467a.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                                                         crossorigin="anonymous"> <span
-                                                data-v-11b31764="">暴击率</span> <i data-v-11b31764="" grey="true">0</i>
-                                        </div>
-                                        <div data-v-11b31764="" class="c-hrdrs-tag"><img data-v-11b31764=""
-                                                                                         src="https://act-webstatic.hoyoverse.com/darkmatter/hkrpg/prod_gf_cn/item_icon_ud9dkb/64a8496adf2f30f15ef4c00546fc34d7.png?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                                                         crossorigin="anonymous"> <span
-                                                data-v-11b31764="">暴击伤害</span> <i data-v-11b31764=""
-                                                                                      grey="true">0</i></div>
+                                        {% endfor %}
                                     </div>
                                 </div>
                                 <div data-v-11b31764="" class="c-hrdrs-overview-right">
-                                    <div data-v-11b31764="" empty="true" class="c-hrdrs-overview-final"><span
-                                            data-v-11b31764="">0</span></div>
-                                    <p data-v-11b31764="" class="c-hrdrs-overview-text">总计命中</p></div>
+                                    <div data-v-11b31764="" empty="true" class="c-hrdrs-overview-final">
+                                        <span data-v-11b31764="">{{ score.count }}</span>
+                                    </div>
+                                    <p data-v-11b31764="" class="c-hrdrs-overview-text">总计命中</p>
+                                </div>
                             </div>
                             <div data-v-11b31764="" class="c-hrdrs-btm">
                                 {% for relic in relics %}
@@ -286,17 +300,22 @@
                                     <div data-v-02f45497="" class="c-hrdr-btm">
                                         {% for prop in relic.properties %}
                                         <div data-v-02f45497="" class="c-hrdr-btm-item">
+                                            {% if prop.highlight %}
+                                                {% set highlight = "highlight=1" %}
+                                            {% else %}
+                                                {% set highlight = "" %}
+                                            {% endif %}
                                             <img data-v-02f45497="" type="img"
                                                  src="{{ prop.icon }}?x-oss-process=image%2Fresize%2Cw_32%2Fformat%2Cwebp"
-                                                 crossorigin="anonymous" class="c-hrdr-icon">
-                                            <span data-v-02f45497="" class="c-hrdr-name">{{ prop.name }}</span>
+                                                 crossorigin="anonymous" class="c-hrdr-icon" {{ highlight }}>
+                                            <span data-v-02f45497="" class="c-hrdr-name" {{ highlight }}>{{ prop.name }}</span>
                                             {% if prop.times > 1 %}
                                             <div data-v-02f45497="" class="c-hrdr-strength">
                                                 <img data-v-02f45497="" src="https://act.hoyolab.com/app/community-game-records-sea/rpg/images/relic_times_icon.d8d07cb7.png">
                                                 <span data-v-02f45497="">{{ prop.times - 1 }}</span>
                                             </div>
                                             {% endif %}
-                                            <span data-v-02f45497="" class="c-hrdr-num">{{ prop.value }}</span>
+                                            <span data-v-02f45497="" class="c-hrdr-num" {{ highlight }}>{{ prop.value }}</span>
                                         </div>
                                         {% endfor %}
                                     </div>

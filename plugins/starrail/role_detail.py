@@ -1,10 +1,11 @@
 import os
 import re
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Dict, Any, List
+from typing import TYPE_CHECKING, Dict, Any, List, Optional
 
+from pydantic import BaseModel
 from simnet.errors import BadRequest as SimnetBadRequest, DataNotPublic
-from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo
+from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters, PropertyInfo, RecommendProperty
 from simnet.models.starrail.diary import StarRailDiary
 from telegram import Update
 from telegram.constants import ChatAction
@@ -23,6 +24,36 @@ if TYPE_CHECKING:
 
 
 __all__ = ("RoleDetailPlugin",)
+
+
+class RelicScoreData(BaseModel, frozen=False):
+    """遗物评分数据"""
+
+    id: int
+    count: int
+    name: str
+    icon: str
+    property_name_relic: str
+
+
+class RelicScore(BaseModel, frozen=False):
+    """遗物评分"""
+
+    ids: List[int]
+    count: int = 0
+    data: List[RelicScoreData]
+    is_custom: bool = False
+
+    @property
+    def names(self) -> List[str]:
+        return [i.property_name_relic for i in self.data]
+
+    def add(self, id_: int, times: int) -> None:
+        self.count += times
+        for i in self.data:
+            if i.id == id_:
+                i.count += times
+                break
 
 
 class RoleDetailPlugin(Plugin):
@@ -57,7 +88,7 @@ class RoleDetailPlugin(Plugin):
         return properties_map
 
     @staticmethod
-    def process_property(data: "StarRailDetailCharacters", index: int) -> List[List[Dict[str, Any]]]:
+    def process_property(data: "StarRailDetailCharacters", index: int, score: RelicScore) -> List[List[Dict[str, Any]]]:
         """处理角色属性"""
         char = data.avatar_list[index].properties
         properties_map = RoleDetailPlugin.get_properties_map(data)
@@ -66,7 +97,8 @@ class RoleDetailPlugin(Plugin):
             info = properties_map[i.property_type]
             new_data = i.dict()
             new_data["show_add"] = i.show_add
-            new_data["name"] = info.name
+            new_data["highlight"] = info.property_name_relic in score.names
+            new_data["name"] = info.property_name_relic
             new_data["icon"] = info.icon
             data.append(new_data)
         data2 = [[], []]
@@ -78,13 +110,14 @@ class RoleDetailPlugin(Plugin):
         return data2
 
     @staticmethod
-    def process_relics(data: "StarRailDetailCharacters", index: int) -> List[Dict[str, Any]]:
+    def process_relics(data: "StarRailDetailCharacters", index: int, score: RelicScore) -> List[Dict[str, Any]]:
         """处理角色遗物"""
         properties_map = RoleDetailPlugin.get_properties_map(data)
 
         def process_relic_prop(_data: Dict[str, Any]) -> None:
             info = properties_map[_data["property_type"]]
-            _data["name"] = info.name
+            _data["highlight"] = info.property_type in score.ids
+            _data["name"] = info.property_name_relic
             _data["icon"] = info.icon
 
         relics = data.avatar_list[index].relics
@@ -98,6 +131,10 @@ class RoleDetailPlugin(Plugin):
             for j in new_data["properties"]:
                 process_relic_prop(j)
             data_map[i.pos] = new_data
+            # 计算遗物评分
+            for j in i.properties:
+                if j.property_type in score.ids:
+                    score.add(j.property_type, j.times)
         for i in range(1, 7):
             if i not in data_map:
                 data_map[i] = {"has_data": False}
@@ -114,6 +151,29 @@ class RoleDetailPlugin(Plugin):
         data["skills_single"] = [i.dict() for i in char.skills_single]
         return data
 
+    @staticmethod
+    def process_score(data: "StarRailDetailCharacters", char_id: int) -> RelicScore:
+        properties_map = RoleDetailPlugin.get_properties_map(data)
+        info = data.get_recommend_property_by_cid(char_id)
+        if info.is_custom_property_valid:
+            ids = info.custom_relic_properties
+        else:
+            ids = info.recommend_relic_properties
+        return RelicScore(
+            ids=ids,
+            count=0,
+            data=[
+                RelicScoreData(
+                    id=i,
+                    count=0,
+                    name=properties_map[i].property_name_filter,
+                    icon=properties_map[i].icon,
+                    property_name_relic=properties_map[i].property_name_relic,
+                ) for i in ids
+            ],
+            is_custom=info.is_custom_property_valid,
+        )
+
     @handler.command(command="role_detail", block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         user = update.effective_user
@@ -126,9 +186,10 @@ class RoleDetailPlugin(Plugin):
             data = await client.get_starrail_characters()
             index = 3
             char = self.process_char(data, index)
-            properties = self.process_property(data, index)
-            relics = self.process_relics(data, index)
-            final = {"char": char, "properties": properties, "relics": relics}
+            score = self.process_score(data, char["id"])
+            properties = self.process_property(data, index, score)
+            relics = self.process_relics(data, index, score)
+            final = {"char": char, "properties": properties, "relics": relics, "score": score.dict()}
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.template_service.render(
             "starrail/role_detail/main.jinja2",
