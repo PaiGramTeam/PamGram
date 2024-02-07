@@ -86,7 +86,7 @@ class WebAppData(BaseModel):
 SET_BY_WEB = 10100
 
 
-class RoleDetailPlugin(Plugin):
+class RoleDetailPlugin(Plugin.Conversation):
     """角色详细信息查询"""
 
     BASE_TYPE_EN = {
@@ -521,7 +521,7 @@ class RoleDetailPlugin(Plugin):
 
     @conversation.state(state=SET_BY_WEB)
     @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
-    async def set_by_web_text(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
+    async def set_by_web_text_role(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         if message.text == "退出":
             await message.reply_text("退出任务", reply_markup=ReplyKeyboardRemove())
@@ -532,7 +532,7 @@ class RoleDetailPlugin(Plugin):
 
     @conversation.state(state=SET_BY_WEB)
     @handler.message(filters=filters.StatusUpdate.WEB_APP_DATA, block=False)
-    async def set_by_web(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
+    async def set_by_web_role(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
         user = update.effective_user
         message = update.effective_message
         web_app_data = message.web_app_data
