@@ -93,7 +93,7 @@ class DailyNoteTasksPlugin(Plugin.Conversation):
             await message.reply_text("退出任务", reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         else:
-            await message.reply_text("输入错误，请重新输入")
+            await message.reply_text("输入错误，请重新输入。或者回复 退出 退出任务。")
         return SET_BY_WEB
 
     @conversation.state(state=SET_BY_WEB)
