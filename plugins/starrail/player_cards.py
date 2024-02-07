@@ -32,6 +32,9 @@ except ImportError:
     import json as jsonlib
 
 
+DEP_MSG = "自 2.0 版本开始，不再推荐使用此功能，推荐使用 /role_detail 查询角色信息。"
+
+
 class PlayerCards(Plugin):
     def __init__(
         self,
@@ -116,7 +119,7 @@ class PlayerCards(Plugin):
             ]
             reply_message = await message.reply_photo(
                 photo=photo,
-                caption=f"角色列表未找到，请尝试点击下方按钮更新角色列表 - UID {uid}",
+                caption=f"角色列表未找到，请尝试点击下方按钮更新角色列表 - UID {uid}\n\n{DEP_MSG}",
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
             if reply_message.photo:
@@ -141,7 +144,7 @@ class PlayerCards(Plugin):
                 photo = open("resources/img/aaa.jpg", "rb")
             reply_message = await message.reply_photo(
                 photo=photo,
-                caption=f"请选择你要查询的角色 - UID {uid}",
+                caption=f"请选择你要查询的角色 - UID {uid}\n\n{DEP_MSG}",
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
             if reply_message.photo:
@@ -151,7 +154,7 @@ class PlayerCards(Plugin):
             if idToRole(characters.avatarId) == ch_name:
                 break
         else:
-            await message.reply_text(f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试")
+            await message.reply_text(f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试\n\n{DEP_MSG}")
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await RenderTemplate(
@@ -209,7 +212,7 @@ class PlayerCards(Plugin):
             render_data,
             viewport={"width": 750, "height": 380},
             ttl=60 * 10,
-            caption=f"更新角色列表成功，请选择你要查询的角色 - UID {uid}",
+            caption=f"更新角色列表成功，请选择你要查询的角色 - UID {uid}\n\n{DEP_MSG}",
         )
         await holder.edit_media(message, reply_markup=InlineKeyboardMarkup(buttons))
 
