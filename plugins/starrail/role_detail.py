@@ -1,17 +1,29 @@
 import math
 from typing import TYPE_CHECKING, Dict, Any, List, Tuple, Optional, Union
+from urllib.parse import quote
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from simnet.errors import InternalDatabaseError
 from simnet.models.starrail.chronicle.characters import StarRailDetailCharacters
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+    WebAppInfo,
+    ReplyKeyboardRemove,
+)
 from telegram.constants import ChatAction
-from telegram.ext import filters
+from telegram.ext import filters, ConversationHandler
+from telegram.helpers import create_deep_linked_url
 
 from core.plugin import Plugin, handler
 from core.services.template.services import TemplateService
 from core.config import config
 from core.dependence.redisdb import RedisDB
+from core.plugin import conversation
 from metadata.shortname import roleToName, idToRole
+from plugins.app.webapp import WebApp
 from plugins.tools.genshin import GenshinHelper
 from utils.log import logger
 from utils.uid import mask_number
@@ -64,6 +76,16 @@ class RelicScore(BaseModel, frozen=False):
                 break
 
 
+class WebAppData(BaseModel):
+    """小程序返回的数据"""
+
+    cid: int
+    custom: List[int]
+
+
+SET_BY_WEB = 10100
+
+
 class RoleDetailPlugin(Plugin):
     """角色详细信息查询"""
 
@@ -100,6 +122,13 @@ class RoleDetailPlugin(Plugin):
         json_data = data.json(by_alias=True)
         await self.redis.set(nickname_k, nickname, ex=self.expire)
         await self.redis.set(data_k, json_data, ex=self.expire)
+
+    async def del_characters_for_redis(
+        self,
+        uid: int,
+    ) -> None:
+        nickname_k, data_k = f"{self.qname}:{uid}:nickname", f"{self.qname}:{uid}:data"
+        await self.redis.delete(nickname_k, data_k)
 
     async def get_characters_for_redis(
         self,
@@ -343,7 +372,12 @@ class RoleDetailPlugin(Plugin):
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.get_render_result(data, nickname, characters.id, client.player_id)
-        await render_result.reply_photo(message, filename=f"{client.player_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(
+            message,
+            filename=f"{client.player_id}.png",
+            allow_sending_without_reply=True,
+            reply_markup=self.get_custom_button(user.id, uid, characters.id),
+        )
 
     @handler.callback_query(pattern=r"^get_role_detail\|", block=False)
     async def get_role_detail(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
@@ -415,4 +449,114 @@ class RoleDetailPlugin(Plugin):
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.get_render_result(data, nickname, characters.id, uid)
         render_result.filename = f"role_detail_{uid}_{result}.png"
-        await render_result.edit_media(message)
+        await render_result.edit_media(message, reply_markup=self.get_custom_button(user.id, uid, characters.id))
+
+    @staticmethod
+    def get_custom_button(user_id: int, uid: int, char_id: int) -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(
+            [[InlineKeyboardButton(">> 有效词条自定义 <<", callback_data=f"set_relic_prop|{user_id}|{uid}|{char_id}")]]
+        )
+
+    @handler.callback_query(pattern=r"^set_relic_prop\|", block=False)
+    async def set_relic_prop_callback(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
+        callback_query = update.callback_query
+        user = callback_query.from_user
+
+        async def set_relic_prop_callback(
+            callback_query_data: str,
+        ) -> Tuple[int, int, int]:
+            _data = callback_query_data.split("|")
+            _user_id = int(_data[1])
+            _uid = int(_data[2])
+            _result = int(_data[3])
+            logger.debug(
+                "callback_query_data函数返回 result[%s] user_id[%s] uid[%s]",
+                _result,
+                _user_id,
+                _uid,
+            )
+            return _result, _user_id, _uid
+
+        char_id, user_id, uid = await set_relic_prop_callback(callback_query.data)
+        if user.id != user_id:
+            await callback_query.answer(text="这不是你的按钮！\n" + config.notice.user_mismatch, show_alert=True)
+            return
+        await callback_query.answer(url=create_deep_linked_url(context.bot.username, f"set_relic_prop_{uid}_{char_id}"))
+
+    @conversation.entry_point
+    @handler.command(command="start", filters=filters.Regex(r" set_relic_prop_(.*)"), block=False)
+    async def start_set_relic_prop(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        user = update.effective_user
+        message = update.effective_message
+        args = self.get_args(context)
+        uid = int(args[0].split("_")[3])
+        char_id = int(args[0].split("_")[4])
+        char_name = idToRole(char_id)
+        logger.info("用户 %s[%s] 通过start命令 进入设置遗器副属性自定义流程 uid[%s] char_id[%s]", user.full_name, user.id, uid, char_id)
+        try:
+            nickname, data = await self.get_characters(uid)
+        except NeedClient:
+            async with self.helper.genshin(user.id) as client:
+                nickname, data = await self.get_characters(client.player_id, client)
+        rec = data.get_recommend_property_by_cid(char_id)
+        if not rec:
+            await message.reply_text(f"未在游戏中找到 {char_name} ，请检查角色是否存在，或者等待角色数据更新后重试")
+            return ConversationHandler.END
+        url = f"{config.pass_challenge_user_web}/relic_property?command=relic_property&cid={char_id}&"
+        url += "recommend=" + ",".join([str(i) for i in rec.recommend_relic_properties]) + "&"
+        url += "custom=" + ",".join([str(i) for i in rec.custom_relic_properties]) + "&"
+        char_name_quote = quote(char_name, "utf-8")
+        url += f"name={char_name_quote}"
+        text = f"你好 {user.mention_markdown_v2()} {nickname} 请点击下方按钮，开始自定义 {char_name} 的遗器副属性"
+        await message.reply_markdown_v2(
+            text,
+            reply_markup=ReplyKeyboardMarkup.from_button(
+                KeyboardButton(
+                    text="点我开始设置",
+                    web_app=WebAppInfo(url=url),
+                )
+            ),
+        )
+        return SET_BY_WEB
+
+    @conversation.state(state=SET_BY_WEB)
+    @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
+    async def set_by_web_text(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
+        message = update.effective_message
+        if message.text == "退出":
+            await message.reply_text("退出任务", reply_markup=ReplyKeyboardRemove())
+            return ConversationHandler.END
+        else:
+            await message.reply_text("输入错误，请重新输入。或者回复 退出 退出任务。")
+        return SET_BY_WEB
+
+    @conversation.state(state=SET_BY_WEB)
+    @handler.message(filters=filters.StatusUpdate.WEB_APP_DATA, block=False)
+    async def set_by_web(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
+        user = update.effective_user
+        message = update.effective_message
+        web_app_data = message.web_app_data
+        if web_app_data:
+            result = WebApp.de_web_app_data(web_app_data.data)
+            if result.code == 0:
+                if result.path == "relic_property":
+                    try:
+                        validate = WebAppData(**result.data)
+                        async with self.helper.genshin(user.id) as client:
+                            client: "StarRailClient"
+                            await client.set_starrail_avatar_recommend_property(validate.cid, validate.custom)
+                        await message.reply_text("修改自定义副属性成功。", reply_markup=ReplyKeyboardRemove())
+                        await self.del_characters_for_redis(client.player_id)
+                    except (ValidationError, InternalDatabaseError):
+                        await message.reply_text(
+                            "数据错误，请重试",
+                            reply_markup=ReplyKeyboardRemove(),
+                        )
+            else:
+                logger.warning(
+                    "用户 %s[%s] WEB_APP_DATA 请求错误 [%s]%s", user.full_name, user.id, result.code, result.message
+                )
+                await message.reply_text(f"WebApp返回错误 {result.message}", reply_markup=ReplyKeyboardRemove())
+        else:
+            logger.warning("用户 %s[%s] WEB_APP_DATA 非法数据", user.full_name, user.id)
+        return ConversationHandler.END
