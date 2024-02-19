@@ -295,9 +295,9 @@ class ChallengeStoryPlugin(Plugin):
         try:
             floor_data = abyss_data.floors[-floor]
         except IndexError:
-            floor_data = None
+            return None
         if not floor_data:
-            raise AbyssUnlocked()
+            return None
         if floor_data.is_fast or floor_data.round_num == 0:
             raise AbyssFastPassed()
         render_data.update(self.get_floor_data(abyss_data, floor))
