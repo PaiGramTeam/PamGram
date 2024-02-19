@@ -27,6 +27,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
+    from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory
 
 
 TZ = timezone("Asia/Shanghai")
@@ -178,7 +179,7 @@ class ChallengeStoryPlugin(Plugin):
         logger.info("用户 %s[%s] [bold]虚构叙事挑战数据[/bold]: 成功发送图片", user.full_name, user.id, extra={"markup": True})
 
     @staticmethod
-    def get_floor_data(abyss_data, floor: int):
+    def get_floor_data(abyss_data: "StarRailChallengeStory", floor: int):
         try:
             floor_data = abyss_data.floors[-floor]
         except IndexError:
@@ -194,15 +195,6 @@ class ChallengeStoryPlugin(Plugin):
             "floor_num": floor,
         }
         return render_data
-
-    @staticmethod
-    def get_avatar_data(avatars, floor_nodes):
-        avatar_data = {i.id: sum([j.is_unlocked for j in i.ranks]) for i in avatars.avatar_list}
-        for node in floor_nodes:
-            for c in node.avatars:
-                if c.id not in avatar_data:
-                    avatar_data[c.id] = 0
-        return avatar_data
 
     async def get_rendered_pic(
         self, client: "StarRailClient", uid: int, floor: int, total: bool, previous: bool
@@ -268,7 +260,6 @@ class ChallengeStoryPlugin(Plugin):
 
             def floor_task(floor_index: int):
                 _abyss_data = self.get_floor_data(abyss_data, floor_index)
-                _abyss_data["avatar_data"] = self.get_avatar_data(avatars, _abyss_data["floor_nodes"])
                 return (
                     floor_index,
                     self.template_service.render(
@@ -284,7 +275,6 @@ class ChallengeStoryPlugin(Plugin):
                 )
 
             render_inputs = []
-            avatars = await client.get_starrail_characters(uid, lang="zh-cn")
             floors = abyss_data.floors[::-1]
             for i in range(len(floors)):
                 try:
@@ -310,9 +300,7 @@ class ChallengeStoryPlugin(Plugin):
             raise AbyssUnlocked()
         if floor_data.is_fast or floor_data.round_num == 0:
             raise AbyssFastPassed()
-        avatars = await client.get_starrail_characters(uid, lang="zh-cn")
         render_data.update(self.get_floor_data(abyss_data, floor))
-        render_data["avatar_data"] = self.get_avatar_data(avatars, render_data["floor_nodes"])
         return [
             await self.template_service.render(
                 "starrail/abyss/floor_story.html", render_data, viewport={"width": 690, "height": 500}

@@ -66,8 +66,8 @@
                     <div class="battle">
                         {% for character in node.avatars %}
                             <div class="character">
-                                {% if avatar_data[character.id] > 0 %}
-                                    {% set constellation = avatar_data[character.id] %}
+                                {% if character.rank > 0 %}
+                                    {% set constellation = character.rank %}
                                     {% set bg = ['blue', 'blue', 'green', 'green', 'red', 'red'][constellation - 1] %}
                                     <div style="background-color: var(--{{ bg }})">
                                         {{ constellation }} 命
