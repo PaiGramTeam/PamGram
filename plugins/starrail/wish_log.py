@@ -144,13 +144,15 @@ class WishLogPlugin(Plugin.Conversation):
     @conversation.entry_point
     @handler.command(command="warp_log_import", filters=filters.ChatType.PRIVATE, block=False)
     @handler.message(filters=filters.Regex("^导入跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
-    @handler.command(command="start", filters=filters.Regex("gacha_log_import$"), block=False)
+    @handler.command(command="start", filters=filters.Regex("warp_log_import$"), block=False)
     async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         user = update.effective_user
         args = self.get_args(context)
         logger.info("用户 %s[%s] 导入跃迁记录命令请求", user.full_name, user.id)
         authkey = from_url_get_authkey(args[0] if args else "")
+        if authkey == "warp_log_import":
+            authkey = ""
         if not authkey:
             await message.reply_text(
                 "<b>开始导入跃迁历史记录：请通过 https://starrailstation.com/cn/warp#import 获取跃迁记录链接后发送给我"
