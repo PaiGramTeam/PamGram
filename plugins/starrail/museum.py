@@ -65,12 +65,12 @@ class PlayerMuseumPlugins(Plugin):
     @handler.command("museum", block=False)
     @handler.message(filters.Regex("^博物馆信息查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询博物馆信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询博物馆信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.render(client, uid)
         except TooManyRequestPublicCookies:
             await message.reply_text("用户查询次数过多 请稍后重试")
@@ -87,7 +87,7 @@ class PlayerMuseumPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     @staticmethod
     async def get_rander_data(uid: int, basic: StarRailMuseumBasic, detail: StarRailMuseumDetail) -> Dict:

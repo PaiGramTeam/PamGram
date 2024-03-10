@@ -77,12 +77,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("fantastic_story", block=False)
     @handler.message(filters.Regex("^评书奇谭信息查询(.*)"), block=False)
     async def fantastic_story_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询评书奇谭信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询评书奇谭信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.fantastic_story_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -96,7 +96,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     async def get_fantastic_story_rander_data(self, uid: int, data: StarRailFantasticStory) -> Dict:
         if not data.exists_data:
@@ -133,12 +133,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("yitai_battle", block=False)
     @handler.message(filters.Regex("^以太战线信息查询(.*)"), block=False)
     async def yitai_battle_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询以太战线信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询以太战线信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.yitai_battle_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -152,7 +152,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     async def yitai_battle_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -181,12 +181,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("endless_side", block=False)
     @handler.message(filters.Regex("^无尽位面信息查询(.*)"), block=False)
     async def endless_side_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询无尽位面信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询无尽位面信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.endless_side_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -200,7 +200,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     async def endless_side_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -233,12 +233,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("fox_story", block=False)
     @handler.message(filters.Regex("^狐斋志异信息查询(.*)"), block=False)
     async def fox_story_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询狐斋志异信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询狐斋志异信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.fox_story_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -252,7 +252,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     @staticmethod
     def line_percent(team: StarRailFoxStoryTeam) -> Tuple[float, float]:
@@ -579,12 +579,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("boxing_show", block=False)
     @handler.message(filters.Regex("^斗技表演赛信息查询(.*)"), block=False)
     async def boxing_show_command_start(self, update: Update, context: CallbackContext) -> None:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询斗技表演赛信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询斗技表演赛信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.boxing_show_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -598,7 +598,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     async def boxing_show_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -635,12 +635,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("space_zoo", block=False)
     @handler.message(filters.Regex("^异宠拾遗信息查询(.*)"), block=False)
     async def space_zoo_command_start(self, update: Update, context: CallbackContext) -> None:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询异宠拾遗信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询异宠拾遗信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.space_zoo_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -654,7 +654,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     async def space_zoo_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -691,12 +691,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("treasure_dungeon", block=False)
     @handler.message(filters.Regex("^地城探宝信息查询(.*)"), block=False)
     async def treasure_dungeon_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询地城探宝信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询地城探宝信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.treasure_dungeon_render(client, uid)
                 if render_result is None:
                     raise NotHaveData
@@ -715,7 +715,12 @@ class PlayerActivityPlugins(Plugin):
         await RenderGroupResult(results=render_result).reply_media_group(
             message, allow_sending_without_reply=True, write_timeout=60
         )
-        logger.info("用户 %s[%s] [bold]地城探宝信息数据[/bold]: 成功发送图片", user.full_name, user.id, extra={"markup": True})
+        self.log_user(
+            update,
+            logger.info,
+            "[bold]地城探宝信息数据[/bold]: 成功发送图片",
+            extra={"markup": True},
+        )
 
     async def treasure_dungeon_render(self, client: "StarRailClient", uid: Optional[int] = None) -> List[RenderResult]:
         if uid is None:
@@ -758,12 +763,12 @@ class PlayerActivityPlugins(Plugin):
     @handler.command("copper_man", block=False)
     @handler.message(filters.Regex("^金人巷信息查询(.*)"), block=False)
     async def copper_man_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        logger.info("用户 %s[%s] 查询金人巷信息命令请求", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询金人巷信息命令请求")
         try:
-            uid = await self.get_uid(user.id, context.args, message.reply_to_message)
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.copper_man_render(client, uid)
         except AttributeError as exc:
             logger.error(ACTIVITY_DATA_ERROR)
@@ -777,7 +782,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
 
     async def copper_man_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:

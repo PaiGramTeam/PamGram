@@ -29,7 +29,6 @@ class RelicsPlugin(Plugin):
     @handler.message(filters=filters.Regex("^遗器套装查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         message = update.effective_message
-        user = update.effective_user
         args = self.get_args(context)
         if len(args) >= 1:
             relics_name = args[0]
@@ -49,7 +48,7 @@ class RelicsPlugin(Plugin):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
             return
-        logger.info("用户 %s[%s] 查询遗器图鉴命令请求 || 参数 %s", user.full_name, user.id, relics_name)
+        self.log_user(update, logger.info, "查询遗器图鉴命令请求 || 参数 %s", relics_name)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         caption = "From 米游社@听语惊花"
         if file_id := await self.cache_service.get_relics_cache(relics_name):
