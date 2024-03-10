@@ -1,4 +1,5 @@
 """混沌回忆数据查询"""
+
 import asyncio
 import re
 from functools import lru_cache
@@ -119,7 +120,9 @@ class ChallengePlugin(Plugin):
         floor, total, previous = get_args(message.text)
 
         if floor > MAX_FLOOR or floor < 0:
-            reply_msg = await message.reply_text(f"混沌回忆层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all")
+            reply_msg = await message.reply_text(
+                f"混沌回忆层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all"
+            )
             if filters.ChatType.GROUPS.filter(message):
                 self.add_delete_message_job(reply_msg)
                 self.add_delete_message_job(message)
@@ -253,6 +256,11 @@ class ChallengePlugin(Plugin):
                 12: "#1D2A4A",
             },
         }
+
+        overview = await self.template_service.render(
+            "starrail/abyss/overview.html", render_data, viewport={"width": 750, "height": 250}
+        )
+
         if total:
 
             def floor_task(floor_index: int):
@@ -281,14 +289,12 @@ class ChallengePlugin(Plugin):
 
             render_group_inputs = list(map(lambda x: x[1], sorted(render_inputs, key=lambda x: x[0])))
 
-            return await asyncio.gather(*render_group_inputs)
+            render_group_outputs = await asyncio.gather(*render_group_inputs)
+            render_group_outputs.insert(0, overview)
+            return render_group_outputs
 
         if floor < 1:
-            return [
-                await self.template_service.render(
-                    "starrail/abyss/overview.html", render_data, viewport={"width": 750, "height": 250}
-                )
-            ]
+            return [overview]
         try:
             floor_data = abyss_data.floors[-floor]
         except IndexError:
