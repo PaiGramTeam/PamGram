@@ -186,7 +186,7 @@ class ChallengePlugin(Plugin):
             floor_data = None
         if not floor_data:
             raise AbyssUnlocked()
-        if floor_data.is_fast or floor_data.round_num == 0:
+        if floor_data.is_fast:
             raise AbyssFastPassed()
         render_data = {
             "floor": floor_data,
@@ -295,7 +295,7 @@ class ChallengePlugin(Plugin):
             return None
         if not floor_data:
             return None
-        if floor_data.is_fast or floor_data.round_num == 0:
+        if floor_data.is_fast:
             raise AbyssFastPassed()
         render_data.update(self.get_floor_data(abyss_data, floor))
         return [
