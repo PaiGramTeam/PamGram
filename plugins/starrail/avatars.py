@@ -49,7 +49,7 @@ class AvatarsPlugin(Plugin):
                 self.add_delete_message_job(message)
                 self.add_delete_message_job(reply_message)
             return
-        self.log_user(update, logger.info, "查询角色图鉴命令请求 || 参数 %s",  character_name)
+        self.log_user(update, logger.info, "查询角色图鉴命令请求 || 参数 %s", character_name)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         caption = "From 米游社@听语惊花"
         if file_id := await self.cache_service.get_avatar_cache(character_name):
