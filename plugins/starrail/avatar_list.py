@@ -146,13 +146,13 @@ class AvatarListPlugin(Plugin):
     @handler.command("avatars", block=False)
     @handler.message(filters.Regex(r"^(全部)?练度统计$"), block=False)
     async def avatar_list(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE"):
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
         all_avatars = "全部" in message.text or "all" in message.text  # 是否发送全部角色
-        logger.info("用户 %s[%s] [bold]练度统计[/bold]: all=%s", user.full_name, user.id, all_avatars, extra={"markup": True})
+        self.log_user(update, logger.info, "[bold]练度统计[/bold]: all=%s", all_avatars, extra={"markup": True})
         await message.reply_chat_action(ChatAction.TYPING)
 
-        async with self.helper.genshin(user.id) as client:
+        async with self.helper.genshin(user_id) as client:
             characters: List["StarRailDetailCharacter"] = await self.get_avatars_data(client)
             record_card = await client.get_record_card()
             nickname = record_card.nickname
@@ -183,10 +183,10 @@ class AvatarListPlugin(Plugin):
             await image.reply_document(message, filename="练度统计.png")
         else:
             await image.reply_photo(message)
-        logger.info(
-            "用户 %s[%s] [bold]练度统计[/bold]发送%s成功",
-            user.full_name,
-            user.id,
+        self.log_user(
+            update,
+            logger.info,
+            "[bold]练度统计[/bold]发送%s成功",
             "文件" if all_avatars else "图片",
             extra={"markup": True},
         )

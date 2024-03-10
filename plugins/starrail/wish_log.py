@@ -277,8 +277,8 @@ class WishLogPlugin(Plugin.Conversation):
     @handler.command(command="warp_log", block=False)
     @handler.message(filters=filters.Regex("^跃迁记录?(光锥|角色|常驻|新手)$"), block=False)
     async def command_start_analysis(self, update: Update, context: CallbackContext) -> None:
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        user = update.effective_user
         pool_type = StarRailBannerType.CHARACTER
         if args := self.get_args(context):
             if "光锥" in args:
@@ -287,11 +287,11 @@ class WishLogPlugin(Plugin.Conversation):
                 pool_type = StarRailBannerType.STANDARD
             elif "新手" in args:
                 pool_type = StarRailBannerType.NOVICE
-        logger.info("用户 %s[%s] 跃迁记录命令请求 || 参数 %s", user.full_name, user.id, pool_type.name)
+        self.log_user(update, logger.info, "跃迁记录命令请求 || 参数 %s", pool_type.name)
         try:
             await message.reply_chat_action(ChatAction.TYPING)
-            player_id = await self.get_player_id(user.id)
-            data = await self.gacha_log.get_analysis(user.id, player_id, pool_type, self.assets_service)
+            player_id = await self.get_player_id(user_id)
+            data = await self.gacha_log.get_analysis(user_id, player_id, pool_type, self.assets_service)
             if isinstance(data, str):
                 reply_message = await message.reply_text(data)
                 if filters.ChatType.GROUPS.filter(message):
@@ -311,7 +311,7 @@ class WishLogPlugin(Plugin.Conversation):
                 else:
                     await png_data.reply_photo(message)
         except GachaLogNotFound:
-            logger.info("未找到用户 %s[%s] 的跃迁记录", user.full_name, user.id)
+            self.log_user(update, logger.info, "未找到跃迁记录")
             buttons = [
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]
@@ -320,8 +320,8 @@ class WishLogPlugin(Plugin.Conversation):
     @handler.command(command="warp_count", block=False)
     @handler.message(filters=filters.Regex("^跃迁统计?(光锥|角色|常驻|新手)$"), block=False)
     async def command_start_count(self, update: Update, context: CallbackContext) -> None:
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        user = update.effective_user
         pool_type = StarRailBannerType.CHARACTER
         all_five = False
         if args := self.get_args(context):
@@ -333,15 +333,15 @@ class WishLogPlugin(Plugin.Conversation):
                 pool_type = StarRailBannerType.NOVICE
             if "仅五星" in args:
                 all_five = True
-        logger.info("用户 %s[%s] 跃迁统计命令请求 || 参数 %s || 仅五星 %s", user.full_name, user.id, pool_type.name, all_five)
+        self.log_user(update, logger.info, "跃迁统计命令请求 || 参数 %s || 仅五星 %s", pool_type.name, all_five)
         try:
             group = filters.ChatType.GROUPS.filter(message)
             await message.reply_chat_action(ChatAction.TYPING)
-            player_id = await self.get_player_id(user.id)
+            player_id = await self.get_player_id(user_id)
             if all_five:
-                data = await self.gacha_log.get_all_five_analysis(user.id, player_id, self.assets_service)
+                data = await self.gacha_log.get_all_five_analysis(user_id, player_id, self.assets_service)
             else:
-                data = await self.gacha_log.get_pool_analysis(user.id, player_id, pool_type, self.assets_service, group)
+                data = await self.gacha_log.get_pool_analysis(user_id, player_id, pool_type, self.assets_service, group)
             if isinstance(data, str):
                 reply_message = await message.reply_text(data)
                 if filters.ChatType.GROUPS.filter(message):
@@ -365,7 +365,7 @@ class WishLogPlugin(Plugin.Conversation):
                 else:
                     await png_data.reply_photo(message)
         except GachaLogNotFound:
-            logger.info("未找到用户 %s[%s] 的跃迁记录", user.full_name, user.id)
+            self.log_user(update, logger.info, "未找到跃迁记录")
             buttons = [
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]

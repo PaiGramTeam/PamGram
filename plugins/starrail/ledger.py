@@ -77,7 +77,7 @@ class LedgerPlugin(Plugin):
     @handler.command(command="ledger", block=False)
     @handler.message(filters=filters.Regex("^开拓月历查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
 
         now = datetime.now()
@@ -110,10 +110,10 @@ class LedgerPlugin(Plugin):
                 self.add_delete_message_job(reply_message, delay=30)
                 self.add_delete_message_job(message, delay=30)
             return
-        logger.info("用户 %s[%s] 查询开拓月历", user.full_name, user.id)
+        self.log_user(update, logger.info, "查询开拓月历")
         await message.reply_chat_action(ChatAction.TYPING)
         try:
-            async with self.helper.genshin(user.id) as client:
+            async with self.helper.genshin(user_id) as client:
                 render_result = await self._start_get_ledger(client, year, month)
         except DataNotPublic:
             reply_message = await message.reply_text("查询失败惹，可能是开拓月历功能被禁用了？请先通过米游社或者 hoyolab 获取一次开拓月历后重试。")

@@ -331,7 +331,7 @@ class RoleDetailPlugin(Plugin.Conversation):
     @handler.command(command="role_detail", block=False)
     @handler.message(filters=filters.Regex("^角色详细信息查询(.*)"), block=False)
     async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
         args = self.get_args(context)
         ch_name = None
@@ -339,18 +339,18 @@ class RoleDetailPlugin(Plugin.Conversation):
             ch_name = roleToName(i)
             if ch_name:
                 break
-        logger.info(
-            "用户 %s[%s] 角色详细信息查询命令请求 || character_name[%s]",
-            user.full_name,
-            user.id,
+        self.log_user(
+            update,
+            logger.info,
+            "角色详细信息查询命令请求 || character_name[%s]",
             ch_name,
         )
         await message.reply_chat_action(ChatAction.TYPING)
-        async with self.helper.genshin(user.id) as client:
+        async with self.helper.genshin(user_id) as client:
             nickname, data = await self.get_characters(client.player_id, client)
         uid = client.player_id
         if ch_name is None:
-            buttons = self.gen_button(data, user.id, uid)
+            buttons = self.gen_button(data, user_id, uid)
             if isinstance(self.kitsune, str):
                 photo = self.kitsune
             else:
@@ -376,7 +376,7 @@ class RoleDetailPlugin(Plugin.Conversation):
             message,
             filename=f"{client.player_id}.png",
             allow_sending_without_reply=True,
-            reply_markup=self.get_custom_button(user.id, uid, characters.id),
+            reply_markup=self.get_custom_button(user_id, uid, characters.id),
         )
 
     @handler.callback_query(pattern=r"^get_role_detail\|", block=False)

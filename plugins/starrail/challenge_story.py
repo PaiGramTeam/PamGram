@@ -97,9 +97,9 @@ class ChallengeStoryPlugin(Plugin):
     @handler.command("challenge_story", block=False)
     @handler.message(filters.Regex(msg_pattern), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        uid: int = await self.get_uid(user.id, context.args, message.reply_to_message)
+        uid: int = await self.get_uid(user_id, context.args, message.reply_to_message)
 
         # 若查询帮助
         if (message.text.startswith("/") and "help" in message.text) or "帮助" in message.text:
@@ -112,7 +112,7 @@ class ChallengeStoryPlugin(Plugin):
                 "<code>虚构叙事数据查询</code>\n<code>虚构叙事数据查询上期第1层</code>\n<code>虚构叙事数据总览上期</code>",
                 parse_mode=ParseMode.HTML,
             )
-            logger.info("用户 %s[%s] 查询[bold]虚构叙事数据[/bold]帮助", user.full_name, user.id, extra={"markup": True})
+            self.log_user(update, logger.info, "查询[bold]虚构叙事数据[/bold]帮助", extra={"markup": True})
             return
 
         # 解析参数
@@ -125,10 +125,10 @@ class ChallengeStoryPlugin(Plugin):
                 self.add_delete_message_job(message)
             return
 
-        logger.info(
-            "用户 %s[%s] [bold]虚构叙事挑战数据[/bold]请求: uid=%s floor=%s total=%s previous=%s",
-            user.full_name,
-            user.id,
+        self.log_user(
+            update,
+            logger.info,
+            "[bold]虚构叙事挑战数据[/bold]请求: uid=%s floor=%s total=%s previous=%s",
             uid,
             floor,
             total,
@@ -142,7 +142,7 @@ class ChallengeStoryPlugin(Plugin):
         reply_text: Optional[Message] = None
 
         try:
-            async with self.helper.genshin_or_public(user.id, uid=uid) as client:
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 if total:
                     reply_text = await message.reply_text("彦卿需要时间整理虚构叙事数据，还请耐心等待哦~")
                 await message.reply_chat_action(ChatAction.TYPING)
@@ -176,7 +176,7 @@ class ChallengeStoryPlugin(Plugin):
         if reply_text is not None:
             await reply_text.delete()
 
-        logger.info("用户 %s[%s] [bold]虚构叙事挑战数据[/bold]: 成功发送图片", user.full_name, user.id, extra={"markup": True})
+        self.log_user(update, logger.info, "[bold]虚构叙事挑战数据[/bold]: 成功发送图片", extra={"markup": True})
 
     @staticmethod
     def get_floor_data(abyss_data: "StarRailChallengeStory", floor: int):

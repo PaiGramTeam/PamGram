@@ -96,13 +96,13 @@ class PlayerCards(Plugin):
     @handler.command(command="player_card", block=False)
     @handler.message(filters=filters.Regex("^角色卡片查询(.*)"), block=False)
     async def player_cards(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
-        user = update.effective_user
+        user_id = await self.get_real_user_id(update)
         message = update.effective_message
         args = self.get_args(context)
         await message.reply_chat_action(ChatAction.TYPING)
-        uid, ch_name = await self.get_uid_and_ch(user.id, args, message.reply_to_message)
+        uid, ch_name = await self.get_uid_and_ch(user_id, args, message.reply_to_message)
         if uid is None:
-            raise PlayerNotFoundError(user.id)
+            raise PlayerNotFoundError(user_id)
         data = await self._load_history(uid)
         if data is None or len(data.avatarList) == 0:
             if isinstance(self.kitsune, str):
@@ -113,7 +113,7 @@ class PlayerCards(Plugin):
                 [
                     InlineKeyboardButton(
                         "更新面板",
-                        callback_data=f"update_player_card|{user.id}|{uid}",
+                        callback_data=f"update_player_card|{user_id}|{uid}",
                     )
                 ]
             ]
@@ -126,18 +126,18 @@ class PlayerCards(Plugin):
                 self.kitsune = reply_message.photo[-1].file_id
             return
         if ch_name is not None:
-            logger.info(
-                "用户 %s[%s] 角色卡片查询命令请求 || character_name[%s] uid[%s]",
-                user.full_name,
-                user.id,
+            self.log_user(
+                update,
+                logger.info,
+                "角色卡片查询命令请求 || character_name[%s] uid[%s]",
                 ch_name,
                 uid,
             )
         else:
-            logger.info("用户 %s[%s] 角色卡片查询命令请求", user.full_name, user.id)
+            self.log_user(update, logger.info, "角色卡片查询命令请求")
             ttl = await self.cache.ttl(uid)
 
-            buttons = self.gen_button(data, user.id, uid, update_button=ttl < 0)
+            buttons = self.gen_button(data, user_id, uid, update_button=ttl < 0)
             if isinstance(self.kitsune, str):
                 photo = self.kitsune
             else:
