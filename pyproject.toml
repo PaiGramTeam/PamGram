@@ -2,7 +2,7 @@
 name = "PamGram"
 version = "0.4.0"
 description = "Telegarm robot, query the official starrail information."
-authors = ["洛水居室", "zhxy-CN", "Chuangbo Li", "kotoriのねこ", "omg-xtao", "艾迪", "Karako", "SiHuaN"]
+authors = ["洛水居室", "zhxy-CN", "Chuangbo Li", "kotoriのねこ", "omg-xtao", "艾迪", "Karako", "SiHuaN", "Nahida Buer"]
 license = "AGPL-3.0"
 readme = "README.md"
 
