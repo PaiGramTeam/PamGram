@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 __all__ = ("DailyNoteTasksPlugin",)
 
-
 SET_BY_WEB = 10100
 
 
@@ -111,7 +110,7 @@ class DailyNoteTasksPlugin(Plugin.Conversation):
                         validate = WebAppData(**result.data)
                     except ValidationError:
                         await message.reply_text(
-                            "数据错误\n开拓力提醒数值必须在 100 ~ 240 之间",
+                            "数据错误\n开拓力提醒数值必须在 100 ~ 240 之间\n每日任务提醒时间必须在 0 ~ 23 之间",
                             reply_markup=ReplyKeyboardRemove(),
                         )
                         return ConversationHandler.END

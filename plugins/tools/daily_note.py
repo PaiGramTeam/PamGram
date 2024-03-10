@@ -1,6 +1,6 @@
 import base64
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from pydantic import BaseModel, validator
 from simnet import Region
@@ -11,13 +11,14 @@ from telegram.error import BadRequest, Forbidden
 
 from core.plugin import Plugin
 from core.services.task.models import Task as TaskUser, TaskStatusEnum
-from core.services.task.services import TaskResinServices, TaskExpeditionServices
+from core.services.task.services import TaskResinServices, TaskExpeditionServices, TaskDailyServices
 from gram_core.plugin.methods.migrate_data import IMigrateData, MigrateDataException
 from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNotFoundError
 from utils.log import logger
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
+    from simnet.models.starrail.chronicle.notes import StarRailNote, StarRailNoteWidget
     from telegram.ext import ContextTypes
     from gram_core.services.task.services import TaskServices
 
@@ -40,9 +41,20 @@ class ExpeditionData(TaskDataBase):
     pass
 
 
+class DailyData(TaskDataBase):
+    notice_hour: Optional[int] = 22
+
+    @validator("notice_hour")
+    def notice_hour_validator(cls, v):
+        if v < 0 or v > 23:
+            raise ValueError("每日任务提醒时间必须在 0 ~ 23 之间")
+        return v
+
+
 class WebAppData(BaseModel):
     resin: Optional[ResinData]
     expedition: Optional[ExpeditionData]
+    daily: Optional[DailyData]
 
 
 class DailyNoteTaskUser:
@@ -51,12 +63,15 @@ class DailyNoteTaskUser:
         user_id: int,
         resin_db: Optional[TaskUser] = None,
         expedition_db: Optional[TaskUser] = None,
+        daily_db: Optional[TaskUser] = None,
     ):
         self.user_id = user_id
         self.resin_db = resin_db
         self.expedition_db = expedition_db
+        self.daily_db = daily_db
         self.resin = ResinData(**self.resin_db.data) if self.resin_db else None
         self.expedition = ExpeditionData(**self.expedition_db.data) if self.expedition_db else None
+        self.daily = DailyData(**self.daily_db.data) if self.daily_db else None
 
     @property
     def status(self) -> TaskStatusEnum:
@@ -64,6 +79,7 @@ class DailyNoteTaskUser:
             [
                 self.resin_db.status if self.resin_db else TaskStatusEnum.STATUS_SUCCESS,
                 self.expedition_db.status if self.expedition_db else TaskStatusEnum.STATUS_SUCCESS,
+                self.daily_db.status if self.daily_db else TaskStatusEnum.STATUS_SUCCESS,
             ]
         )
 
@@ -73,6 +89,8 @@ class DailyNoteTaskUser:
             self.resin_db.status = value
         if self.expedition_db:
             self.expedition_db.status = value
+        if self.daily:
+            self.daily_db.status = value
 
     @staticmethod
     def js_bool(value: bool) -> str:
@@ -91,6 +109,7 @@ class DailyNoteTaskUser:
                 WebAppData(
                     resin=self.set_model_noticed(self.resin) if self.resin else None,
                     expedition=self.set_model_noticed(self.expedition) if self.expedition else None,
+                    daily=self.set_model_noticed(self.daily) if self.daily else None,
                 ).json()
             ).encode()
         ).decode()
@@ -100,6 +119,8 @@ class DailyNoteTaskUser:
             self.resin_db.data = self.resin.dict()
         if self.expedition_db:
             self.expedition_db.data = self.expedition.dict()
+        if self.daily_db:
+            self.daily_db.data = self.daily.dict()
 
 
 class DailyNoteSystem(Plugin):
@@ -108,32 +129,26 @@ class DailyNoteSystem(Plugin):
         genshin_helper: GenshinHelper,
         resin_service: TaskResinServices,
         expedition_service: TaskExpeditionServices,
+        daily_service: TaskDailyServices,
     ):
         self.genshin_helper = genshin_helper
         self.resin_service = resin_service
         self.expedition_service = expedition_service
+        self.daily_service = daily_service
 
     async def get_single_task_user(self, user_id: int) -> DailyNoteTaskUser:
         resin_db = await self.resin_service.get_by_user_id(user_id)
         expedition_db = await self.expedition_service.get_by_user_id(user_id)
+        daily_db = await self.daily_service.get_by_user_id(user_id)
         return DailyNoteTaskUser(
             user_id=user_id,
             resin_db=resin_db,
             expedition_db=expedition_db,
+            daily_db=daily_db,
         )
 
     @staticmethod
-    async def start_get_notes(
-        client: "StarRailClient",
-        user: DailyNoteTaskUser = None,
-    ) -> List[str]:
-        if client.region == Region.OVERSEAS:
-            notes = await client.get_starrail_notes()
-        else:
-            notes = await client.get_starrail_notes_by_stoken()
-        if not user:
-            return []
-        notices = []
+    def get_resin_notice(user: DailyNoteTaskUser, notes: Union["StarRailNote", "StarRailNoteWidget"]) -> str:
         notice = None
         if user.resin_db and notes.max_stamina > 0:
             if notes.current_stamina >= user.resin.notice_num:
@@ -146,7 +161,10 @@ class DailyNoteSystem(Plugin):
                     user.resin.noticed = True
             else:
                 user.resin.noticed = False
-        notices.append(notice)
+        return notice
+
+    @staticmethod
+    def get_expedition_notice(user: DailyNoteTaskUser, notes: Union["StarRailNote", "StarRailNoteWidget"]) -> str:
         notice = None
         if user.expedition_db and len(notes.expeditions) > 0:
             all_finished = all(i.status == "Finished" for i in notes.expeditions)
@@ -156,23 +174,59 @@ class DailyNoteSystem(Plugin):
                     user.expedition.noticed = True
             else:
                 user.expedition.noticed = False
-        notices.append(notice)
+        return notice
+
+    @staticmethod
+    def get_daily_notice(user: DailyNoteTaskUser, notes: Union["StarRailNote", "StarRailNoteWidget"]) -> str:
+        notice = None
+        now_hour = datetime.now().hour
+        if user.daily_db:
+            if now_hour == user.daily.notice_hour:
+                if notes.current_train_score != notes.max_train_score and (not user.daily.noticed):
+                    notice = (
+                        f"### 每日任务提示 ####\n\n" f"当前进度为 {notes.current_train_score} / {notes.max_train_score} ，记得完成哦~"
+                    )
+                    user.daily.noticed = True
+            else:
+                user.daily.noticed = False
+        return notice
+
+    @staticmethod
+    async def start_get_notes(
+        client: "StarRailClient",
+        user: DailyNoteTaskUser = None,
+    ) -> List[str]:
+        if client.region == Region.OVERSEAS:
+            notes = await client.get_starrail_notes()
+        else:
+            notes = await client.get_starrail_notes_by_stoken()
+        if not user:
+            return []
+        notices = [
+            DailyNoteSystem.get_resin_notice(user, notes),
+            DailyNoteSystem.get_expedition_notice(user, notes),
+            DailyNoteSystem.get_daily_notice(user, notes),
+        ]
         user.save()
         return notices
 
     async def get_all_task_users(self) -> List[DailyNoteTaskUser]:
         resin_list = await self.resin_service.get_all()
         expedition_list = await self.expedition_service.get_all()
+        daily_list = await self.daily_service.get_all()
         user_list = set()
         for i in resin_list:
             user_list.add(i.user_id)
         for i in expedition_list:
+            user_list.add(i.user_id)
+        for i in daily_list:
             user_list.add(i.user_id)
         return [
             DailyNoteTaskUser(
                 user_id=i,
                 resin_db=next((x for x in resin_list if x.user_id == i), None),
                 expedition_db=next((x for x in expedition_list if x.user_id == i), None),
+                daily_db=next((x for x in daily_list if x.user_id == i), None),
             )
             for i in user_list
         ]
@@ -182,6 +236,8 @@ class DailyNoteSystem(Plugin):
             await self.resin_service.remove(user.resin_db)
         if user.expedition_db:
             await self.expedition_service.remove(user.expedition_db)
+        if user.daily_db:
+            await self.daily_service.remove(user.daily_db)
 
     async def update_task_user(self, user: DailyNoteTaskUser):
         if user.resin_db:
@@ -194,6 +250,11 @@ class DailyNoteSystem(Plugin):
                 await self.expedition_service.update(user.expedition_db)
             except StaleDataError:
                 logger.warning("用户 user_id[%s] 自动便签提醒 - 探索派遣数据过期，跳过更新数据", user.user_id)
+        if user.daily_db:
+            try:
+                await self.daily_service.update(user.daily_db)
+            except StaleDataError:
+                logger.warning("用户 user_id[%s] 自动便签提醒 - 每日任务数据过期，跳过更新数据", user.user_id)
 
     @staticmethod
     async def check_need_note(web_config: WebAppData) -> bool:
@@ -202,47 +263,79 @@ class DailyNoteSystem(Plugin):
             need_verify = True
         if web_config.expedition and web_config.expedition.noticed:
             need_verify = True
+        if web_config.daily and web_config.daily.noticed:
+            need_verify = True
         return need_verify
+
+    async def import_web_config_resin(self, user: DailyNoteTaskUser, web_config: WebAppData):
+        user_id = user.user_id
+        if web_config.resin.noticed:
+            if not user.resin_db:
+                resin = self.resin_service.create(
+                    user_id,
+                    user_id,
+                    status=TaskStatusEnum.STATUS_SUCCESS,
+                    data=ResinData(notice_num=web_config.resin.notice_num).dict(),
+                )
+                await self.resin_service.add(resin)
+            else:
+                user.resin.notice_num = web_config.resin.notice_num
+                user.resin.noticed = False
+                user.resin_db.status = TaskStatusEnum.STATUS_SUCCESS
+        else:
+            if user.resin_db:
+                await self.resin_service.remove(user.resin_db)
+                user.resin_db = None
+                user.resin = None
+
+    async def import_web_config_expedition(self, user: DailyNoteTaskUser, web_config: WebAppData):
+        user_id = user.user_id
+        if web_config.expedition.noticed:
+            if not user.expedition_db:
+                expedition = self.expedition_service.create(
+                    user_id,
+                    user_id,
+                    status=TaskStatusEnum.STATUS_SUCCESS,
+                    data=ExpeditionData().dict(),
+                )
+                await self.expedition_service.add(expedition)
+            else:
+                user.expedition.noticed = False
+                user.expedition_db.status = TaskStatusEnum.STATUS_SUCCESS
+        else:
+            if user.expedition_db:
+                await self.expedition_service.remove(user.expedition_db)
+                user.expedition_db = None
+                user.expedition = None
+
+    async def import_web_config_daily(self, user: DailyNoteTaskUser, web_config: WebAppData):
+        user_id = user.user_id
+        if web_config.daily.noticed:
+            if not user.daily_db:
+                daily = self.daily_service.create(
+                    user_id,
+                    user_id,
+                    status=TaskStatusEnum.STATUS_SUCCESS,
+                    data=DailyData(notice_hour=web_config.daily.notice_hour).dict(),
+                )
+                await self.daily_service.add(daily)
+            else:
+                user.daily.noticed = False
+                user.daily_db.status = TaskStatusEnum.STATUS_SUCCESS
+        else:
+            if user.daily_db:
+                await self.daily_service.remove(user.daily_db)
+                user.daily_db = None
+                user.daily = None
 
     async def import_web_config(self, user_id: int, web_config: WebAppData):
         user = await self.get_single_task_user(user_id)
         if web_config.resin:
-            if web_config.resin.noticed:
-                if not user.resin_db:
-                    resin = self.resin_service.create(
-                        user_id,
-                        user_id,
-                        status=TaskStatusEnum.STATUS_SUCCESS,
-                        data=ResinData(notice_num=web_config.resin.notice_num).dict(),
-                    )
-                    await self.resin_service.add(resin)
-                else:
-                    user.resin.notice_num = web_config.resin.notice_num
-                    user.resin.noticed = False
-                    user.resin_db.status = TaskStatusEnum.STATUS_SUCCESS
-            else:
-                if user.resin_db:
-                    await self.resin_service.remove(user.resin_db)
-                    user.resin_db = None
-                    user.resin = None
+            await self.import_web_config_resin(user, web_config)
         if web_config.expedition:
-            if web_config.expedition.noticed:
-                if not user.expedition_db:
-                    expedition = self.expedition_service.create(
-                        user_id,
-                        user_id,
-                        status=TaskStatusEnum.STATUS_SUCCESS,
-                        data=ExpeditionData().dict(),
-                    )
-                    await self.expedition_service.add(expedition)
-                else:
-                    user.expedition.noticed = False
-                    user.expedition_db.status = TaskStatusEnum.STATUS_SUCCESS
-            else:
-                if user.expedition_db:
-                    await self.expedition_service.remove(user.expedition_db)
-                    user.expedition_db = None
-                    user.expedition = None
+            await self.import_web_config_expedition(user, web_config)
+        if web_config.daily:
+            await self.import_web_config_daily(user, web_config)
         user.save()
         await self.update_task_user(user)
 
@@ -282,7 +375,7 @@ class DailyNoteSystem(Plugin):
                 text = "获取便签失败了呜呜呜 ~ 执行自动便签提醒时发生错误"
             else:
                 task_db.status = TaskStatusEnum.STATUS_SUCCESS
-            for idx, task_user_db in enumerate([task_db.resin_db, task_db.expedition_db]):
+            for idx, task_user_db in enumerate([task_db.resin_db, task_db.expedition_db, task_db.daily_db]):
                 if task_user_db is None:
                     continue
                 notice_text = text[idx] if isinstance(text, list) else text

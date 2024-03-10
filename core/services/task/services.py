@@ -4,6 +4,7 @@ from gram_core.services.task.services import (
     TaskCardServices,
     TaskResinServices,
     TaskExpeditionServices,
+    TaskDailyServices,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "TaskCardServices",
     "TaskResinServices",
     "TaskExpeditionServices",
+    "TaskDailyServices",
 ]
