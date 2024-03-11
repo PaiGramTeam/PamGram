@@ -1,4 +1,5 @@
 """混沌回忆数据查询"""
+
 import asyncio
 import re
 from functools import lru_cache
@@ -253,6 +254,11 @@ class ChallengePlugin(Plugin):
                 12: "#1D2A4A",
             },
         }
+
+        overview = await self.template_service.render(
+            "starrail/abyss/overview.html", render_data, viewport={"width": 750, "height": 250}
+        )
+
         if total:
 
             def floor_task(floor_index: int):
@@ -281,14 +287,12 @@ class ChallengePlugin(Plugin):
 
             render_group_inputs = list(map(lambda x: x[1], sorted(render_inputs, key=lambda x: x[0])))
 
-            return await asyncio.gather(*render_group_inputs)
+            render_group_outputs = await asyncio.gather(*render_group_inputs)
+            render_group_outputs.insert(0, overview)
+            return render_group_outputs
 
         if floor < 1:
-            return [
-                await self.template_service.render(
-                    "starrail/abyss/overview.html", render_data, viewport={"width": 750, "height": 250}
-                )
-            ]
+            return [overview]
         try:
             floor_data = abyss_data.floors[-floor]
         except IndexError:
