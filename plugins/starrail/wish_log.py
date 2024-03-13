@@ -280,7 +280,7 @@ class WishLogPlugin(Plugin.Conversation):
             await message.reply_text("未查询到您所绑定的账号信息，请先绑定账号")
 
     async def rander_wish_log_analysis(
-            self, user_id: int, player_id: int, pool_type: StarRailBannerType
+        self, user_id: int, player_id: int, pool_type: StarRailBannerType
     ) -> Union[str, "RenderResult"]:
         data = await self.gacha_log.get_analysis(user_id, player_id, pool_type, self.assets_service)
         if isinstance(data, str):
