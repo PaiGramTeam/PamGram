@@ -183,6 +183,10 @@ class GachaLog:
         new_num = 0
         for item_info in all_items:
             pool_name = GACHA_TYPE_LIST[StarRailBannerType(int(item_info.gacha_type))]
+            if pool_name not in temp_id_data:
+                temp_id_data[pool_name] = []
+            if pool_name not in gacha_log.item_list:
+                gacha_log.item_list[pool_name] = []
             if item_info.id not in temp_id_data[pool_name]:
                 gacha_log.item_list[pool_name].append(item_info)
                 temp_id_data[pool_name].append(item_info.id)
@@ -272,6 +276,10 @@ class GachaLog:
                         ),
                     )
 
+                    if pool_name not in temp_id_data:
+                        temp_id_data[pool_name] = {}
+                    if pool_name not in gacha_log.item_list:
+                        gacha_log.item_list[pool_name] = []
                     if item.id not in temp_id_data[pool_name].keys():
                         gacha_log.item_list[pool_name].append(item)
                         temp_id_data[pool_name][item.id] = item
@@ -520,6 +528,8 @@ class GachaLog:
         if not status:
             raise GachaLogNotFound
         pool_name = GACHA_TYPE_LIST[pool]
+        if pool_name not in gacha_log.item_list:
+            raise GachaLogNotFound
         data = gacha_log.item_list[pool_name]
         total = len(data)
         if total == 0:
@@ -565,6 +575,8 @@ class GachaLog:
         if not status:
             raise GachaLogNotFound
         pool_name = GACHA_TYPE_LIST[pool]
+        if pool_name not in gacha_log.item_list:
+            raise GachaLogNotFound
         data = gacha_log.item_list[pool_name]
         total = len(data)
         if total == 0:

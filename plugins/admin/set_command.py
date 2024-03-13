@@ -32,7 +32,6 @@ class SetCommandPlugin(Plugin):
         group_command = [
             BotCommand("help", "帮助"),
             BotCommand("warp_log", "查看跃迁记录"),
-            BotCommand("warp_count", "查看跃迁统计（按卡池）"),
             BotCommand("dailynote", "查询实时便笺"),
             BotCommand("redeem", "（国际服）兑换 Key"),
             BotCommand("ledger", "查询当月开拓月历"),

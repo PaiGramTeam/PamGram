@@ -9,3 +9,4 @@ GACHA_TYPE_LIST = {
     StarRailBannerType.CHARACTER: "角色跃迁",
     StarRailBannerType.WEAPON: "光锥跃迁",
 }
+GACHA_TYPE_LIST_REVERSE = {v: k for k, v in GACHA_TYPE_LIST.items()}
