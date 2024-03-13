@@ -330,7 +330,7 @@ class WishLogPlugin(Plugin.Conversation):
         if isinstance(self.wish_photo, str):
             photo = self.wish_photo
         else:
-            photo = open("resources/img/wish.jpeg", "rb")
+            photo = open("resources/img/wish.jpg", "rb")
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         reply_message = await message.reply_photo(
             photo=photo,
