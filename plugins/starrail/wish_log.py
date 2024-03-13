@@ -348,7 +348,10 @@ class WishLogPlugin(Plugin.Conversation):
             reply = await message.reply_text(png_data)
         else:
             await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-            reply = await png_data.reply_photo(message)
+            if png_data.file_type == FileType.DOCUMENT:
+                reply = await png_data.reply_document(message, filename="抽卡统计.png")
+            else:
+                reply = await png_data.reply_photo(message)
         if filters.ChatType.GROUPS.filter(message):
             self.add_delete_message_job(reply)
             self.add_delete_message_job(message)
@@ -434,7 +437,11 @@ class WishLogPlugin(Plugin.Conversation):
         else:
             await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
             await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-            await png_data.edit_media(message)
+            if png_data.file_type == FileType.DOCUMENT:
+                await png_data.reply_document(message, filename="抽卡统计.png")
+                self.add_delete_message_job(message, delay=1)
+            else:
+                await png_data.edit_media(message)
 
     async def get_wish_log_count(self, update: "Update", user_id: int, uid: int, pool: str):
         callback_query = update.callback_query
