@@ -11,9 +11,13 @@
     {% for item in damage_info %}
         <tr class="text-center odd:bg-white odd:bg-opacity-10">
             <td class="border px-4 py-2">{{ item.name }}</td>
-            <td class="border px-4 py-2">{{ item.damagelist[0]|round|int }}</td>
-            <td class="border px-4 py-2">{{ item.damagelist[1]|round|int }}</td>
-            <td class="border px-4 py-2">{{ item.damagelist[2]|round|int }}</td>
+            {% if item.damagelist|length == 1 %}
+                <td class="border px-4 py-2 " colspan="3">{{ item.damagelist[0]|round|int }}</td>
+            {% else %}
+                {% for damage in item.damagelist %}
+                    <td class="border px-4 py-2">{{ damage|round|int }}</td>
+                {% endfor %}
+            {% endif %}
         </tr>
     {% endfor %}
     </tbody>
