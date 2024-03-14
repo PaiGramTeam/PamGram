@@ -49,6 +49,10 @@
         font-family: shicon;
         font-size: 1.25em;
       }
+
+      body {
+          width: 1050px;
+      }
     </style>
   </head>
   <body class="text-xl text-neutral-200">
@@ -91,11 +95,18 @@
       </div>
 
       <!-- Info -->
-      <div class="px-5 relative">
+      <div class="px-5 relative mb-4">
         <div class="grid grid-cols-3 gap-4">
           {% include 'starrail/player_card/artifacts.html' %}
         </div>
       </div>
+
+      <!-- damage -->
+      {%- if damage_function_available == True -%}
+        <div class="px-5 relative">
+          {% include "starrail/player_card/damage.html" %}
+        </div>
+      {%- endif -%}
 
       <!-- Logo -->
       <div class="mt-4 relative">
