@@ -22,6 +22,21 @@ from plugins.tools.genshin import PlayerNotFoundError
 from utils.log import logger
 from utils.uid import mask_number
 
+try:
+    from starrail_damage_cal.mihomo.models import Avatar as DamageAvatar
+    from starrail_damage_cal.to_data import get_data as get_damage_data
+    from starrail_damage_cal.cal_damage import cal_info as cal_damage_info
+    from msgspec import convert as msgspec_convert
+
+    STARRAIL_ARTIFACT_FUNCTION_AVAILABLE = True
+except ImportError:
+    DamageAvatar = None
+    get_damage_data = None
+    cal_damage_info = None
+    msgspec_convert = None
+
+    STARRAIL_ARTIFACT_FUNCTION_AVAILABLE = False
+
 if TYPE_CHECKING:
     from telegram.ext import ContextTypes
     from telegram import Update
@@ -154,7 +169,9 @@ class PlayerCards(Plugin):
             if idToRole(characters.avatarId) == ch_name:
                 break
         else:
-            await message.reply_text(f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试\n\n{DEP_MSG}")
+            await message.reply_text(
+                f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试\n\n{DEP_MSG}"
+            )
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await RenderTemplate(
@@ -203,7 +220,10 @@ class PlayerCards(Plugin):
             return
         if data.avatarList is None:
             await message.delete()
-            await callback_query.answer("请先将角色加入到角色展柜并允许查看角色详情后再使用此功能，如果已经添加了角色，请等待角色数据更新后重试", show_alert=True)
+            await callback_query.answer(
+                "请先将角色加入到角色展柜并允许查看角色详情后再使用此功能，如果已经添加了角色，请等待角色数据更新后重试",
+                show_alert=True,
+            )
             return
         buttons = self.gen_button(data, user.id, uid, update_button=False)
         render_data = await self.parse_holder_data(data)
@@ -268,7 +288,10 @@ class PlayerCards(Plugin):
             return
         if data.avatarList is None:
             await message.delete()
-            await callback_query.answer("请先将角色加入到角色展柜并允许查看角色详情后再使用此功能，如果已经添加了角色，请等待角色数据更新后重试", show_alert=True)
+            await callback_query.answer(
+                "请先将角色加入到角色展柜并允许查看角色详情后再使用此功能，如果已经添加了角色，请等待角色数据更新后重试",
+                show_alert=True,
+            )
             return
         if page:
             buttons = self.gen_button(data, user.id, uid, page, await self.cache.ttl(uid) <= 0)
@@ -280,7 +303,10 @@ class PlayerCards(Plugin):
                 break
         else:
             await message.delete()
-            await callback_query.answer(f"角色展柜中未找到 {result} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试", show_alert=True)
+            await callback_query.answer(
+                f"角色展柜中未找到 {result} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试",
+                show_alert=True,
+            )
             return
         await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
@@ -493,6 +519,7 @@ class RenderTemplate:
             "artifacts": artifacts,
             "skills": skills,
             "images": images,
+            **(await self.cal_avatar_damage()),
         }
 
         return await self.template_service.render(
@@ -553,3 +580,25 @@ class RenderTemplate:
             for e in relic_list
             if self.client.get_affix_by_id(e.tid) is not None
         ]
+
+    async def cal_avatar_damage(self) -> Dict:
+        if not STARRAIL_ARTIFACT_FUNCTION_AVAILABLE:
+            return {
+                "damage_function_available": False,
+            }
+        try:
+            data = self.character.dict()
+            if "property" in data:
+                del data["property"]
+            avatar = msgspec_convert(data, type=DamageAvatar)
+            damage_data = await get_damage_data(avatar, "", str(self.uid))
+            damage_info = await cal_damage_info(damage_data[0])
+            return {
+                "damage_function_available": True,
+                "damage_info": damage_info,
+            }
+        except Exception:
+            logger.warning("计算角色伤害时出现错误 uid[%s] avatar[%s]", self.uid, self.character.avatarId)
+            return {
+                "damage_function_available": False,
+            }

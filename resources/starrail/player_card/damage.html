@@ -1,0 +1,24 @@
+<table class="table-auto border-collapse w-full bg-black bg-opacity-20 rounded-lg">
+    <thead>
+    <tr class="bg-black bg-opacity-20">
+        <th class="px-4 py-2">技能</th>
+        <th class="px-4 py-2">暴击伤害</th>
+        <th class="px-4 py-2">期望伤害</th>
+        <th class="px-4 py-2">满配辅助末日兽</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in damage_info %}
+        <tr class="text-center odd:bg-white odd:bg-opacity-10">
+            <td class="border px-4 py-2">{{ item.name }}</td>
+            {% if item.damagelist|length == 1 %}
+                <td class="border px-4 py-2 " colspan="3">{{ item.damagelist[0]|round|int }}</td>
+            {% else %}
+                {% for damage in item.damagelist %}
+                    <td class="border px-4 py-2">{{ damage|round|int }}</td>
+                {% endfor %}
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
