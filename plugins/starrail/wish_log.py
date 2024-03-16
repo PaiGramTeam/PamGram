@@ -213,7 +213,9 @@ class WishLogPlugin(Plugin.Conversation):
         if not status:
             await message.reply_text("你还没有导入跃迁记录哦~")
             return ConversationHandler.END
-        await message.reply_text("你确定要删除跃迁记录吗？（此项操作无法恢复），如果确定请发送 ”确定“，发送其他内容取消")
+        await message.reply_text(
+            "你确定要删除跃迁记录吗？（此项操作无法恢复），如果确定请发送 ”确定“，发送其他内容取消"
+        )
         return CONFIRM_DELETE
 
     @conversation.state(state=CONFIRM_DELETE)
@@ -270,7 +272,9 @@ class WishLogPlugin(Plugin.Conversation):
             buttons = [
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]
-            await message.reply_text("彦卿没有找到你的跃迁记录，快来私聊彦卿导入吧~", reply_markup=InlineKeyboardMarkup(buttons))
+            await message.reply_text(
+                "彦卿没有找到你的跃迁记录，快来私聊彦卿导入吧~", reply_markup=InlineKeyboardMarkup(buttons)
+            )
         except GachaLogAccountNotFound:
             await message.reply_text("导入失败，可能文件包含的跃迁记录所属 uid 与你当前绑定的 uid 不同")
         except GachaLogFileError:
@@ -382,7 +386,10 @@ class WishLogPlugin(Plugin.Conversation):
             buttons = [
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]
-            await message.reply_text("彦卿没有找到你此卡池的跃迁记录，快来点击按钮私聊彦卿导入吧~", reply_markup=InlineKeyboardMarkup(buttons))
+            await message.reply_text(
+                "彦卿没有找到你此卡池的跃迁记录，快来点击按钮私聊彦卿导入吧~",
+                reply_markup=InlineKeyboardMarkup(buttons),
+            )
 
     @handler.callback_query(pattern=r"^get_wish_log\|", block=False)
     async def get_wish_log(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:

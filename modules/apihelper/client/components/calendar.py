@@ -35,7 +35,9 @@ class Calendar:
         187,  # 《崩坏：星穹铁道》防沉迷系统公告
         185,  # 《崩坏：星穹铁道》公平运营声明
     ]
-    IGNORE_RE = re.compile(r"(内容专题页|版本更新说明|调研|防沉迷|米游社|专项意见|游戏优化及已知问题说明|问卷调查|版本更新通知|更新时间说明|预下载功能|周边限时|周边上新|角色演示)")
+    IGNORE_RE = re.compile(
+        r"(内容专题页|版本更新说明|调研|防沉迷|米游社|专项意见|游戏优化及已知问题说明|问卷调查|版本更新通知|更新时间说明|预下载功能|周边限时|周边上新|角色演示)"
+    )
     FULL_TIME_RE = re.compile(r"(魔神任务)")
 
     def __init__(self):
@@ -61,7 +63,9 @@ class Calendar:
                 continue
             content = re.sub(r'(<|&lt;)[\w "%:;=\-\\/\\(\\),\\.]+(>|&gt;)', "", content)
             try:
-                if reg_ret := re.search(r"(?:活动时间|祈愿介绍|任务开放时间|冒险....包|折扣时间)\s*〓([^〓]+)(〓|$)", content):
+                if reg_ret := re.search(
+                    r"(?:活动时间|祈愿介绍|任务开放时间|冒险....包|折扣时间)\s*〓([^〓]+)(〓|$)", content
+                ):
                     if time_ret := re.search(r"(?:活动时间)?(?:〓|\s)*([0-9\\/\\: ~]{6,})", reg_ret[1]):
                         start_time, end_time = time_ret[1].split("~")
                         start_time = start_time.replace("/", "-").strip()

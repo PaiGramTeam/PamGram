@@ -1,4 +1,5 @@
 """虚构叙事数据查询"""
+
 import asyncio
 import re
 from functools import lru_cache
@@ -119,7 +120,9 @@ class ChallengeStoryPlugin(Plugin):
         floor, total, previous = get_args(message.text)
 
         if floor > MAX_FLOOR or floor < 0:
-            reply_msg = await message.reply_text(f"虚构叙事层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all")
+            reply_msg = await message.reply_text(
+                f"虚构叙事层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all"
+            )
             if filters.ChatType.GROUPS.filter(message):
                 self.add_delete_message_job(reply_msg)
                 self.add_delete_message_job(message)

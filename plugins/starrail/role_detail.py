@@ -492,7 +492,13 @@ class RoleDetailPlugin(Plugin.Conversation):
         uid = int(args[0].split("_")[3])
         char_id = int(args[0].split("_")[4])
         char_name = idToRole(char_id)
-        logger.info("用户 %s[%s] 通过start命令 进入设置遗器副属性自定义流程 uid[%s] char_id[%s]", user.full_name, user.id, uid, char_id)
+        logger.info(
+            "用户 %s[%s] 通过start命令 进入设置遗器副属性自定义流程 uid[%s] char_id[%s]",
+            user.full_name,
+            user.id,
+            uid,
+            char_id,
+        )
         try:
             nickname, data = await self.get_characters(uid)
         except NeedClient:

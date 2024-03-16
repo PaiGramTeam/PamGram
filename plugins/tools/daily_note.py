@@ -184,7 +184,8 @@ class DailyNoteSystem(Plugin):
             if now_hour == user.daily.notice_hour:
                 if notes.current_train_score != notes.max_train_score and (not user.daily.noticed):
                     notice = (
-                        f"### 每日任务提示 ####\n\n" f"当前进度为 {notes.current_train_score} / {notes.max_train_score} ，记得完成哦~"
+                        f"### 每日任务提示 ####\n\n"
+                        f"当前进度为 {notes.current_train_score} / {notes.max_train_score} ，记得完成哦~"
                     )
                     user.daily.noticed = True
             else:

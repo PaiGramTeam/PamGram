@@ -149,7 +149,13 @@ class Inline(Plugin):
         elif args[0] == "cookies_export":
             return
         else:
-            if args[0] in ["查看角色攻略列表并查询", "查看角色图鉴列表并查询", "查看光锥列表并查询", "查看遗器套装列表并查询", "查看角色培养素材列表并查询"]:
+            if args[0] in [
+                "查看角色攻略列表并查询",
+                "查看角色图鉴列表并查询",
+                "查看光锥列表并查询",
+                "查看遗器套装列表并查询",
+                "查看角色培养素材列表并查询",
+            ]:
                 temp_data = {
                     "查看角色攻略列表并查询": (self.characters_list, "角色攻略查询"),
                     "查看角色图鉴列表并查询": (self.characters_guide_list, "角色图鉴查询"),
@@ -180,7 +186,9 @@ class Inline(Plugin):
                             title=f"当前查询内容为 {args[0]}",
                             description="如果无查看图片描述 这是正常的 客户端问题",
                             thumbnail_url="https://www.miyoushe.com/_nuxt/img/game-sr.4f80911.jpg",
-                            input_message_content=InputTextMessageContent(f"当前查询内容为 {args[0]}\n如果无查看图片描述 这是正常的 客户端问题"),
+                            input_message_content=InputTextMessageContent(
+                                f"当前查询内容为 {args[0]}\n如果无查看图片描述 这是正常的 客户端问题"
+                            ),
                         )
                     )
                     for simple_search_result in simple_search_results:
