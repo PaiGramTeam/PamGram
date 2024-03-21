@@ -25,6 +25,7 @@ from core.config import config
 from core.plugin import Plugin, conversation, handler
 from modules.apihelper.client.components.hyperion import Hyperion
 from modules.apihelper.error import APIHelperException
+from modules.apihelper.models.genshin.hyperion import ArtworkImage
 from utils.helpers import sha1
 from utils.log import logger
 
@@ -32,7 +33,6 @@ if TYPE_CHECKING:
     from bs4 import Tag
     from telegram import Update, Message
     from telegram.ext import ContextTypes
-    from modules.apihelper.models.genshin.hyperion import ArtworkImage
 
 
 class PostHandlerData:
@@ -45,13 +45,15 @@ class PostHandlerData:
 
 
 CHECK_POST, SEND_POST, CHECK_COMMAND, GTE_DELETE_PHOTO = range(10900, 10904)
-GET_POST_CHANNEL, GET_TAGS, GET_TEXT = range(10904, 10907)
+GET_POST_CHANNEL, GET_TAGS, GET_TEXT, GET_VIDEO = range(10904, 10908)
 
 
 class Post(Plugin.Conversation):
     """文章推送"""
 
-    MENU_KEYBOARD = ReplyKeyboardMarkup([["推送频道", "添加TAG"], ["编辑文字", "删除图片"], ["退出"]], True, True)
+    MENU_KEYBOARD = ReplyKeyboardMarkup(
+        [["推送频道", "添加TAG"], ["编辑文字", "删除图片"], ["添加视频", "退出"]], True, True
+    )
 
     def __init__(self):
         self.gids = 6
@@ -177,6 +179,10 @@ class Post(Plugin.Conversation):
     def input_media(
         media: "ArtworkImage", *args, **kwargs
     ) -> Union[None, InputMediaDocument, InputMediaPhoto, InputMediaVideo]:
+        if media.art_id == 114514:
+            doc = InputMediaVideo(media.file_name, *args, **kwargs)
+            doc._frozen = False
+            return doc
         file_extension = media.file_extension
         filename = media.file_name
         doc = None
@@ -375,6 +381,8 @@ class Post(Plugin.Conversation):
             return await self.edit_text(update, context)
         if message.text == "删除图片":
             return await self.delete_photo(update, context)
+        if message.text == "添加视频":
+            return await self.add_video(update, context)
         return ConversationHandler.END
 
     @staticmethod
@@ -479,6 +487,23 @@ class Post(Plugin.Conversation):
         message = update.effective_message
         post_handler_data.post_text = message.text_markdown_v2
         await message.reply_text("替换成功")
+        await message.reply_text("请选择你的操作", reply_markup=self.MENU_KEYBOARD)
+        return CHECK_COMMAND
+
+    @staticmethod
+    async def add_video(update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> int:
+        message = update.effective_message
+        await message.reply_text("请回复添加的视频")
+        return GET_VIDEO
+
+    @conversation.state(state=GET_VIDEO)
+    @handler.message(filters=filters.VIDEO & ~filters.COMMAND, block=False)
+    async def get_add_video(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        post_handler_data: PostHandlerData = context.chat_data.get("post_handler_data")
+        message = update.effective_message
+        video = message.video
+        post_handler_data.post_images.insert(0, ArtworkImage(art_id=114514, file_name=video.file_id))
+        await message.reply_text("插入视频成功")
         await message.reply_text("请选择你的操作", reply_markup=self.MENU_KEYBOARD)
         return CHECK_COMMAND
 
