@@ -12,6 +12,7 @@ from core.services.players import PlayersService
 from modules.apihelper.client.components.verify import Verify
 from modules.apihelper.error import ResponseException, APIHelperException
 from plugins.tools.genshin import PlayerNotFoundError, CookiesNotFoundError, GenshinHelper
+from plugins.tools.recognize import RecognizeSystem
 from utils.log import logger
 
 __all__ = ("ChallengeSystemException", "ChallengeSystem")
@@ -49,7 +50,7 @@ class ChallengeSystem(Plugin):
         await self.cache.expire(f"{self.qname}{uid}", 10 * 60)
 
     async def create_challenge(
-        self, user_id: int, need_verify: bool = True, ajax: bool = False
+        self, user_id: int, need_verify: bool = True, ajax: bool = True
     ) -> Tuple[Optional[int], Optional[str], Optional[str]]:
         try:
             client = await self.genshin_helper.get_genshin_client(user_id)
@@ -80,10 +81,10 @@ class ChallengeSystem(Plugin):
             raise ChallengeSystemException(f"创建验证失败 错误信息为 [{exc.code}]{exc.message} 请稍后重试")
         if ajax:
             try:
-                validate = await verify.ajax(referer="https://webstatic.mihoyo.com/", gt=gt, challenge=challenge)
+                validate = await RecognizeSystem.recognize(gt, challenge, client.player_id)
                 if validate:
                     await verify.verify(challenge, validate)
-                    return client.player_id, "ajax", "ajax"
+                    raise ChallengeSystemException("自动验证成功，无需手动验证")
             except APIHelperException as exc:
                 logger.warning("用户 %s ajax 验证失效 错误信息为 %s", user_id, str(exc))
             logger.warning("用户 %s ajax 验证失败 重新申请验证", user_id)

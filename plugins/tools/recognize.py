@@ -14,10 +14,10 @@ class RecognizeSystem:
     )
 
     @staticmethod
-    async def recognize(gt: str, challenge: str, referer: str = None, uid: int = None) -> Optional[str]:
+    async def recognize(gt: str, challenge: str, referer: str = None, _: int = None) -> Optional[str]:
         if not referer:
             referer = RecognizeSystem.REFERER
-        if not gt or not challenge or not uid:
+        if not gt or not challenge:
             return None
         pass_challenge_params = {
             "gt": gt,
@@ -33,16 +33,19 @@ class RecognizeSystem:
         }
         try:
             async with AsyncClient(headers=headers) as client:
-                resp = await client.post(
-                    config.pass_challenge_api,
-                    params=pass_challenge_params,
-                    timeout=60,
-                )
-            logger.debug("recognize 请求返回：%s", resp.text)
-            data = resp.json()
-            status = data.get("status")
-            if status != 0:
-                logger.error("recognize 解析错误：[%s]%s", data.get("code"), data.get("msg"))
+                for _ in range(3):
+                    resp = await client.post(
+                        config.pass_challenge_api,
+                        data=pass_challenge_params,
+                        timeout=60,
+                    )
+                    logger.info("recognize 请求返回：%s", resp.text)
+                    data = resp.json()
+                    status = data.get("status")
+                    if status != 0:
+                        logger.error("recognize 解析错误：[%s]%s", data.get("code"), data.get("msg"))
+                        continue
+                    break
             if data.get("code", 0) != 0:
                 raise RuntimeError
             logger.info("recognize 解析成功")
