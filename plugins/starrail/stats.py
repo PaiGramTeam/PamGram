@@ -54,8 +54,8 @@ class PlayerStatsPlugins(Plugin):
                     uid = player_info.player_id
         return uid
 
-    @handler.command("stats", block=False)
-    @handler.message(filters.Regex("^玩家统计查询(.*)"), block=False)
+    @handler.command("stats", player=True, block=False)
+    @handler.message(filters.Regex("^玩家统计查询(.*)"), player=True, block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message

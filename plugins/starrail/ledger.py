@@ -74,7 +74,7 @@ class LedgerPlugin(Plugin):
         )
         return render_result
 
-    @handler.command(command="ledger", block=False)
+    @handler.command(command="ledger", cookie=True, block=False)
     @handler.message(filters=filters.Regex("^开拓月历查询(.*)"), block=False)
     async def command_start(self, update: Update, context: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
