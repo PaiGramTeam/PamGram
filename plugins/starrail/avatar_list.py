@@ -143,8 +143,8 @@ class AvatarListPlugin(Plugin):
                 logger.warning("未找到角色 %s[%s] 的资源: %s", character.name, character.id, e)
         return data
 
-    @handler.command("avatars", block=False)
-    @handler.message(filters.Regex(r"^(全部)?练度统计$"), block=False)
+    @handler.command("avatars", cookie=True, block=False)
+    @handler.message(filters.Regex(r"^(全部)?练度统计$"), cookie=True, block=False)
     async def avatar_list(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE"):
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
