@@ -108,6 +108,28 @@ class PlayerCards(Plugin):
                     uid = player_info.player_id
         return uid, ch_name
 
+    @staticmethod
+    def get_caption_stats(character: "Avatar") -> List[str]:
+        tags = []
+
+        def num(_s) -> int:
+            return int(round(float(_s.replace("%", "")), 0))
+
+        for stat in character.property:
+            tags.append(f"{stat.name}{num(stat.total)}")
+
+        return tags
+
+    def get_caption(self, character: "Avatar") -> str:
+        tags = [idToRole(character.avatarId), f"等级{character.level}", f"命座{character.rank}"]
+        if equip := character.equipment:
+            weapon_detail = self.wiki_service.light_cone.get_by_id(equip.tid)
+            tags.append(weapon_detail.name)
+            tags.append(f"武器等级{equip.level}")
+            tags.append(f"精{equip.rank}")
+        tags.extend(PlayerCards.get_caption_stats(character))
+        return "#" + " #".join(tags)
+
     @handler.command(command="player_card", player=True, block=False)
     @handler.message(filters=filters.Regex("^角色卡片查询(.*)"), player=True, block=False)
     async def player_cards(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
@@ -186,6 +208,7 @@ class PlayerCards(Plugin):
         await render_result.reply_photo(
             message,
             filename=f"player_card_{uid}_{ch_name}.png",
+            caption=self.get_caption(characters),
         )
 
     @handler.callback_query(pattern=r"^update_player_card\|", block=False)
@@ -320,6 +343,7 @@ class PlayerCards(Plugin):
             self.fight_prop_rule,
         ).render()  # pylint: disable=W0631
         render_result.filename = f"player_card_{uid}_{result}.png"
+        render_result.caption = self.get_caption(characters)
         await render_result.edit_media(message)
 
     @staticmethod

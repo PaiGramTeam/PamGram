@@ -328,6 +328,38 @@ class RoleDetailPlugin(Plugin.Conversation):
             query_selector=".pc-role-detail-num",
         )
 
+    @staticmethod
+    def get_caption_stats(data: "StarRailDetailCharacters", character_id: int) -> List[str]:
+        maps = RoleDetailPlugin.get_properties_map(data)
+        tags = []
+
+        def num(_s) -> int:
+            return int(round(float(_s.replace("%", "")), 0))
+
+        for character in data.avatar_list:
+            if character.id == character_id:
+                for stat in character.properties:
+                    info = maps.get(stat.property_type)
+                    tags.append(f"{info.name}{num(stat.final)}")
+
+        return tags
+
+    @staticmethod
+    def get_caption(data: "StarRailDetailCharacters", character_id: int) -> str:
+        tags = []
+        for character in data.avatar_list:
+            if character.id == character_id:
+                tags.append(character.name)
+                tags.append(f"等级{character.level}")
+                tags.append(f"命座{character.rank}")
+                if equip := character.equip:
+                    tags.append(equip.name)
+                    tags.append(f"武器等级{equip.level}")
+                    tags.append(f"精{equip.rank}")
+                tags.extend(RoleDetailPlugin.get_caption_stats(data, character_id))
+                break
+        return "#" + " #".join(tags)
+
     @handler.command(command="role_detail", block=False)
     @handler.message(filters=filters.Regex("^角色详细信息查询(.*)"), block=False)
     async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
@@ -377,6 +409,7 @@ class RoleDetailPlugin(Plugin.Conversation):
             filename=f"{client.player_id}.png",
             allow_sending_without_reply=True,
             reply_markup=self.get_custom_button(user_id, uid, characters.id),
+            caption=self.get_caption(data, characters.id),
         )
 
     @handler.callback_query(pattern=r"^get_role_detail\|", block=False)
@@ -449,6 +482,7 @@ class RoleDetailPlugin(Plugin.Conversation):
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
         render_result = await self.get_render_result(data, nickname, characters.id, uid)
         render_result.filename = f"role_detail_{uid}_{result}.png"
+        render_result.caption = self.get_caption(data, characters.id)
         await render_result.edit_media(message, reply_markup=self.get_custom_button(user.id, uid, characters.id))
 
     @staticmethod
