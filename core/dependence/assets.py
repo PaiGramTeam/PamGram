@@ -9,6 +9,7 @@ from httpx import AsyncClient, HTTPError
 from core.base_service import BaseService
 from modules.wiki.base import WikiModel
 from modules.wiki.models.avatar_config import AvatarIcon
+from modules.wiki.models.head_icon import HeadIcon
 from modules.wiki.models.light_cone_config import LightConeIcon
 from utils.const import PROJECT_ROOT
 from utils.log import logger
@@ -21,6 +22,7 @@ DATA_MAP = {
     "light_cone": WikiModel.BASE_URL + "light_cone_icons.json",
     "avatar_eidolon": WikiModel.BASE_URL + "avatar_eidolon_icons.json",
     "avatar_skill": WikiModel.BASE_URL + "skill/info.json",
+    "head_icon": WikiModel.BASE_URL + "head_icons.json",
 }
 
 
@@ -270,6 +272,79 @@ class _LightConeAssets(_AssetsService):
         return self.get_path(icon, "icon")
 
 
+class _HeadIconAssets(_AssetsService):
+    path: Path
+    data: List[HeadIcon]
+    id_map: Dict[int, HeadIcon]
+    avatar_id_map: Dict[int, HeadIcon]
+
+    def __init__(self, client: Optional[AsyncClient] = None) -> None:
+        super().__init__(client)
+        self.path = ASSETS_PATH.joinpath("head_icon")
+        self.path.mkdir(exist_ok=True, parents=True)
+
+    async def initialize(self):
+        logger.info("正在初始化头像素材图标")
+        html = await self.client.get(DATA_MAP["head_icon"])
+        self.data = [HeadIcon(**data) for data in html.json()]
+        self.id_map = {icon.id: icon for icon in self.data}
+        self.avatar_id_map = {icon.avatar_id: icon for icon in self.data if icon.avatar_id}
+        tasks = []
+        for icon in self.data:
+            webp_path = self.path / f"{icon.id}.webp"
+            png_path = self.path / f"{icon.id}.png"
+            if not webp_path.exists() and icon.webp:
+                tasks.append(self._download(icon.webp, webp_path))
+            if not png_path.exists():
+                tasks.append(self._download(icon.png, png_path))
+            if len(tasks) >= 100:
+                await asyncio.gather(*tasks)
+                tasks = []
+        if tasks:
+            await asyncio.gather(*tasks)
+        logger.info("头像素材图标初始化完成")
+
+    def get_path(self, icon: HeadIcon, ext: str) -> Path:
+        path = self.path / f"{icon.id}.{ext}"
+        return path
+
+    def get_by_id(self, id_: int) -> Optional[HeadIcon]:
+        return self.id_map.get(id_, None)
+
+    def get_by_avatar_id(self, avatar_id: int) -> Optional[HeadIcon]:
+        return self.avatar_id_map.get(avatar_id, None)
+
+    def get_target(self, target: StrOrInt, second_target: StrOrInt = None) -> Optional[HeadIcon]:
+        if 1000 < target <= 9000:
+            data = self.get_by_avatar_id(target)
+            if data:
+                return data
+        data = self.get_by_id(target)
+        if data:
+            return data
+        if second_target:
+            return self.get_target(second_target)
+        raise AssetsCouldNotFound("头像素材图标不存在", target)
+
+    def webp(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
+        return self.get_path(icon, "webp")
+
+    def png(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
+        return self.get_path(icon, "png")
+
+    def icon(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        icon = self.get_target(target, second_target)
+        webp_path = self.get_path(icon, "webp")
+        png_path = self.get_path(icon, "png")
+        if webp_path.exists():
+            return webp_path
+        if png_path.exists():
+            return png_path
+        raise AssetsCouldNotFound("头像素材图标不存在", target)
+
+
 class AssetsService(BaseService.Dependence):
     """asset服务
 
@@ -283,14 +358,19 @@ class AssetsService(BaseService.Dependence):
     avatar: _AvatarAssets
     """角色"""
 
+    head_icon: _HeadIconAssets
+    """头像"""
+
     light_cone: _LightConeAssets
     """光锥"""
 
     def __init__(self):
         self.client = AsyncClient(timeout=60.0)
         self.avatar = _AvatarAssets(self.client)
+        self.head_icon = _HeadIconAssets(self.client)
         self.light_cone = _LightConeAssets(self.client)
 
     async def initialize(self):  # pylint: disable=W0221
         await self.avatar.initialize()
+        await self.head_icon.initialize()
         await self.light_cone.initialize()
