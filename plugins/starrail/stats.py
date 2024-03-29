@@ -7,10 +7,12 @@ from telegram.ext import CallbackContext, filters
 
 from core.plugin import Plugin, handler
 from core.services.cookies.error import TooManyRequestPublicCookies
+from core.services.players.services import PlayerInfoService
 from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper
 from plugins.tools.head_icon import HeadIconService
+from plugins.tools.phone_theme import PhoneThemeService
 from utils.log import logger
 from utils.uid import mask_number
 
@@ -29,10 +31,14 @@ class PlayerStatsPlugins(Plugin):
         template: TemplateService,
         helper: GenshinHelper,
         head_icon: HeadIconService,
+        phone_theme: PhoneThemeService,
+        player_info_service: PlayerInfoService,
     ):
         self.template_service = template
         self.helper = helper
         self.head_icon = head_icon
+        self.phone_theme = phone_theme
+        self.player_info_service = player_info_service
 
     async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
@@ -88,7 +94,7 @@ class PlayerStatsPlugins(Plugin):
         except SimnetBadRequest:
             rogue = None
         logger.debug(user_info)
-
+        await self.set_name_card(uid, user_info.phone_background_image_url)
         data = {
             "uid": mask_number(uid),
             "info": user_info.info,
@@ -118,3 +124,13 @@ class PlayerStatsPlugins(Plugin):
             {"width": 650, "height": 440},
             full_page=True,
         )
+
+    async def set_name_card(self, player_id: int, image_url: str):
+        if not image_url:
+            return
+        try:
+            phone_theme_id = int(image_url.split("/")[-1].replace(".png", ""))
+        except (IndexError, ValueError):
+            return
+        await self.phone_theme.set_to_cache(player_id, phone_theme_id)
+        await self.player_info_service.set_name_card(player_id, phone_theme_id)
