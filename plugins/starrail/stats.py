@@ -10,6 +10,7 @@ from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper
+from plugins.tools.head_icon import HeadIconService
 from utils.log import logger
 from utils.uid import mask_number
 
@@ -27,9 +28,11 @@ class PlayerStatsPlugins(Plugin):
         self,
         template: TemplateService,
         helper: GenshinHelper,
+        head_icon: HeadIconService,
     ):
         self.template_service = template
         self.helper = helper
+        self.head_icon = head_icon
 
     async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
@@ -86,19 +89,17 @@ class PlayerStatsPlugins(Plugin):
             rogue = None
         logger.debug(user_info)
 
-        # 因为需要替换线上图片地址为本地地址，先克隆数据，避免修改原数据
-        user_info = user_info.copy(deep=True)
-
         data = {
             "uid": mask_number(uid),
             "info": user_info.info,
             "stats": user_info.stats,
             "stats_labels": [
                 ("活跃天数", "active_days"),
-                ("成就达成数", "achievement_num"),
                 ("获取角色数", "avatar_num"),
-                ("忘却之庭", "abyss_process"),
+                ("成就达成数", "achievement_num"),
                 ("战利品开启数", "chest_num"),
+                ("逐光捡金", "abyss_process"),
+                ("梦境护照贴纸", "dream_paster_num"),
             ],
             "rogue": rogue.basic_info if rogue else None,
             "rogue_labels": [
@@ -107,6 +108,8 @@ class PlayerStatsPlugins(Plugin):
                 ("已解锁祝福", "unlocked_buff_num"),
             ],
             "style": "xianzhou",  # nosec
+            "avatar": (await self.head_icon.get_head_icon(uid)).as_uri(),
+            "background": user_info.phone_background_image_url,
         }
 
         return await self.template_service.render(
