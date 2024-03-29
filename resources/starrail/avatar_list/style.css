@@ -157,5 +157,9 @@
 }
 
 .talent-level-max {
+    background-image: linear-gradient(90deg, rgba(251, 129, 124, 0.8) 0%, rgba(255, 93, 85, 0.65) 50%, rgba(251, 129, 124, 0.8) 100%) !important;
+}
+
+.talent-level-max-img {
     background-image: linear-gradient(90deg, rgba(251, 129, 124, 0.8) 0%, rgba(255, 93, 85, 0.65) 50%, rgba(251, 129, 124, 0.8) 100%), url("../../img/241.png") !important;
 }

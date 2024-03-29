@@ -3,7 +3,7 @@ body {
 }
 
 .header {
-  background-image: url(../../bot/help/background/header.png);
+  /*background-image: url(../../bot/help/background/header.png);*/
   box-shadow: 0 0 8px #72a2ae79;
 }
 

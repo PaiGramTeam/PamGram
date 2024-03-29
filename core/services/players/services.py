@@ -136,3 +136,6 @@ class PlayerInfoService(BaseService):
 
     async def get_all_by_user_id(self, user_id: int):
         return await self._players_info_repository.get_all_by_user_id(user_id)
+
+    async def get_by_player_id(self, player_id: int):
+        return await self._players_info_repository.get_by_player_id(player_id)
