@@ -11,6 +11,7 @@ from modules.wiki.base import WikiModel
 from modules.wiki.models.avatar_config import AvatarIcon
 from modules.wiki.models.head_icon import HeadIcon
 from modules.wiki.models.light_cone_config import LightConeIcon
+from modules.wiki.models.phone_theme import PhoneTheme
 from utils.const import PROJECT_ROOT
 from utils.log import logger
 from utils.typedefs import StrOrURL, StrOrInt
@@ -23,6 +24,7 @@ DATA_MAP = {
     "avatar_eidolon": WikiModel.BASE_URL + "avatar_eidolon_icons.json",
     "avatar_skill": WikiModel.BASE_URL + "skill/info.json",
     "head_icon": WikiModel.BASE_URL + "head_icons.json",
+    "phone_theme": WikiModel.BASE_URL + "phone_themes.json",
 }
 
 
@@ -345,6 +347,59 @@ class _HeadIconAssets(_AssetsService):
         raise AssetsCouldNotFound("头像素材图标不存在", target)
 
 
+class _PhoneThemeAssets(_AssetsService):
+    path: Path
+    data: List[PhoneTheme]
+    id_map: Dict[int, PhoneTheme]
+
+    def __init__(self, client: Optional[AsyncClient] = None) -> None:
+        super().__init__(client)
+        self.path = ASSETS_PATH.joinpath("phone_theme")
+        self.path.mkdir(exist_ok=True, parents=True)
+
+    async def initialize(self):
+        logger.info("正在初始化手机壁纸素材图标")
+        html = await self.client.get(DATA_MAP["phone_theme"])
+        self.data = [PhoneTheme(**data) for data in html.json()]
+        self.id_map = {theme.id: theme for theme in self.data}
+        tasks = []
+        for theme in self.data:
+            path = self.path / f"{theme.id}.png"
+            if not path.exists():
+                if theme.urls[0]:
+                    tasks.append(self._download(theme.urls[0], path))
+                elif theme.urls[1]:
+                    tasks.append(self._download(theme.urls[1], path))
+            if len(tasks) >= 100:
+                await asyncio.gather(*tasks)
+                tasks = []
+        if tasks:
+            await asyncio.gather(*tasks)
+        logger.info("手机壁纸素材图标初始化完成")
+
+    def get_path(self, theme: PhoneTheme, ext: str) -> Path:
+        path = self.path / f"{theme.id}.{ext}"
+        return path
+
+    def get_by_id(self, id_: int) -> Optional[PhoneTheme]:
+        return self.id_map.get(id_, None)
+
+    def get_target(self, target: StrOrInt, second_target: StrOrInt = None) -> Optional[PhoneTheme]:
+        data = self.get_by_id(target)
+        if data:
+            return data
+        if second_target:
+            return self.get_target(second_target)
+        raise AssetsCouldNotFound("手机壁纸素材图标不存在", target)
+
+    def icon(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
+        theme = self.get_target(target, second_target)
+        png_path = self.get_path(theme, "png")
+        if png_path.exists():
+            return png_path
+        raise AssetsCouldNotFound("手机壁纸素材图标不存在", target)
+
+
 class AssetsService(BaseService.Dependence):
     """asset服务
 
@@ -361,6 +416,9 @@ class AssetsService(BaseService.Dependence):
     head_icon: _HeadIconAssets
     """头像"""
 
+    phone_theme: _PhoneThemeAssets
+    """手机壁纸"""
+
     light_cone: _LightConeAssets
     """光锥"""
 
@@ -368,9 +426,11 @@ class AssetsService(BaseService.Dependence):
         self.client = AsyncClient(timeout=60.0)
         self.avatar = _AvatarAssets(self.client)
         self.head_icon = _HeadIconAssets(self.client)
+        self.phone_theme = _PhoneThemeAssets(self.client)
         self.light_cone = _LightConeAssets(self.client)
 
     async def initialize(self):  # pylint: disable=W0221
         await self.avatar.initialize()
         await self.head_icon.initialize()
+        await self.phone_theme.initialize()
         await self.light_cone.initialize()
