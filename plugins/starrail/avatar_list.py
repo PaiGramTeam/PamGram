@@ -12,6 +12,7 @@ from core.services.template.models import FileType
 from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
 from plugins.tools.genshin import GenshinHelper, CharacterDetails
+from plugins.tools.head_icon import HeadIconService
 from utils.log import logger
 from utils.uid import mask_number
 
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
     from telegram.ext import ContextTypes
     from telegram import Update
 
-MAX_AVATAR_COUNT = 30
+MAX_AVATAR_COUNT = 40
 
 
 class EquipmentData(BaseModel):
@@ -62,6 +63,7 @@ class AvatarListPlugin(Plugin):
         wiki_service: WikiService = None,
         helper: GenshinHelper = None,
         character_details: CharacterDetails = None,
+        head_icon: HeadIconService = None,
     ) -> None:
         self.cookies_service = cookies_service
         self.assets_service = assets_service
@@ -69,6 +71,7 @@ class AvatarListPlugin(Plugin):
         self.wiki_service = wiki_service
         self.helper = helper
         self.character_details = character_details
+        self.head_icon = head_icon
 
     async def get_avatar_data(
         self, character_id: int, client: "StarRailClient"
@@ -166,6 +169,7 @@ class AvatarListPlugin(Plugin):
             "nickname": nickname,  # 玩家昵称
             "avatar_datas": avatar_datas,  # 角色数据
             "has_more": has_more,  # 是否显示了全部角色
+            "avatar": (await self.head_icon.get_head_icon(client.player_id)).as_uri(),
         }
 
         as_document = all_avatars and len(characters) > MAX_AVATAR_COUNT
