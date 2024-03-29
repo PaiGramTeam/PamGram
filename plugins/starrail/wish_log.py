@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Optional, TYPE_CHECKING, List, Union, Tuple
+from typing import Optional, TYPE_CHECKING, List, Union, Tuple, Dict
 
 from simnet.models.starrail.wish import StarRailBannerType
 from telegram import Document, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
@@ -29,6 +29,7 @@ from modules.gacha_log.migrate import GachaLogMigrate
 from modules.gacha_log.models import GachaLogInfo
 from plugins.tools.genshin import PlayerNotFoundError
 from plugins.tools.head_icon import HeadIconService
+from plugins.tools.phone_theme import PhoneThemeService
 from utils.log import logger
 
 try:
@@ -57,12 +58,14 @@ class WishLogPlugin(Plugin.Conversation):
         assets: AssetsService,
         cookie_service: CookiesService,
         head_icon: HeadIconService,
+        phone_theme: PhoneThemeService,
     ):
         self.template_service = template_service
         self.players_service = players_service
         self.assets_service = assets
         self.cookie_service = cookie_service
         self.head_icon = head_icon
+        self.phone_theme = phone_theme
         self.gacha_log = GachaLog()
         self.wish_photo = None
 
@@ -292,7 +295,7 @@ class WishLogPlugin(Plugin.Conversation):
         data = await self.gacha_log.get_analysis(user_id, player_id, pool_type, self.assets_service)
         if isinstance(data, str):
             return data
-        data["avatar"] = (await self.head_icon.get_head_icon(player_id)).as_uri()
+        await self.add_theme_data(data, player_id)
         png_data = await self.template_service.render(
             "starrail/gacha_log/gacha_log.html",
             data,
@@ -473,7 +476,7 @@ class WishLogPlugin(Plugin.Conversation):
             await callback_query.answer(png_data, show_alert=True)
             self.add_delete_message_job(message, delay=1)
         else:
-            png_data["avatar"] = (await self.head_icon.get_head_icon(uid)).as_uri()
+            await self.add_theme_data(png_data, uid)
             await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
             document = False
             if png_data["hasMore"] and not group:
@@ -493,6 +496,11 @@ class WishLogPlugin(Plugin.Conversation):
                 self.add_delete_message_job(message, delay=1)
             else:
                 await png.edit_media(message)
+
+    async def add_theme_data(self, data: Dict, player_id: int):
+        data["avatar"] = (await self.head_icon.get_head_icon(player_id)).as_uri()
+        data["background"] = (await self.phone_theme.get_phone_theme(player_id)).as_uri()
+        return data
 
     @staticmethod
     async def get_migrate_data(

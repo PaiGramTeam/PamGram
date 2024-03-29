@@ -6,12 +6,15 @@
 }
 
 .header {
-  background: #e0dad3 url(./img/starrail.png) no-repeat right;
+  /*background: #e0dad3 url(./img/starrail.png) no-repeat right;*/
   box-shadow: 0 0 8px #72a2ae79;
+  background-size: cover;
+  background-position: top;
 }
 
 .frame {
   border-color: #cdbea8;
+  color: white;
 }
 
 body {
@@ -225,7 +228,7 @@ body {
 }
 
 .label {
-  color: #fff;
+  color: #fff!important;
   border-radius: 10px;
   font-size: 12px;
   padding: 2px 7px;

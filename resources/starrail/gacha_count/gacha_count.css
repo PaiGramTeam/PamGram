@@ -20,12 +20,15 @@
 }
 
 .header {
-  background: #e0dad3 url(../gacha_log/img/starrail.png) no-repeat right;
+  /*background: #e0dad3 url(../gacha_log/img/starrail.png) no-repeat right;*/
   box-shadow: 0 0 8px #72a2ae79;
+  background-size: cover;
+  background-position: top;
 }
 
 .frame {
   border-color: #cdbea8;
+  color: white;
 }
 
 body {

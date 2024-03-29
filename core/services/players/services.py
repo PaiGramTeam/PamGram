@@ -119,6 +119,15 @@ class PlayerInfoService(BaseService):
             return True
         return False
 
+    async def set_name_card(self, player_id: int, phone_theme_id: int):
+        player_info = await self._players_info_repository.get_by_player_id(player_id)
+        if player_info is None:
+            return False
+        player_info.name_card = phone_theme_id
+        player_info.last_save_time = datetime.now()
+        await self._players_info_repository.update(player_info)
+        return True
+
     async def get_form_sql(self, player: Player):
         return await self._players_info_repository.get(player.user_id, player.player_id)
 
