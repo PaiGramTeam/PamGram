@@ -13,6 +13,7 @@ from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
 from plugins.tools.genshin import GenshinHelper, CharacterDetails
 from plugins.tools.head_icon import HeadIconService
+from plugins.tools.phone_theme import PhoneThemeService
 from utils.log import logger
 from utils.uid import mask_number
 
@@ -64,6 +65,7 @@ class AvatarListPlugin(Plugin):
         helper: GenshinHelper = None,
         character_details: CharacterDetails = None,
         head_icon: HeadIconService = None,
+        phone_theme: PhoneThemeService = None,
     ) -> None:
         self.cookies_service = cookies_service
         self.assets_service = assets_service
@@ -72,6 +74,7 @@ class AvatarListPlugin(Plugin):
         self.helper = helper
         self.character_details = character_details
         self.head_icon = head_icon
+        self.phone_theme = phone_theme
 
     async def get_avatar_data(
         self, character_id: int, client: "StarRailClient"
@@ -170,6 +173,7 @@ class AvatarListPlugin(Plugin):
             "avatar_datas": avatar_datas,  # 角色数据
             "has_more": has_more,  # 是否显示了全部角色
             "avatar": (await self.head_icon.get_head_icon(client.player_id)).as_uri(),
+            "background": (await self.phone_theme.get_phone_theme(client.player_id)).as_uri(),
         }
 
         as_document = all_avatars and len(characters) > MAX_AVATAR_COUNT

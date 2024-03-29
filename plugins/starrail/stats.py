@@ -115,7 +115,7 @@ class PlayerStatsPlugins(Plugin):
             ],
             "style": "xianzhou",  # nosec
             "avatar": (await self.head_icon.get_head_icon(uid)).as_uri(),
-            "background": user_info.phone_background_image_url,
+            "background": (await self.phone_theme.get_phone_theme(uid)).as_uri(),
         }
 
         return await self.template_service.render(
