@@ -10,14 +10,10 @@ RUN echo "deb http://ftp.us.debian.org/debian bookworm main non-free" >> /etc/ap
     && apt install git wget curl ffmpeg -y                \
     && git clone -b sr --recursive https://github.com/PaiGramTeam/PamGram.git /app \
     # install dependencies \
-    && pip install virtualenv poetry  \
+    && pip install virtualenv  \
     && python3 -m virtualenv venv/                 \
     && . venv/bin/activate                         \
-    && poetry config virtualenvs.create false      \
-    && poetry source add --default mirrors https://pypi.tuna.tsinghua.edu.cn/simple/ \
-    && poetry source add --secondary mirrors https://mirrors.aliyun.com/pypi/simple  \
-    && poetry install                              \
-    && poetry install --extras all                 \
+    && pip install -r requirements.txt             \
     && playwright install chromium                 \
     && playwright install-deps chromium            \
     ## set timezone
