@@ -216,7 +216,9 @@ class ChallengePlugin(Plugin):
             await self.save_abyss_data(uid, abyss_data)
         return abyss_data
 
-    async def get_rendered_pic(self, abyss_data: "StarRailChallenge", uid: int, floor: int, total: bool) -> Union[
+    async def get_rendered_pic(  # skipcq: PY-R1000 #
+        self, abyss_data: "StarRailChallenge", uid: int, floor: int, total: bool
+    ) -> Union[
         Tuple[
             Union[BaseException, Any],
             Union[BaseException, Any],
