@@ -1,22 +1,28 @@
 """混沌回忆数据查询"""
 
 import asyncio
+import math
 import re
 from functools import lru_cache
 from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 
 from arkowrapper import ArkoWrapper
 from pytz import timezone
-from telegram import Message, Update
+from telegram import Message, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction, ParseMode
-from telegram.ext import CallbackContext, filters
+from telegram.ext import CallbackContext, filters, ContextTypes
 
 from core.dependence.assets import AssetsService
 from core.plugin import Plugin, handler
 from core.services.cookies.error import TooManyRequestPublicCookies
+from core.services.history_data.models import HistoryDataAbyss
+from core.services.history_data.services import HistoryDataAbyssServices
 from core.services.template.models import RenderGroupResult, RenderResult
 from core.services.template.services import TemplateService
+from gram_core.config import config
+from gram_core.dependence.redisdb import RedisDB
 from plugins.tools.genshin import GenshinHelper
+from utils.enkanetwork import RedisCache
 from utils.log import logger
 from utils.uid import mask_number
 
@@ -68,10 +74,14 @@ class ChallengePlugin(Plugin):
         template: TemplateService,
         helper: GenshinHelper,
         assets_service: AssetsService,
+        history_data_abyss: HistoryDataAbyssServices,
+        redis: RedisDB,
     ):
         self.template_service = template
         self.helper = helper
         self.assets_service = assets_service
+        self.history_data_abyss = history_data_abyss
+        self.cache = RedisCache(redis.client, key="plugin:challenge:history")
 
     async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
@@ -149,7 +159,8 @@ class ChallengePlugin(Plugin):
                 if total:
                     reply_text = await message.reply_text("彦卿需要时间整理混沌回忆数据，还请耐心等待哦~")
                 await message.reply_chat_action(ChatAction.TYPING)
-                images = await self.get_rendered_pic(client, uid, floor, total, previous)
+                abyss_data = await self.get_rendered_pic_data(client, uid, previous)
+                images = await self.get_rendered_pic(abyss_data, uid, floor, total)
         except TooManyRequestPublicCookies:
             reply_message = await message.reply_text("查询次数太多，请您稍后重试")
             if filters.ChatType.GROUPS.filter(message):
@@ -199,9 +210,13 @@ class ChallengePlugin(Plugin):
         }
         return render_data
 
-    async def get_rendered_pic(
-        self, client: "StarRailClient", uid: int, floor: int, total: bool, previous: bool
-    ) -> Union[
+    async def get_rendered_pic_data(self, client: "StarRailClient", uid: int, previous: bool) -> "StarRailChallenge":
+        abyss_data = await client.get_starrail_challenge(uid, previous=previous, lang="zh-cn")
+        if abyss_data.has_data:
+            await self.save_abyss_data(uid, abyss_data)
+        return abyss_data
+
+    async def get_rendered_pic(self, abyss_data: "StarRailChallenge", uid: int, floor: int, total: bool) -> Union[
         Tuple[
             Union[BaseException, Any],
             Union[BaseException, Any],
@@ -216,17 +231,15 @@ class ChallengePlugin(Plugin):
         获取渲染后的图片
 
         Args:
-            client (Client): 获取 genshin 数据的 client
+            abyss_data (StarRailChallenge): 混沌回忆数据
             uid (int): 需要查询的 uid
             floor (int): 层数
             total (bool): 是否为总览
-            previous (bool): 是否为上期
 
         Returns:
             bytes格式的图片
         """
 
-        abyss_data = await client.get_starrail_challenge(uid, previous=previous, lang="zh-cn")
         if not abyss_data.has_data:
             raise AbyssUnlocked()
         start_time = abyss_data.begin_time.datetime.astimezone(TZ).strftime("%m月%d日 %H:%M")
@@ -309,3 +322,252 @@ class ChallengePlugin(Plugin):
                 "starrail/abyss/floor.html", render_data, viewport={"width": 690, "height": 500}
             )
         ]
+
+    async def save_abyss_data(self, uid: int, abyss_data: "StarRailChallenge"):
+        model = self.history_data_abyss.create(uid, abyss_data)
+        old_data = await self.history_data_abyss.get_by_user_id_data_id(uid, model.data_id)
+        exists = self.history_data_abyss.exists_data(model, old_data)
+        if not exists:
+            await self.history_data_abyss.add(model)
+
+    async def get_abyss_data(self, uid: int):
+        return await self.history_data_abyss.get_by_user_id(uid)
+
+    @staticmethod
+    def get_season_data_name(data: "HistoryDataAbyss"):
+        start_time = data.abyss_data.begin_time.datetime.astimezone(TZ)
+        time = start_time.strftime("%Y.%m.%d")
+        honor = ""
+        if data.abyss_data.total_stars == 36:
+            if data.abyss_data.total_battles == 12:
+                honor = "👑"
+            last_battles = data.abyss_data.floors[-1]
+            num_of_characters = max(
+                len(last_battles.node_1.avatars),
+                len(last_battles.node_2.avatars),
+            )
+            if num_of_characters == 2:
+                honor = "双通"
+            elif num_of_characters == 1:
+                honor = "单通"
+
+        return f"{time} {data.abyss_data.total_stars} ★ {honor}"
+
+    async def get_session_button_data(self, user_id: int, uid: int, force: bool = False):
+        redis = await self.cache.get(str(uid))
+        if redis and not force:
+            return redis["buttons"]
+        data = await self.get_abyss_data(uid)
+        data.sort(key=lambda x: x.id, reverse=True)
+        abyss_data = [HistoryDataAbyss.from_data(i) for i in data]
+        buttons = [
+            {
+                "name": self.get_season_data_name(abyss_data[idx]),
+                "value": f"get_abyss_history|{user_id}|{uid}|{value.id}",
+            }
+            for idx, value in enumerate(data)
+        ]
+        await self.cache.set(str(uid), {"buttons": buttons})
+        return buttons
+
+    async def gen_season_button(
+        self,
+        user_id: int,
+        uid: int,
+        page: int = 1,
+    ) -> List[List[InlineKeyboardButton]]:
+        """生成按钮"""
+        data = await self.get_session_button_data(user_id, uid)
+        if not data:
+            return []
+        buttons = [
+            InlineKeyboardButton(
+                value["name"],
+                callback_data=value["value"],
+            )
+            for value in data
+        ]
+        all_buttons = [buttons[i : i + 3] for i in range(0, len(buttons), 3)]
+        send_buttons = all_buttons[(page - 1) * 5 : page * 5]
+        last_page = page - 1 if page > 1 else 0
+        all_page = math.ceil(len(all_buttons) / 5)
+        next_page = page + 1 if page < all_page and all_page > 1 else 0
+        last_button = []
+        if last_page:
+            last_button.append(
+                InlineKeyboardButton(
+                    "<< 上一页",
+                    callback_data=f"get_abyss_history|{user_id}|{uid}|p_{last_page}",
+                )
+            )
+        if last_page or next_page:
+            last_button.append(
+                InlineKeyboardButton(
+                    f"{page}/{all_page}",
+                    callback_data=f"get_abyss_history|{user_id}|{uid}|empty_data",
+                )
+            )
+        if next_page:
+            last_button.append(
+                InlineKeyboardButton(
+                    "下一页 >>",
+                    callback_data=f"get_abyss_history|{user_id}|{uid}|p_{next_page}",
+                )
+            )
+        if last_button:
+            send_buttons.append(last_button)
+        return send_buttons
+
+    @staticmethod
+    async def gen_floor_button(
+        data_id: int,
+        abyss_data: "HistoryDataAbyss",
+        user_id: int,
+        uid: int,
+    ) -> List[List[InlineKeyboardButton]]:
+        max_floors = len(abyss_data.abyss_data.floors)
+        bypass_floors = len([i for i in abyss_data.abyss_data.floors if i.is_fast])
+        buttons = [
+            InlineKeyboardButton(
+                f"第 {i} 层",
+                callback_data=f"get_abyss_history|{user_id}|{uid}|{data_id}|{i}",
+            )
+            for i in range(bypass_floors + 1, max_floors + 1)
+        ]
+        send_buttons = [buttons[i : i + 4] for i in range(0, len(buttons), 4)]
+        all_buttons = [
+            InlineKeyboardButton(
+                "<< 返回",
+                callback_data=f"get_abyss_history|{user_id}|{uid}|p_1",
+            ),
+            InlineKeyboardButton(
+                "总览",
+                callback_data=f"get_abyss_history|{user_id}|{uid}|{data_id}|total",
+            ),
+            InlineKeyboardButton(
+                "所有",
+                callback_data=f"get_abyss_history|{user_id}|{uid}|{data_id}|all",
+            ),
+        ]
+        send_buttons.append(all_buttons)
+        return send_buttons
+
+    @handler.command("challenge_history", block=False)
+    @handler.message(filters.Regex(r"^混沌回忆历史数据"), block=False)
+    async def abyss_history_command_start(self, update: Update, context: CallbackContext) -> None:
+        user_id = await self.get_real_user_id(update)
+        message = update.effective_message
+        uid: int = await self.get_uid(user_id, context.args, message.reply_to_message)
+        self.log_user(update, logger.info, "查询混沌回忆历史数据 uid[%s]", uid)
+
+        async with self.helper.genshin_or_public(user_id, uid=uid) as _:
+            await self.get_session_button_data(user_id, uid, force=True)
+            buttons = await self.gen_season_button(user_id, uid)
+            if not buttons:
+                await message.reply_text("还没有混沌回忆历史数据哦~")
+                return
+        await message.reply_text("请选择要查询的混沌回忆历史数据", reply_markup=InlineKeyboardMarkup(buttons))
+
+    async def get_abyss_history_page(self, update: "Update", user_id: int, uid: int, result: str):
+        """翻页处理"""
+        callback_query = update.callback_query
+
+        self.log_user(update, logger.info, "切换混沌回忆历史数据页 page[%s]", result)
+        page = int(result.split("_")[1])
+        async with self.helper.genshin_or_public(user_id) as _:
+            buttons = await self.gen_season_button(user_id, uid, page)
+            if not buttons:
+                await callback_query.answer("还没有混沌回忆历史数据哦~", show_alert=True)
+                await callback_query.edit_message_text("还没有混沌回忆历史数据哦~")
+                return
+        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+        await callback_query.answer(f"已切换到第 {page} 页", show_alert=False)
+
+    async def get_abyss_history_season(self, update: "Update", data_id: int):
+        """进入选择层数"""
+        callback_query = update.callback_query
+        user = callback_query.from_user
+
+        self.log_user(update, logger.info, "切换混沌回忆历史数据到层数页 data_id[%s]", data_id)
+        data = await self.history_data_abyss.get_by_id(data_id)
+        if not data:
+            await callback_query.answer("数据不存在，请尝试重新发送命令~", show_alert=True)
+            await callback_query.edit_message_text("数据不存在，请尝试重新发送命令~")
+            return
+        abyss_data = HistoryDataAbyss.from_data(data)
+        buttons = await self.gen_floor_button(data_id, abyss_data, user.id, data.user_id)
+        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+        await callback_query.answer("已切换到层数页", show_alert=False)
+
+    async def get_abyss_history_floor(self, update: "Update", data_id: int, detail: str):
+        """渲染层数数据"""
+        callback_query = update.callback_query
+        message = callback_query.message
+
+        floor = 0
+        total = False
+        if detail == "total":
+            floor = 0
+        elif detail == "all":
+            total = True
+        else:
+            floor = int(detail)
+        data = await self.history_data_abyss.get_by_id(data_id)
+        if not data:
+            await callback_query.answer("数据不存在，请尝试重新发送命令", show_alert=True)
+            await callback_query.edit_message_text("数据不存在，请尝试重新发送命令~")
+            return
+        abyss_data = HistoryDataAbyss.from_data(data)
+
+        images = await self.get_rendered_pic(abyss_data.abyss_data, data.user_id, floor, total)
+        if images is None:
+            await callback_query.answer(f"还没有第 {floor} 层的挑战数据", show_alert=True)
+            return
+        await callback_query.answer("正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
+
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+
+        for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
+            await RenderGroupResult(results=group).reply_media_group(
+                message, allow_sending_without_reply=True, write_timeout=60
+            )
+        self.log_user(update, logger.info, "[bold]混沌回忆挑战数据[/bold]: 成功发送图片", extra={"markup": True})
+        self.add_delete_message_job(message, delay=1)
+
+    @handler.callback_query(pattern=r"^get_abyss_history\|", block=False)
+    async def get_abyss_history(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
+        callback_query = update.callback_query
+        user = callback_query.from_user
+
+        async def get_abyss_history_callback(
+            callback_query_data: str,
+        ) -> Tuple[str, str, int, int]:
+            _data = callback_query_data.split("|")
+            _user_id = int(_data[1])
+            _uid = int(_data[2])
+            _result = _data[3]
+            _detail = _data[4] if len(_data) > 4 else None
+            logger.debug(
+                "callback_query_data函数返回 detail[%s] result[%s] user_id[%s] uid[%s]",
+                _detail,
+                _result,
+                _user_id,
+                _uid,
+            )
+            return _detail, _result, _user_id, _uid
+
+        detail, result, user_id, uid = await get_abyss_history_callback(callback_query.data)
+        if user.id != user_id:
+            await callback_query.answer(text="这不是你的按钮！\n" + config.notice.user_mismatch, show_alert=True)
+            return
+        if result == "empty_data":
+            await callback_query.answer(text="此按钮不可用", show_alert=True)
+            return
+        if result.startswith("p_"):
+            await self.get_abyss_history_page(update, user_id, uid, result)
+            return
+        data_id = int(result)
+        if detail:
+            await self.get_abyss_history_floor(update, data_id, detail)
+            return
+        await self.get_abyss_history_season(update, data_id)
