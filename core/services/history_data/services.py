@@ -3,8 +3,14 @@ from typing import List
 
 from pytz import timezone
 from simnet.models.starrail.chronicle.challenge import StarRailChallenge
+from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory, StarRailChallengeStoryGroup
 
-from core.services.history_data.models import HistoryData, HistoryDataTypeEnum, HistoryDataAbyss
+from core.services.history_data.models import (
+    HistoryData,
+    HistoryDataTypeEnum,
+    HistoryDataAbyss,
+    HistoryDataChallengeStory,
+)
 from gram_core.base_service import BaseService
 from gram_core.services.history_data.services import HistoryDataBaseServices
 
@@ -17,6 +23,7 @@ except ImportError:
 __all__ = (
     "HistoryDataBaseServices",
     "HistoryDataAbyssServices",
+    "HistoryDataChallengeStoryServices",
 )
 
 TZ = timezone("Asia/Shanghai")
@@ -45,4 +52,26 @@ class HistoryDataAbyssServices(BaseService, HistoryDataBaseServices):
             time_created=datetime.datetime.now(),
             type=HistoryDataAbyssServices.DATA_TYPE,
             data=jsonlib.loads(json_data),
+        )
+
+
+class HistoryDataChallengeStoryServices(BaseService, HistoryDataBaseServices):
+    DATA_TYPE = HistoryDataTypeEnum.CHALLENGE_STORY.value
+
+    @staticmethod
+    def exists_data(data: HistoryData, old_data: List[HistoryData]) -> bool:
+        return any(d.data == data.data for d in old_data)
+
+    @staticmethod
+    def create(user_id: int, story_data: StarRailChallengeStory, group: StarRailChallengeStoryGroup):
+        data = HistoryDataChallengeStory(story_data=story_data, group=group)
+        json_data = data.json(by_alias=True, encoder=json_encoder)
+        dict_data = jsonlib.loads(json_data)
+        dict_data["story_data"]["groups"] = []
+        return HistoryData(
+            user_id=user_id,
+            data_id=group.season,
+            time_created=datetime.datetime.now(),
+            type=HistoryDataChallengeStoryServices.DATA_TYPE,
+            data=dict_data,
         )
