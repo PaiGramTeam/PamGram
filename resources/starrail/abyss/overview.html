@@ -18,7 +18,12 @@
 </head>
 <body>
 <div class="container">
-    <div class="overview">
+    {% if title == '混沌回忆' %}
+    {% set overview_class = 'overview-abyss' %}
+    {% else %}
+    {% set overview_class = 'overview-abyss-story' %}
+    {% endif %}
+    <div class="overview {{ overview_class }}">
         <div class="title">{{ title }}挑战回顾</div>
         <div class="summarize">
             <div>

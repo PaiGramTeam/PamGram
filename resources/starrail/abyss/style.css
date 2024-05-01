@@ -51,10 +51,17 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    background-image: linear-gradient(to top, rgb(0 0 0 / 10%), rgb(0 0 0 / 10%)), url("./background/lookback-bg.png");
     background-attachment: local;
     border-radius: 15px;
     overflow: hidden;
+}
+
+.overview-abyss {
+    background-image: linear-gradient(to top, rgb(0 0 0 / 10%), rgb(0 0 0 / 10%)), url("./background/abyss-bg-grad.png");
+}
+
+.overview-abyss-story {
+    background-image: linear-gradient(to top, rgb(0 0 0 / 10%), rgb(0 0 0 / 10%)), url("./background/abyss-story-bg-grad.png");
 }
 
 .summarize {
@@ -248,7 +255,16 @@ body {
     outline-offset: -7px;
     background-position: top center;
     background-repeat: no-repeat;
+}
+
+.floor-abyss {
+    background-image: url('./background/abyss-bg-grad.png');
+}
+
+.floor-abyss-story {
+    background-image: url('./background/abyss-story-bg-grad.png');
     background-size: contain;
+    background-color: #1c232c;
 }
 
 .head {
@@ -274,7 +290,7 @@ body {
     color: black;
     width: 100px;
     height: 100px;
-    background-image: url("./background/abyss.png");
+    background-image: url("./background/abyss.webp");
     background-size: contain;
     filter: drop-shadow(0 0 5px rgb(0 0 0/80%)) grayscale(10%);
     position: relative;
