@@ -42,6 +42,9 @@
           <img class="icon" src="./items/后备开拓力.webp" alt="" />
           <div class="info">
             <div class="name">后备开拓力</div>
+            {% if is_reserve_stamina_full %}
+            <div class="time">后备开拓力已满</div>
+            {% endif %}
           </div>
         </div>
         <div class="right">
@@ -74,10 +77,19 @@
           <img class="icon" src="./items/里程.webp" alt="" />
           <div class="info">
             <div class="name">每日实训</div>
+            <div class="time">
+            {% if current_train_score == max_train_score %}
+            每日实训已完成
+            {% else %}
+            每日实训未完成
+            {% endif %}
+            </div>
           </div>
         </div>
         <div class="right">
-          <span>{{ current_train_score }}/{{ max_train_score }}</span>
+          <span
+           class="{% if current_train_score != max_train_score %}red{% endif %}"
+          >{{ current_train_score }}/{{ max_train_score }}</span>
         </div>
       </div>
       <div class="item">
@@ -86,10 +98,19 @@
           <img class="icon" src="./items/银河大乐透.webp" alt="" />
           <div class="info">
             <div class="name">模拟宇宙</div>
+            <div class="time">
+              {% if current_lottery_score == max_lottery_score %}
+              模拟宇宙已完成
+              {% else %}
+              模拟宇宙未完成
+              {% endif %}
+            </div>
           </div>
         </div>
         <div class="right">
-          <span>{{ current_rogue_score }}/{{ max_rogue_score }}</span>
+          <span
+            class="{% if current_lottery_score != max_lottery_score %}red{% endif %}"
+          >{{ current_rogue_score }}/{{ max_rogue_score }}</span>
         </div>
       </div>
       <div class="item">
@@ -105,7 +126,9 @@
             </div>
         </div>
         <div class="right">
-            <span>{{ remaining_weekly_discounts }}/{{ max_weekly_discounts }}</span>
+            <span
+              class="{% if remaining_weekly_discounts > 0 %}red{% endif %}"
+            >{{ remaining_weekly_discounts }}/{{ max_weekly_discounts }}</span>
         </div>
       </div>
     </div>
