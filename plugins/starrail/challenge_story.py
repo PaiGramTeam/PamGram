@@ -356,7 +356,8 @@ class ChallengeStoryPlugin(Plugin):
         time = start_time.strftime("%Y.%m.%d")
         honor = ""
         if data.story_data.total_stars == 12:
-            if data.story_data.total_battles == 4:
+            fast_count = len([i for i in data.story_data.floors if i.is_fast])
+            if data.story_data.total_battles == (4 - fast_count):
                 honor = "👑"
             last_battles = data.story_data.floors[-1]
             num_of_characters = max(
@@ -368,7 +369,7 @@ class ChallengeStoryPlugin(Plugin):
             elif num_of_characters == 1:
                 honor = "单通"
 
-        return f"{time} {data.story_data.total_stars} ★ {honor}"
+        return f"{time} {data.story_data.total_stars} ★ {honor}".strip()
 
     async def get_session_button_data(self, user_id: int, uid: int, force: bool = False):
         redis = await self.cache.get(str(uid))
@@ -445,10 +446,11 @@ class ChallengeStoryPlugin(Plugin):
         max_floors = len(abyss_data.story_data.floors)
         buttons = [
             InlineKeyboardButton(
-                f"第 {i} 层",
-                callback_data=f"get_challenge_story_history|{user_id}|{uid}|{data_id}|{i}",
+                f"第 {i + 1} 层",
+                callback_data=f"get_challenge_story_history|{user_id}|{uid}|{data_id}|{i + 1}",
             )
-            for i in range(1, max_floors + 1)
+            for i in range(0, max_floors)
+            if not abyss_data.story_data.floors[max_floors - 1 - i].is_fast
         ]
         send_buttons = [buttons[i : i + 4] for i in range(0, len(buttons), 4)]
         all_buttons = [
