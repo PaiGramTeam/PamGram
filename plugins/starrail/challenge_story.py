@@ -175,6 +175,11 @@ class ChallengeStoryPlugin(Plugin):
         except IndexError:  # 若虚构叙事为挑战此层
             await reply_message_func("还没有挑战本层呢，咕咕咕~")
             return
+        except ValueError as e:
+            if uid:
+                await reply_message_func("UID 输入错误，请重新输入")
+                return
+            raise e
         if images is None:
             await reply_message_func(f"还没有第 {floor} 层的挑战数据")
             return
@@ -352,14 +357,17 @@ class ChallengeStoryPlugin(Plugin):
 
     @staticmethod
     def get_season_data_name(data: "HistoryDataChallengeStory"):
-        start_time = data.group.begin_time.datetime.astimezone(TZ)
+        last_battles = data.story_data.floors[0]
+        start_time = last_battles.node_1.challenge_time.datetime.astimezone(TZ)
         time = start_time.strftime("%Y.%m.%d")
+        name = ""
+        if "其" in last_battles.name:
+            name = last_battles.name.split("其")[0]
         honor = ""
         if data.story_data.total_stars == 12:
             fast_count = len([i for i in data.story_data.floors if i.is_fast])
             if data.story_data.total_battles == (4 - fast_count):
                 honor = "👑"
-            last_battles = data.story_data.floors[-1]
             num_of_characters = max(
                 len(last_battles.node_1.avatars),
                 len(last_battles.node_2.avatars),
@@ -369,7 +377,7 @@ class ChallengeStoryPlugin(Plugin):
             elif num_of_characters == 1:
                 honor = "单通"
 
-        return f"{time} {data.story_data.total_stars} ★ {honor}".strip()
+        return f"{name} {time} {data.story_data.total_stars} ★ {honor}".strip()
 
     async def get_session_button_data(self, user_id: int, uid: int, force: bool = False):
         redis = await self.cache.get(str(uid))
@@ -405,10 +413,10 @@ class ChallengeStoryPlugin(Plugin):
             )
             for value in data
         ]
-        all_buttons = [buttons[i : i + 3] for i in range(0, len(buttons), 3)]
-        send_buttons = all_buttons[(page - 1) * 5 : page * 5]
+        all_buttons = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+        send_buttons = all_buttons[(page - 1) * 7 : page * 7]
         last_page = page - 1 if page > 1 else 0
-        all_page = math.ceil(len(all_buttons) / 5)
+        all_page = math.ceil(len(all_buttons) / 7)
         next_page = page + 1 if page < all_page and all_page > 1 else 0
         last_button = []
         if last_page:
