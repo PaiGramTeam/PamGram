@@ -47,6 +47,8 @@ class _AssetsService:
 
     async def _download(self, url: StrOrURL, path: Path, retry: int = 5) -> Optional[Path]:
         """从 url 下载图标至 path"""
+        if not url:
+            return None
         logger.debug("正在从 %s 下载图标至 %s", url, path)
         headers = None
         for time in range(retry):
@@ -297,7 +299,7 @@ class _HeadIconAssets(_AssetsService):
             png_path = self.path / f"{icon.id}.png"
             if not webp_path.exists() and icon.webp:
                 tasks.append(self._download(icon.webp, webp_path))
-            if not png_path.exists():
+            if not png_path.exists() and icon.png:
                 tasks.append(self._download(icon.png, png_path))
             if len(tasks) >= 100:
                 await asyncio.gather(*tasks)
