@@ -54,6 +54,14 @@
                 </div>
                 {% endfor %}
                 {% endif %}
+                {% if ledger %}
+                {% for label, key in ledger_labels %}
+                <div class="">
+                    <div class="text-xl box-stats">{{ ledger[key] }}</div>
+                    <div class="text-neutral-400 box-stats-label">{{ label }}</div>
+                </div>
+                {% endfor %}
+                {% endif %}
             </div>
 
             <div class="about text-center leading-8 text-xs opacity-50">

@@ -93,6 +93,10 @@ class PlayerStatsPlugins(Plugin):
             rogue = await client.get_starrail_rogue(uid)
         except SimnetBadRequest:
             rogue = None
+        try:
+            ledger = await client.get_starrail_ledger_month_info(uid)
+        except SimnetBadRequest:
+            ledger = None
         logger.debug(user_info)
         await self.set_name_card(uid, user_info.phone_background_image_url)
         data = {
@@ -112,6 +116,13 @@ class PlayerStatsPlugins(Plugin):
                 ("技能树已激活", "unlocked_skill_points"),
                 ("已解锁奇物", "unlocked_miracle_num"),
                 ("已解锁祝福", "unlocked_buff_num"),
+            ],
+            "ledger": ledger,
+            "ledger_labels": [
+                ("本月星琼", "current_hcoin"),
+                ("本月通专票", "current_rails_pass"),
+                ("上月星琼", "last_hcoin"),
+                ("上月通专票", "last_rails_pass"),
             ],
             "style": "xianzhou",  # nosec
             "avatar": (await self.head_icon.get_head_icon(uid)).as_uri(),
