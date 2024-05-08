@@ -68,6 +68,7 @@ class LedgerPlugin(Plugin):
             "last_rails_pass": format_amount(diary_info.month_data.last_rails_pass),
             "categories": categories,
             "color": color,
+            "day_data": diary_info.day_data,
         }
         render_result = await self.template_service.render(
             "starrail/ledger/ledger.html", ledger_data, {"width": 580, "height": 610}

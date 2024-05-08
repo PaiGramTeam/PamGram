@@ -15,6 +15,13 @@
         <div class="info">
           <div class="uid">ID：{{uid}}</div>
           <div class="month">{{day}}月开拓月历</div>
+          <div class="tip">
+            {% if day_data.current_hcoin == 0 and day_data.current_rails_pass == 0 %}
+            看来，削减开支要提上日程了......<br><br>
+            {% else %}
+            开拓者今日已获得 {{ day_data.current_hcoin }} 星琼，{{ day_data.current_rails_pass }} 星琼通票&星琼专票，收获满满的一天！
+            {% endif %}
+          </div>
         </div>
       </div>
       <div class="data-box">
