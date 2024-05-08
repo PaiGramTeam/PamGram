@@ -68,8 +68,11 @@ class Avatar(BaseModel):
 class RecordInfo(BaseModel):
     achievementCount: Optional[int] = 0
     avatarCount: Optional[int] = 0
+    bookCount: Optional[int] = 0
     equipmentCount: Optional[int] = 0
     maxRogueChallengeScore: Optional[int] = 0
+    musicCount: Optional[int] = 0
+    relicCount: Optional[int] = 0
 
 
 class PlayerBaseInfo(BaseModel):
