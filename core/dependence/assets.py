@@ -319,7 +319,7 @@ class _HeadIconAssets(_AssetsService):
         return self.avatar_id_map.get(avatar_id, None)
 
     def get_target(self, target: StrOrInt, second_target: StrOrInt = None) -> Optional[HeadIcon]:
-        if 1000 < target <= 9000:
+        if target and 1000 < target <= 9000:
             data = self.get_by_avatar_id(target)
             if data:
                 return data
