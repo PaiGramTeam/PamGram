@@ -1,5 +1,7 @@
+import contextlib
 from typing import Optional, List, TYPE_CHECKING
 
+from simnet import Region
 from simnet.errors import BadRequest as SimnetBadRequest
 from telegram import Update, Message
 from telegram.constants import ChatAction
@@ -18,7 +20,6 @@ from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from simnet import StarRailClient
-
 
 __all__ = ("PlayerStatsPlugins",)
 
@@ -93,10 +94,10 @@ class PlayerStatsPlugins(Plugin):
             rogue = await client.get_starrail_rogue(uid)
         except SimnetBadRequest:
             rogue = None
-        try:
-            ledger = await client.get_starrail_ledger_month_info(uid)
-        except SimnetBadRequest:
-            ledger = None
+        ledger = None
+        if (not client.public) and client.region != Region.OVERSEAS:
+            with contextlib.suppress(SimnetBadRequest):
+                ledger = await client.get_starrail_ledger_month_info(uid)
         logger.debug(user_info)
         await self.set_name_card(uid, user_info.phone_background_image_url)
         data = {
