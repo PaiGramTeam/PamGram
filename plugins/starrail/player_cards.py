@@ -2,6 +2,7 @@ import math
 from typing import List, Tuple, Union, Optional, TYPE_CHECKING, Dict
 
 from pydantic import BaseModel
+from starrailrelicscore.client.character import Character as CharacterClient
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.constants import ChatAction
 from telegram.ext import filters
@@ -16,8 +17,6 @@ from core.services.wiki.services import WikiService
 from metadata.shortname import roleToName, idToRole
 from modules.apihelper.client.components.player_cards import PlayerCards as PlayerCardsClient, PlayerInfo, Avatar, Relic
 from modules.apihelper.client.components.remote import Remote
-from modules.playercards.fight_prop import EquipmentsStats
-from modules.playercards.helpers import ArtifactStatsTheory
 from plugins.tools.genshin import PlayerNotFoundError
 from utils.log import logger
 from utils.uid import mask_number
@@ -40,6 +39,8 @@ except ImportError:
 if TYPE_CHECKING:
     from telegram.ext import ContextTypes
     from telegram import Update
+
+    from starrailrelicscore.models.relic_scorer import Score, TotalScore
 
 try:
     import ujson as jsonlib
@@ -418,7 +419,9 @@ class PlayerCards(Plugin):
         }
 
 
-class Artifact(BaseModel):
+class Artifact(BaseModel, frozen=False):
+    tid: int = 0
+    # ID
     equipment: Dict = {}
     # 圣遗物评分
     score: float = 0
@@ -426,44 +429,29 @@ class Artifact(BaseModel):
     score_label: str = "E"
     # 圣遗物评级颜色
     score_class: str = ""
-    # 圣遗物单行属性评分
-    substat_scores: List[float]
+    # 副词条分数
+    substat_scores: List[float] = []
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        for substat_scores in self.substat_scores:
-            self.score += substat_scores
-        self.score = round(self.score, 1)
-
-        for r in (
-            ("D", 10.0),
-            ("C", 16.5),
-            ("B", 23.1),
-            ("A", 29.7),
-            ("S", 36.3),
-            ("SS", 42.9),
-            ("SSS", 49.5),
-            ("ACE", 56.1),
-            ("ACE²", 66.0),
-        ):
-            if self.score >= r[1]:
-                self.score_label = r[0]
-                self.score_class = self.get_score_class(r[0])
+    def set_score(self, result: "Score"):
+        self.score = result.score
+        self.score_label = result.rating
+        self.score_class = self.get_score_class(result.rating)
+        self.substat_scores = result.sub_stat_score
 
     @staticmethod
     def get_score_class(label: str) -> str:
         mapping = {
-            "D": "text-neutral-400",
-            "C": "text-neutral-200",
+            "F": "text-neutral-400",
+            "D": "text-neutral-200",
+            "C": "text-violet-400",
             "B": "text-violet-400",
-            "A": "text-violet-400",
+            "A": "text-yellow-400",
             "S": "text-yellow-400",
             "SS": "text-yellow-400",
-            "SSS": "text-yellow-400",
-            "ACE": "text-red-500",
-            "ACE²": "text-red-500",
+            "SSS": "text-red-500",
+            "WTF": "text-red-500",
         }
-        return mapping.get(label, "text-neutral-400")
+        return mapping.get(label.replace("+", ""), "text-neutral-400")
 
 
 class RenderTemplate:
@@ -488,24 +476,19 @@ class RenderTemplate:
     async def render(self):
         images = await self.cache_images()
 
+        score = self.cal_avatar_relic_score()
+        artifact_total_score: float = 0
         artifacts = self.find_artifacts()
-        artifact_total_score: float = sum(artifact.score for artifact in artifacts)
-        artifact_total_score = round(artifact_total_score, 1)
+        if score and score.relics:
+            relic_map = {relic.tid: relic for relic in artifacts}
+            for relic in score.relics:
+                artifact = relic_map.get(relic.tid)
+                if artifact:
+                    artifact.set_score(relic)
 
-        artifact_total_score_label: str = "E"
-        for r in (
-            ("D", 10.0),
-            ("C", 16.5),
-            ("B", 23.1),
-            ("A", 29.7),
-            ("S", 36.3),
-            ("SS", 42.9),
-            ("SSS", 49.5),
-            ("ACE", 56.1),
-            ("ACE²", 66.0),
-        ):
-            if artifact_total_score / 5 >= r[1]:
-                artifact_total_score_label = r[0]
+            artifact_total_score = score.total_score
+        artifact_total_score = round(artifact_total_score, 1)
+        artifact_total_score_label: str = score.total_rating
 
         weapon = None
         weapon_detail = None
@@ -558,12 +541,7 @@ class RenderTemplate:
     def find_artifacts(self) -> List[Artifact]:
         """在 equipments 数组中找到圣遗物，并转换成带有分数的 model。equipments 数组包含圣遗物和武器"""
 
-        stats = ArtifactStatsTheory(idToRole(self.character.avatarId), self.fight_prop_rule)
-
-        def substat_score(s: EquipmentsStats) -> float:
-            return stats.theory(s)
-
-        def fix_equipment(e: Relic) -> Dict:
+        def fix_relic(e: Relic) -> Dict:
             rid = e.tid
             affix = self.client.get_affix_by_id(rid)
             relic_set = self.wiki_service.relic.get_by_id(affix.set_id)
@@ -584,13 +562,19 @@ class RenderTemplate:
         relic_list = self.character.relicList or []
         return [
             Artifact(
-                equipment=fix_equipment(e),
-                # 圣遗物单行属性评分
-                substat_scores=[substat_score(s) for s in self.client.get_affix(e, False)],
+                tid=e.tid,
+                equipment=fix_relic(e),
             )
             for e in relic_list
             if self.client.get_affix_by_id(e.tid) is not None
         ]
+
+    def cal_avatar_relic_score(self) -> Optional["TotalScore"]:
+        try:
+            return CharacterClient.score_character(self.character)
+        except Exception:
+            logger.warning("计算角色圣遗物分数时出现错误 uid[%s] avatar[%s]", self.uid, self.character.avatarId)
+            return None
 
     async def cal_avatar_damage(self) -> Dict:
         if not STARRAIL_ARTIFACT_FUNCTION_AVAILABLE:
