@@ -44,6 +44,7 @@ aiosqlite = { extras = ["sqlite"], version = "^0.20.0" }
 simnet = { git = "https://github.com/PaiGramTeam/SIMNet" }
 psutil = "^5.9.6"
 starrail-damage-cal = "^1.4.2"
+starrailrelicscore = {git = "https://github.com/PaiGramTeam/StarRailRelicScore"}
 
 [tool.poetry.extras]
 pyro = ["Pyrogram", "TgCrypto"]
