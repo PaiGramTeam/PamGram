@@ -99,7 +99,7 @@
           <div class="info">
             <div class="name">模拟宇宙</div>
             <div class="time">
-              {% if current_lottery_score == max_lottery_score %}
+              {% if current_rogue_score == max_rogue_score %}
               模拟宇宙已完成
               {% else %}
               模拟宇宙未完成
@@ -109,7 +109,7 @@
         </div>
         <div class="right">
           <span
-            class="{% if current_lottery_score != max_lottery_score %}red{% endif %}"
+            class="{% if current_rogue_score != max_rogue_score %}red{% endif %}"
           >{{ current_rogue_score }}/{{ max_rogue_score }}</span>
         </div>
       </div>
