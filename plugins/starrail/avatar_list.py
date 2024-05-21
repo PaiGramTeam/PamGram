@@ -1,6 +1,7 @@
 import asyncio
-from typing import List, Optional, TYPE_CHECKING, Dict
+from typing import List, Optional, TYPE_CHECKING, Dict, Union, Tuple, Any
 
+from arkowrapper import ArkoWrapper
 from pydantic import BaseModel
 from telegram.constants import ChatAction
 from telegram.ext import filters
@@ -11,6 +12,7 @@ from core.services.cookies import CookiesService
 from core.services.template.models import FileType
 from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
+from gram_core.services.template.models import RenderGroupResult
 from plugins.tools.genshin import GenshinHelper, CharacterDetails
 from plugins.tools.head_icon import HeadIconService
 from plugins.tools.phone_theme import PhoneThemeService
@@ -23,6 +25,7 @@ if TYPE_CHECKING:
     from simnet.models.starrail.chronicle.characters import StarRailDetailCharacter
     from telegram.ext import ContextTypes
     from telegram import Update
+    from gram_core.services.template.models import RenderResult
 
 MAX_AVATAR_COUNT = 40
 
@@ -149,6 +152,36 @@ class AvatarListPlugin(Plugin):
                 logger.warning("未找到角色 %s[%s] 的资源: %s", character.name, character.id, e)
         return data
 
+    async def avatar_list_render(
+        self,
+        base_render_data: Dict,
+        avatar_datas: List[AvatarData],
+        only_one_page: bool,
+    ) -> Union[Tuple[Any], List["RenderResult"], None]:
+        def render_task(start_id: int, c: List[AvatarData]):
+            _render_data = {
+                "avatar_datas": c,  # 角色数据
+                "start_id": start_id,  # 开始序号
+            }
+            _render_data.update(base_render_data)
+            return self.template_service.render(
+                "starrail/avatar_list/main.html",
+                _render_data,
+                viewport={"width": 1040, "height": 500},
+                full_page=True,
+                query_selector=".container",
+                file_type=FileType.PHOTO,
+                ttl=30 * 24 * 60 * 60,
+            )
+
+        if only_one_page:
+            return [await render_task(0, avatar_datas)]
+        avatar_datas_group = [
+            avatar_datas[i : i + MAX_AVATAR_COUNT] for i in range(0, len(avatar_datas), MAX_AVATAR_COUNT)
+        ]
+        tasks = [render_task(i * MAX_AVATAR_COUNT, c) for i, c in enumerate(avatar_datas_group)]
+        return await asyncio.gather(*tasks)
+
     @handler.command("avatars", cookie=True, block=False)
     @handler.message(filters.Regex(r"^(全部)?练度统计$"), cookie=True, block=False)
     async def avatar_list(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE"):
@@ -159,6 +192,7 @@ class AvatarListPlugin(Plugin):
         await message.reply_chat_action(ChatAction.TYPING)
 
         async with self.helper.genshin(user_id) as client:
+            notice = await message.reply_text("彦卿需要收集整理数据，还请耐心等待哦~")
             characters: List["StarRailDetailCharacter"] = await self.get_avatars_data(client)
             record_card = await client.get_record_card()
             nickname = record_card.nickname
@@ -167,34 +201,25 @@ class AvatarListPlugin(Plugin):
                 characters = characters[:MAX_AVATAR_COUNT]
             avatar_datas = await self.get_final_data(characters, client)
 
-        render_data = {
+        base_render_data = {
             "uid": mask_number(client.player_id),  # 玩家uid
             "nickname": nickname,  # 玩家昵称
-            "avatar_datas": avatar_datas,  # 角色数据
             "has_more": has_more,  # 是否显示了全部角色
             "avatar": (await self.head_icon.get_head_icon(client.player_id)).as_uri(),
             "background": (await self.phone_theme.get_phone_theme(client.player_id)).as_uri(),
         }
 
-        as_document = all_avatars and len(characters) > MAX_AVATAR_COUNT
-        await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT if as_document else ChatAction.UPLOAD_PHOTO)
-        image = await self.template_service.render(
-            "starrail/avatar_list/main.html",
-            render_data,
-            viewport={"width": 1040, "height": 500},
-            full_page=True,
-            query_selector=".container",
-            file_type=FileType.DOCUMENT if as_document else FileType.PHOTO,
-            ttl=30 * 24 * 60 * 60,
-        )
-        if as_document:
-            await image.reply_document(message, filename="练度统计.png")
-        else:
-            await image.reply_photo(message)
+        images = await self.avatar_list_render(base_render_data, avatar_datas, has_more)
+        self.add_delete_message_job(notice, delay=5)
+
+        for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
+            await RenderGroupResult(results=group).reply_media_group(
+                message, allow_sending_without_reply=True, write_timeout=60
+            )
+
         self.log_user(
             update,
             logger.info,
-            "[bold]练度统计[/bold]发送%s成功",
-            "文件" if all_avatars else "图片",
+            "[bold]练度统计[/bold]发送图片成功",
             extra={"markup": True},
         )

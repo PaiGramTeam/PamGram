@@ -47,7 +47,7 @@
             {% set equip_star = '' %}
           {% endif %}
           <tr class="h-8 border border-b">
-            <td class="text-right {{row_bg}}">{{ loop.index }}</td>
+            <td class="text-right {{row_bg}}">{{ start_id + loop.index }}</td>
             <td class="role {{row_bg}}">
               <img class="h-8 pl-2 img-drop-shadow" src="{{ avatar_data.icon }}"/>
             </td>
