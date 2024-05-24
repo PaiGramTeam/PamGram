@@ -218,7 +218,7 @@ class ChallengePlugin(Plugin):
     async def get_rendered_pic_data(self, client: "StarRailClient", uid: int, previous: bool) -> "StarRailChallenge":
         abyss_data = await client.get_starrail_challenge(uid, previous=previous, lang="zh-cn")
         if abyss_data.has_data:
-            await self.save_abyss_data(uid, abyss_data)
+            await self.save_abyss_data(self.history_data_abyss, uid, abyss_data)
         return abyss_data
 
     async def get_rendered_pic(  # skipcq: PY-R1000 #
@@ -330,12 +330,17 @@ class ChallengePlugin(Plugin):
             )
         ]
 
-    async def save_abyss_data(self, uid: int, abyss_data: "StarRailChallenge"):
-        model = self.history_data_abyss.create(uid, abyss_data)
-        old_data = await self.history_data_abyss.get_by_user_id_data_id(uid, model.data_id)
-        exists = self.history_data_abyss.exists_data(model, old_data)
+    @staticmethod
+    async def save_abyss_data(
+        history_data_abyss: "HistoryDataAbyssServices", uid: int, abyss_data: "StarRailChallenge"
+    ) -> bool:
+        model = history_data_abyss.create(uid, abyss_data)
+        old_data = await history_data_abyss.get_by_user_id_data_id(uid, model.data_id)
+        exists = history_data_abyss.exists_data(model, old_data)
         if not exists:
-            await self.history_data_abyss.add(model)
+            await history_data_abyss.add(model)
+            return True
+        return False
 
     async def get_abyss_data(self, uid: int):
         return await self.history_data_abyss.get_by_user_id(uid)

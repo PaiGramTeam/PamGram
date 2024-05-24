@@ -221,7 +221,7 @@ class ChallengeStoryPlugin(Plugin):
         group = None
         if abyss_data.has_data and abyss_data.groups:
             group = abyss_data.groups[1] if previous else abyss_data.groups[0]
-            await self.save_abyss_data(uid, abyss_data, group)
+            await self.save_abyss_data(self.history_data_abyss, uid, abyss_data, group)
         return abyss_data, group
 
     async def get_rendered_pic(
@@ -343,14 +343,20 @@ class ChallengeStoryPlugin(Plugin):
             )
         ]
 
+    @staticmethod
     async def save_abyss_data(
-        self, uid: int, abyss_data: "StarRailChallengeStory", group: "StarRailChallengeStoryGroup"
-    ):
-        model = self.history_data_abyss.create(uid, abyss_data, group)
-        old_data = await self.history_data_abyss.get_by_user_id_data_id(uid, model.data_id)
-        exists = self.history_data_abyss.exists_data(model, old_data)
+        history_data_abyss: "HistoryDataChallengeStoryServices",
+        uid: int,
+        abyss_data: "StarRailChallengeStory",
+        group: "StarRailChallengeStoryGroup",
+    ) -> bool:
+        model = history_data_abyss.create(uid, abyss_data, group)
+        old_data = await history_data_abyss.get_by_user_id_data_id(uid, model.data_id)
+        exists = history_data_abyss.exists_data(model, old_data)
         if not exists:
-            await self.history_data_abyss.add(model)
+            await history_data_abyss.add(model)
+            return True
+        return False
 
     async def get_abyss_data(self, uid: int):
         return await self.history_data_abyss.get_by_user_id(uid)
