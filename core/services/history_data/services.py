@@ -4,12 +4,14 @@ from typing import List
 from pytz import timezone
 from simnet.models.starrail.chronicle.challenge import StarRailChallenge
 from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory, StarRailChallengeStoryGroup
+from simnet.models.starrail.diary import StarRailDiary
 
 from core.services.history_data.models import (
     HistoryData,
     HistoryDataTypeEnum,
     HistoryDataAbyss,
     HistoryDataChallengeStory,
+    HistoryDataLedger,
 )
 from gram_core.base_service import BaseService
 from gram_core.services.history_data.services import HistoryDataBaseServices
@@ -24,6 +26,7 @@ __all__ = (
     "HistoryDataBaseServices",
     "HistoryDataAbyssServices",
     "HistoryDataChallengeStoryServices",
+    "HistoryDataLedgerServices",
 )
 
 TZ = timezone("Asia/Shanghai")
@@ -74,4 +77,20 @@ class HistoryDataChallengeStoryServices(BaseService, HistoryDataBaseServices):
             time_created=datetime.datetime.now(),
             type=HistoryDataChallengeStoryServices.DATA_TYPE,
             data=dict_data,
+        )
+
+
+class HistoryDataLedgerServices(BaseService, HistoryDataBaseServices):
+    DATA_TYPE = HistoryDataTypeEnum.LEDGER.value
+
+    @staticmethod
+    def create(user_id: int, diary_data: StarRailDiary):
+        data = HistoryDataLedger(diary_data=diary_data)
+        json_data = data.json(by_alias=True, encoder=json_encoder)
+        return HistoryData(
+            user_id=user_id,
+            data_id=diary_data.data_id,
+            time_created=datetime.datetime.now(),
+            type=HistoryDataLedgerServices.DATA_TYPE,
+            data=jsonlib.loads(json_data),
         )

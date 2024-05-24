@@ -35,6 +35,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("dailynote", "查询实时便笺"),
             BotCommand("redeem", "（国际服）兑换 Key"),
             BotCommand("ledger", "查询当月开拓月历"),
+            BotCommand("ledger_history", "查询开拓月历历史记录"),
             BotCommand("avatars", "查询角色练度"),
             BotCommand("player_card", "角色卡片"),
             BotCommand("role_detail", "角色详细信息"),
