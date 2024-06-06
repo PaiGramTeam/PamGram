@@ -196,6 +196,7 @@ class AvatarListPlugin(Plugin):
 
         async with self.helper.genshin(user_id) as client:
             notice = await message.reply_text("彦卿需要收集整理数据，还请耐心等待哦~")
+            self.add_delete_message_job(notice, delay=60)
             characters: List["StarRailDetailCharacter"] = await self.get_avatars_data(client)
             record_card = await client.get_record_card()
             nickname = record_card.nickname
@@ -213,7 +214,6 @@ class AvatarListPlugin(Plugin):
         }
 
         images = await self.avatar_list_render(base_render_data, avatar_datas, has_more)
-        self.add_delete_message_job(notice, delay=5)
 
         for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
             await RenderGroupResult(results=group).reply_media_group(
