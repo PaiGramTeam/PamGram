@@ -279,9 +279,7 @@ class WishLogPlugin(Plugin.Conversation):
             buttons = [
                 [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "warp_log_import"))]
             ]
-            await message.reply_text(
-                WISHLOG_NOT_FOUND, reply_markup=InlineKeyboardMarkup(buttons)
-            )
+            await message.reply_text(WISHLOG_NOT_FOUND, reply_markup=InlineKeyboardMarkup(buttons))
         except GachaLogAccountNotFound:
             await message.reply_text("导入失败，可能文件包含的跃迁记录所属 uid 与你当前绑定的 uid 不同")
         except GachaLogFileError:
