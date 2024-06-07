@@ -265,8 +265,7 @@ class ErrorHandler(Plugin):
             context.error, (CookiesNotFoundError, PlayerNotFoundError, GenshinPlayerNotFoundError)
         ) or not isinstance(update, Update):
             return
-        notice = "未查询到您所绑定的账号信息，请先私聊彦卿绑定账号"
-        self.create_notice_task(update, context, notice)
+        self.create_notice_task(update, context, config.notice.user_not_found)
         raise ApplicationHandlerStop
 
     @error_handler(block=False)
