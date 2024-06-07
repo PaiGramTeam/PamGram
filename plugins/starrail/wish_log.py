@@ -176,9 +176,10 @@ class WishLogPlugin(Plugin.Conversation):
                 parse_mode="html",
             )
             return INPUT_URL
+        text = WAITING
         if not args:
             text += "\n\n> 由于你绑定的 Cookie 中存在 stoken ，本次通过 stoken 自动刷新数据"
-        reply = await message.reply_text(WAITING)
+        reply = await message.reply_text(text)
         await message.reply_chat_action(ChatAction.TYPING)
         data = await self._refresh_user_data(user, authkey=authkey)
         await reply.edit_text(data)
