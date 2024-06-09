@@ -10,10 +10,13 @@ RUN echo "deb http://ftp.us.debian.org/debian bookworm main non-free" >> /etc/ap
     && apt install git wget curl ffmpeg -y                \
     && git clone -b sr --recursive https://github.com/PaiGramTeam/PamGram.git /app \
     # install dependencies \
-    && pip install virtualenv  \
+    && pip install virtualenv pdm  \
     && python3 -m virtualenv venv/                 \
     && . venv/bin/activate                         \
-    && pip install -r requirements.txt             \
+    && pdm use -f venv                             \
+    && pdm config pypi.url https://pypi.tuna.tsinghua.edu.cn/simple/ \
+    && pdm install                              \
+    && pdm install -G :all                      \
     && playwright install chromium                 \
     && playwright install-deps chromium            \
     ## set timezone
