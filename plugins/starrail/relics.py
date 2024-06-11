@@ -60,7 +60,6 @@ class RelicsPlugin(Plugin):
                 photo=file_id,
                 caption=caption,
                 filename=f"{relics_name}.png",
-                allow_sending_without_reply=True,
                 parse_mode=ParseMode.HTML,
             )
         else:
@@ -68,7 +67,6 @@ class RelicsPlugin(Plugin):
                 photo=open(file_path, "rb"),
                 caption=caption,
                 filename=f"{relics_name}.png",
-                allow_sending_without_reply=True,
                 parse_mode=ParseMode.HTML,
             )
             if reply_photo.photo:

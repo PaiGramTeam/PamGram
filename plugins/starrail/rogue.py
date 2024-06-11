@@ -114,7 +114,7 @@ class PlayerRoguePlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def get_rander_data(self, uid: int, data: StarRailRogue, pre: bool) -> Dict:
         record_raw = data.last_record if pre else data.current_record
@@ -174,7 +174,7 @@ class PlayerRoguePlugins(Plugin):
             await message.reply_text("寰宇蝗灾数据有误 估计是彦卿晕了")
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user.id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user.id}.png")
 
     async def rogue_locust_render(self, source: StarRailRogueLocust, uid: int) -> RenderResult:
         try:

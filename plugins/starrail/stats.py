@@ -83,7 +83,7 @@ class PlayerStatsPlugins(Plugin):
             await message.reply_text("角色数据有误 估计是彦卿晕了")
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:

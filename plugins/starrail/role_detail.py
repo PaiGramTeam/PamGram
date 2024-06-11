@@ -390,7 +390,6 @@ class RoleDetailPlugin(Plugin.Conversation):
         await render_result.reply_photo(
             message,
             filename=f"{client.player_id}.png",
-            allow_sending_without_reply=True,
             reply_markup=self.get_custom_button(user_id, uid, characters.id),
             caption=self.get_caption(data, characters.id),
         )

@@ -96,7 +96,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def get_fantastic_story_rander_data(self, uid: int, data: StarRailFantasticStory) -> Dict:
         if not data.exists_data:
@@ -152,7 +152,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def yitai_battle_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -200,7 +200,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def endless_side_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -252,7 +252,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     @staticmethod
     def line_percent(team: StarRailFoxStoryTeam) -> Tuple[float, float]:
@@ -598,7 +598,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def boxing_show_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -654,7 +654,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def space_zoo_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:
@@ -712,9 +712,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await RenderGroupResult(results=render_result).reply_media_group(
-            message, allow_sending_without_reply=True, write_timeout=60
-        )
+        await RenderGroupResult(results=render_result).reply_media_group(message, write_timeout=60)
         self.log_user(
             update,
             logger.info,
@@ -782,7 +780,7 @@ class PlayerActivityPlugins(Plugin):
                 self.add_delete_message_job(reply_message)
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-        await render_result.reply_photo(message, filename=f"{user_id}.png", allow_sending_without_reply=True)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
 
     async def copper_man_render(self, client: "StarRailClient", uid: Optional[int] = None) -> RenderResult:
         if uid is None:

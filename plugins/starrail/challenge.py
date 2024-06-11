@@ -188,9 +188,7 @@ class ChallengePlugin(Plugin):
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
 
         for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
-            await RenderGroupResult(results=group).reply_media_group(
-                message, allow_sending_without_reply=True, write_timeout=60
-            )
+            await RenderGroupResult(results=group).reply_media_group(message, write_timeout=60)
 
         if reply_text is not None:
             await reply_text.delete()
@@ -547,9 +545,7 @@ class ChallengePlugin(Plugin):
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
 
         for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
-            await RenderGroupResult(results=group).reply_media_group(
-                reply or message, allow_sending_without_reply=True, write_timeout=60
-            )
+            await RenderGroupResult(results=group).reply_media_group(reply or message, write_timeout=60)
         self.log_user(update, logger.info, "[bold]混沌回忆挑战数据[/bold]: 成功发送图片", extra={"markup": True})
         self.add_delete_message_job(message, delay=1)
 

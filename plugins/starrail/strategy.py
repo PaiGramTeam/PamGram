@@ -62,7 +62,6 @@ class StrategyPlugin(Plugin):
                 photo=file_id,
                 caption=caption,
                 filename=f"{character_name}.png",
-                allow_sending_without_reply=True,
                 parse_mode=ParseMode.HTML,
             )
         else:
@@ -70,7 +69,6 @@ class StrategyPlugin(Plugin):
                 photo=open(file_path, "rb"),
                 caption=caption,
                 filename=f"{character_name}.png",
-                allow_sending_without_reply=True,
                 parse_mode=ParseMode.HTML,
             )
             if reply_photo.photo:
