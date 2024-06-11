@@ -348,9 +348,12 @@ class RoleDetailPlugin(Plugin.Conversation):
     async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         args = self.get_args(context)
         ch_name = None
         for i in args:
+            if i.startswith("@"):
+                continue
             ch_name = roleToName(i)
             if ch_name:
                 break
@@ -361,7 +364,7 @@ class RoleDetailPlugin(Plugin.Conversation):
             ch_name,
         )
         await message.reply_chat_action(ChatAction.TYPING)
-        async with self.helper.genshin(user_id) as client:
+        async with self.helper.genshin(user_id, player_id=uid, offset=offset) as client:
             nickname, data = await self.get_characters(client.player_id, client)
         uid = client.player_id
         if ch_name is None:
@@ -443,7 +446,7 @@ class RoleDetailPlugin(Plugin.Conversation):
         try:
             nickname, data = await self.get_characters(uid)
         except NeedClient:
-            async with self.helper.genshin(user.id) as client:
+            async with self.helper.genshin(user.id, player_id=uid) as client:
                 nickname, data = await self.get_characters(client.player_id, client)
         if page:
             buttons = self.gen_button(data, user.id, uid, page)
@@ -518,7 +521,7 @@ class RoleDetailPlugin(Plugin.Conversation):
         try:
             nickname, data = await self.get_characters(uid)
         except NeedClient:
-            async with self.helper.genshin(user.id) as client:
+            async with self.helper.genshin(user.id, player_id=uid) as client:
                 nickname, data = await self.get_characters(client.player_id, client)
         rec = data.get_recommend_property_by_cid(char_id)
         if not rec:
