@@ -71,16 +71,16 @@ class WishLogPlugin(Plugin.Conversation):
         self.gacha_log = GachaLog()
         self.wish_photo = None
 
-    async def get_player_id(self, uid: int) -> Optional[int]:
+    async def get_player_id(self, user_id: int, player_id: int, offset: int) -> int:
         """获取绑定的游戏ID"""
         logger.debug("尝试获取已绑定的星穹铁道账号")
-        player = await self.players_service.get_player(uid)
+        player = await self.players_service.get_player(user_id, player_id=player_id, offset=offset)
         if player is None:
-            raise PlayerNotFoundError(uid)
+            raise PlayerNotFoundError(user_id)
         return player.player_id
 
     async def _refresh_user_data(
-        self, user: User, data: dict = None, authkey: str = None, verify_uid: bool = True
+        self, user: User, player_id: int, data: dict = None, authkey: str = None, verify_uid: bool = True
     ) -> str:
         """刷新用户数据
         :param user: 用户
@@ -90,7 +90,6 @@ class WishLogPlugin(Plugin.Conversation):
         """
         try:
             logger.debug("尝试获取已绑定的星穹铁道账号")
-            player_id = await self.get_player_id(user.id)
             if authkey:
                 new_num = await self.gacha_log.get_gacha_log_data(user.id, player_id, authkey)
                 return "更新完成，本次没有新增数据" if new_num == 0 else f"更新完成，本次共新增{new_num}条跃迁记录"
@@ -113,7 +112,7 @@ class WishLogPlugin(Plugin.Conversation):
             logger.info("未查询到用户 %s[%s] 所绑定的账号信息", user.full_name, user.id)
             return config.notice.user_not_found
 
-    async def import_from_file(self, user: User, message: Message, document: Document = None) -> None:
+    async def import_from_file(self, user: User, player_id: int, message: Message, document: Document = None) -> None:
         if not document:
             document = message.document
         # TODO: 使用 mimetype 判断文件类型
@@ -148,7 +147,7 @@ class WishLogPlugin(Plugin.Conversation):
         reply = await message.reply_text("文件解析成功，正在导入数据")
         await message.reply_chat_action(ChatAction.TYPING)
         try:
-            text = await self._refresh_user_data(user, data=data, verify_uid=file_type == "json")
+            text = await self._refresh_user_data(user, player_id, data=data, verify_uid=file_type == "json")
         except Exception as exc:  # pylint: disable=W0703
             logger.error("文件解析失败 %s", repr(exc))
             text = "文件解析失败，请检查文件是否符合 SRGF 标准"
@@ -159,8 +158,11 @@ class WishLogPlugin(Plugin.Conversation):
     @handler.message(filters=filters.Regex("^导入跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
     @handler.command(command="start", filters=filters.Regex("warp_log_import$"), block=False)
     async def command_start(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
+        uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         user = update.effective_user
+        player_id = await self.get_player_id(user.id, uid, offset)
+        context.chat_data["uid"] = player_id
         args = self.get_args(context)
         logger.info("用户 %s[%s] 导入跃迁记录命令请求", user.full_name, user.id)
         authkey = from_url_get_authkey(args[0] if args else "")
@@ -181,17 +183,18 @@ class WishLogPlugin(Plugin.Conversation):
             text += "\n\n> 由于你绑定的 Cookie 中存在 stoken ，本次通过 stoken 自动刷新数据"
         reply = await message.reply_text(text)
         await message.reply_chat_action(ChatAction.TYPING)
-        data = await self._refresh_user_data(user, authkey=authkey)
+        data = await self._refresh_user_data(user, player_id, authkey=authkey)
         await reply.edit_text(data)
         return ConversationHandler.END
 
     @conversation.state(state=INPUT_URL)
     @handler.message(filters=~filters.COMMAND, block=False)
-    async def import_data_from_message(self, update: Update, _: CallbackContext) -> int:
+    async def import_data_from_message(self, update: Update, context: CallbackContext) -> int:
         message = update.effective_message
         user = update.effective_user
+        player_id = context.chat_data["uid"]
         if message.document:
-            await self.import_from_file(user, message)
+            await self.import_from_file(user, player_id, message)
             return ConversationHandler.END
         if not message.text:
             await message.reply_text("请发送文件或链接")
@@ -199,7 +202,7 @@ class WishLogPlugin(Plugin.Conversation):
         authkey = from_url_get_authkey(message.text)
         reply = await message.reply_text(WAITING)
         await message.reply_chat_action(ChatAction.TYPING)
-        text = await self._refresh_user_data(user, authkey=authkey)
+        text = await self._refresh_user_data(user, player_id, authkey=authkey)
         await reply.edit_text(text)
         return ConversationHandler.END
 
@@ -207,11 +210,12 @@ class WishLogPlugin(Plugin.Conversation):
     @handler.command(command="warp_log_delete", filters=filters.ChatType.PRIVATE, block=False)
     @handler.message(filters=filters.Regex("^删除跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
     async def command_start_delete(self, update: Update, context: CallbackContext) -> int:
+        uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         user = update.effective_user
         logger.info("用户 %s[%s] 删除跃迁记录命令请求", user.full_name, user.id)
         try:
-            player_id = await self.get_player_id(user.id)
+            player_id = await self.get_player_id(user.id, uid, offset)
             context.chat_data["uid"] = player_id
         except PlayerNotFoundError:
             logger.info("未查询到用户 %s[%s] 所绑定的账号信息", user.full_name, user.id)
@@ -240,6 +244,7 @@ class WishLogPlugin(Plugin.Conversation):
 
     @handler.command(command="warp_log_force_delete", block=False, admin=True)
     async def command_warp_log_force_delete(self, update: Update, context: CallbackContext):
+        uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         args = self.get_args(context)
         if not args:
@@ -249,7 +254,7 @@ class WishLogPlugin(Plugin.Conversation):
             cid = int(args[0])
             if cid < 0:
                 raise ValueError("Invalid cid")
-            player_id = await self.get_player_id(cid)
+            player_id = await self.get_player_id(cid, uid, offset)
             _, status = await self.gacha_log.load_history_info(str(cid), str(player_id), only_status=True)
             if not status:
                 await message.reply_text("该用户还没有导入跃迁记录")
@@ -266,12 +271,13 @@ class WishLogPlugin(Plugin.Conversation):
     @handler.command(command="warp_log_export", filters=filters.ChatType.PRIVATE, block=False)
     @handler.message(filters=filters.Regex("^导出跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
     async def command_start_export(self, update: Update, context: CallbackContext) -> None:
+        uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         user = update.effective_user
         logger.info("用户 %s[%s] 导出跃迁记录命令请求", user.full_name, user.id)
         try:
             await message.reply_chat_action(ChatAction.TYPING)
-            player_id = await self.get_player_id(user.id)
+            player_id = await self.get_player_id(user.id, uid, offset)
             path = await self.gacha_log.gacha_log_to_srgf(str(user.id), str(player_id))
             await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT)
             await message.reply_document(document=open(path, "rb+"), caption=f"跃迁记录导出文件 - SRGF {SRGF_VERSION}")
@@ -331,9 +337,8 @@ class WishLogPlugin(Plugin.Conversation):
         buttons.append([InlineKeyboardButton("五星抽卡统计", callback_data=f"get_wish_log|{user_id}|{uid}|count|five")])
         return buttons
 
-    async def wish_log_pool_choose(self, user_id: int, message: "Message"):
+    async def wish_log_pool_choose(self, user_id: int, player_id: int, message: "Message"):
         await message.reply_chat_action(ChatAction.TYPING)
-        player_id = await self.get_player_id(user_id)
         gacha_log, status = await self.gacha_log.load_history_info(str(user_id), str(player_id))
         if not status:
             raise GachaLogNotFound
@@ -351,9 +356,8 @@ class WishLogPlugin(Plugin.Conversation):
         if reply_message.photo:
             self.wish_photo = reply_message.photo[-1].file_id
 
-    async def wish_log_pool_send(self, user_id: int, pool_type: "StarRailBannerType", message: "Message"):
+    async def wish_log_pool_send(self, user_id: int, uid: int, pool_type: "StarRailBannerType", message: "Message"):
         await message.reply_chat_action(ChatAction.TYPING)
-        uid = await self.get_player_id(user_id)
         png_data = await self.rander_wish_log_analysis(user_id, uid, pool_type)
         if isinstance(png_data, str):
             reply = await message.reply_text(png_data)
@@ -371,6 +375,7 @@ class WishLogPlugin(Plugin.Conversation):
     @handler.message(filters=filters.Regex("^跃迁记录?(光锥|角色|常驻|新手)$"), block=False)
     async def command_start_analysis(self, update: Update, context: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
+        uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         pool_type = None
         if args := self.get_args(context):
@@ -384,10 +389,11 @@ class WishLogPlugin(Plugin.Conversation):
                 pool_type = StarRailBannerType.NOVICE
         self.log_user(update, logger.info, "跃迁记录命令请求 || 参数 %s", pool_type.name if pool_type else None)
         try:
+            player_id = await self.get_player_id(user_id, uid, offset)
             if pool_type is None:
-                await self.wish_log_pool_choose(user_id, message)
+                await self.wish_log_pool_choose(user_id, player_id, message)
             else:
-                await self.wish_log_pool_send(user_id, pool_type, message)
+                await self.wish_log_pool_send(user_id, player_id, pool_type, message)
         except GachaLogNotFound:
             self.log_user(update, logger.info, "未找到跃迁记录")
             buttons = [

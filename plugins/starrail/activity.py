@@ -51,37 +51,33 @@ class PlayerActivityPlugins(Plugin):
         self.assets = assets
         self.helper = helper
 
-    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
+    async def get_uid(self, user_id: int, reply: Optional[Message], player_id: int, offset: int) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
-        uid, user_id_ = None, user_id
-        if args:
-            for i in args:
-                if i is not None:
-                    if i.isdigit() and len(i) == 9:
-                        uid = int(i)
+        uid, user_id_ = player_id, user_id
         if reply:
             try:
                 user_id_ = reply.from_user.id
             except AttributeError:
                 pass
         if not uid:
-            player_info = await self.helper.players_service.get_player(user_id_)
+            player_info = await self.helper.players_service.get_player(user_id_, offset=offset)
             if player_info is not None:
                 uid = player_info.player_id
             if (not uid) and (user_id_ != user_id):
-                player_info = await self.helper.players_service.get_player(user_id)
+                player_info = await self.helper.players_service.get_player(user_id, offset=offset)
                 if player_info is not None:
                     uid = player_info.player_id
         return uid
 
     @handler.command("fantastic_story", block=False)
     @handler.message(filters.Regex("^评书奇谭信息查询(.*)"), block=False)
-    async def fantastic_story_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def fantastic_story_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询评书奇谭信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.fantastic_story_render(client, uid)
         except AttributeError as exc:
@@ -132,12 +128,13 @@ class PlayerActivityPlugins(Plugin):
 
     @handler.command("yitai_battle", block=False)
     @handler.message(filters.Regex("^以太战线信息查询(.*)"), block=False)
-    async def yitai_battle_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def yitai_battle_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询以太战线信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.yitai_battle_render(client, uid)
         except AttributeError as exc:
@@ -180,12 +177,13 @@ class PlayerActivityPlugins(Plugin):
 
     @handler.command("endless_side", block=False)
     @handler.message(filters.Regex("^无尽位面信息查询(.*)"), block=False)
-    async def endless_side_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def endless_side_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询无尽位面信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.endless_side_render(client, uid)
         except AttributeError as exc:
@@ -232,12 +230,13 @@ class PlayerActivityPlugins(Plugin):
 
     @handler.command("fox_story", block=False)
     @handler.message(filters.Regex("^狐斋志异信息查询(.*)"), block=False)
-    async def fox_story_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def fox_story_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询狐斋志异信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.fox_story_render(client, uid)
         except AttributeError as exc:
@@ -578,12 +577,13 @@ class PlayerActivityPlugins(Plugin):
 
     @handler.command("boxing_show", block=False)
     @handler.message(filters.Regex("^斗技表演赛信息查询(.*)"), block=False)
-    async def boxing_show_command_start(self, update: Update, context: CallbackContext) -> None:
+    async def boxing_show_command_start(self, update: Update, _: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询斗技表演赛信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.boxing_show_render(client, uid)
         except AttributeError as exc:
@@ -634,12 +634,13 @@ class PlayerActivityPlugins(Plugin):
 
     @handler.command("space_zoo", block=False)
     @handler.message(filters.Regex("^异宠拾遗信息查询(.*)"), block=False)
-    async def space_zoo_command_start(self, update: Update, context: CallbackContext) -> None:
+    async def space_zoo_command_start(self, update: Update, _: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询异宠拾遗信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.space_zoo_render(client, uid)
         except AttributeError as exc:
@@ -690,12 +691,13 @@ class PlayerActivityPlugins(Plugin):
 
     @handler.command("treasure_dungeon", block=False)
     @handler.message(filters.Regex("^地城探宝信息查询(.*)"), block=False)
-    async def treasure_dungeon_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def treasure_dungeon_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询地城探宝信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.treasure_dungeon_render(client, uid)
                 if render_result is None:
@@ -760,12 +762,13 @@ class PlayerActivityPlugins(Plugin):
 
     @handler.command("copper_man", block=False)
     @handler.message(filters.Regex("^金人巷信息查询(.*)"), block=False)
-    async def copper_man_command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def copper_man_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "查询金人巷信息命令请求")
         try:
-            uid = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.copper_man_render(client, uid)
         except AttributeError as exc:

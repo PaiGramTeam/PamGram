@@ -92,10 +92,11 @@ class DailyNotePlugin(Plugin):
     async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         self.log_user(update, logger.info, "每日便签命令请求")
 
         try:
-            async with self.helper.genshin(user_id) as client:
+            async with self.helper.genshin(user_id, player_id=uid, offset=offset) as client:
                 render_result = await self._get_daily_note(client)
         except DataNotPublic:
             reply_message = await message.reply_text(

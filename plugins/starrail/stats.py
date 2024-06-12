@@ -41,37 +41,33 @@ class PlayerStatsPlugins(Plugin):
         self.phone_theme = phone_theme
         self.player_info_service = player_info_service
 
-    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
+    async def get_uid(self, user_id: int, reply: Optional[Message], player_id: int, offset: int) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
-        uid, user_id_ = None, user_id
-        if args:
-            for i in args:
-                if i is not None:
-                    if i.isdigit() and len(i) == 9:
-                        uid = int(i)
+        uid, user_id_ = player_id, user_id
         if reply:
             try:
                 user_id_ = reply.from_user.id
             except AttributeError:
                 pass
         if not uid:
-            player_info = await self.helper.players_service.get_player(user_id_)
+            player_info = await self.helper.players_service.get_player(user_id_, offset=offset)
             if player_info is not None:
                 uid = player_info.player_id
             if (not uid) and (user_id_ != user_id):
-                player_info = await self.helper.players_service.get_player(user_id)
+                player_info = await self.helper.players_service.get_player(user_id, offset=offset)
                 if player_info is not None:
                     uid = player_info.player_id
         return uid
 
     @handler.command("stats", player=True, block=False)
     @handler.message(filters.Regex("^玩家统计查询(.*)"), player=True, block=False)
-    async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
         user_id = await self.get_real_user_id(update)
+        uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         self.log_user(update, logger.info, "查询游戏用户命令请求")
         try:
-            uid: int = await self.get_uid(user_id, context.args, message.reply_to_message)
+            uid: int = await self.get_uid(user_id, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.render(client, uid)
         except TooManyRequestPublicCookies:

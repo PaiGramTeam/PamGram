@@ -82,34 +82,31 @@ class ChallengeStoryPlugin(Plugin):
         self.history_data_abyss = history_data_abyss
         self.cache = RedisCache(redis.client, key="plugin:challenge_story:history")
 
-    async def get_uid(self, user_id: int, args: List[str], reply: Optional[Message]) -> int:
+    async def get_uid(self, user_id: int, reply: Optional[Message], player_id: int, offset: int) -> int:
         """通过消息获取 uid，优先级：args > reply > self"""
-        uid, user_id_ = None, user_id
-        if args:
-            for i in args:
-                if i is not None and i.isdigit() and len(i) == 9:
-                    uid = int(i)
+        uid, user_id_ = player_id, user_id
         if reply:
             try:
                 user_id_ = reply.from_user.id
             except AttributeError:
                 pass
         if not uid:
-            player_info = await self.helper.players_service.get_player(user_id_)
+            player_info = await self.helper.players_service.get_player(user_id_, offset=offset)
             if player_info is not None:
                 uid = player_info.player_id
             if (not uid) and (user_id_ != user_id):
-                player_info = await self.helper.players_service.get_player(user_id)
+                player_info = await self.helper.players_service.get_player(user_id, offset=offset)
                 if player_info is not None:
                     uid = player_info.player_id
         return uid
 
     @handler.command("challenge_story", block=False)
     @handler.message(filters.Regex(msg_pattern), block=False)
-    async def command_start(self, update: Update, context: CallbackContext) -> None:
+    async def command_start(self, update: Update, _: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        uid: int = await self.get_uid(user_id, context.args, message.reply_to_message)
+        uid, offset = self.get_real_uid_or_offset(update)
+        uid: int = await self.get_uid(user_id, message.reply_to_message, uid, offset)
 
         # 若查询帮助
         if (message.text.startswith("/") and "help" in message.text) or "帮助" in message.text:
@@ -484,10 +481,11 @@ class ChallengeStoryPlugin(Plugin):
 
     @handler.command("challenge_story_history", block=False)
     @handler.message(filters.Regex(r"^虚构叙事历史数据"), block=False)
-    async def challenge_story_history_command_start(self, update: Update, context: CallbackContext) -> None:
+    async def challenge_story_history_command_start(self, update: Update, _: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
-        uid: int = await self.get_uid(user_id, context.args, message.reply_to_message)
+        uid, offset = self.get_real_uid_or_offset(update)
+        uid: int = await self.get_uid(user_id, message.reply_to_message, uid, offset)
         self.log_user(update, logger.info, "查询虚构叙事历史数据 uid[%s]", uid)
 
         async with self.helper.genshin_or_public(user_id, uid=uid) as _:

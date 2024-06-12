@@ -190,11 +190,12 @@ class AvatarListPlugin(Plugin):
     async def avatar_list(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE"):
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
         all_avatars = "全部" in message.text or "all" in message.text  # 是否发送全部角色
         self.log_user(update, logger.info, "[bold]练度统计[/bold]: all=%s", all_avatars, extra={"markup": True})
         await message.reply_chat_action(ChatAction.TYPING)
 
-        async with self.helper.genshin(user_id) as client:
+        async with self.helper.genshin(user_id, player_id=uid, offset=offset) as client:
             notice = await message.reply_text("彦卿需要收集整理数据，还请耐心等待哦~")
             self.add_delete_message_job(notice, delay=60)
             characters: List["StarRailDetailCharacter"] = await self.get_avatars_data(client)
