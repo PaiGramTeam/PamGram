@@ -48,7 +48,7 @@ markupsafe==2.1.5
 mdurl==0.1.2
 msgspec==0.18.6
 mypy-extensions==1.0.0
-openpyxl==3.1.3
+openpyxl==3.1.4
 orjson==3.10.4
 packaging==24.1
 pathspec==0.12.1
@@ -59,7 +59,7 @@ pluggy==1.5.0
 psutil==5.9.8
 pyaes==1.6.1
 pycparser==2.22; platform_python_implementation != "PyPy"
-pydantic==1.10.15
+pydantic==1.10.16
 pyee==11.1.0
 pygments==2.18.0
 pyrogram==2.0.106
