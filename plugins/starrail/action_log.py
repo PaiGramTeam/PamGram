@@ -34,12 +34,12 @@ class ActionLogPlugins(Plugin):
     """登录记录信息查询"""
 
     def __init__(
-            self,
-            helper: GenshinHelper,
-            action_log_service: ActionLogService,
-            template_service: TemplateService,
-            head_icon: HeadIconService,
-            phone_theme: PhoneThemeService,
+        self,
+        helper: GenshinHelper,
+        action_log_service: ActionLogService,
+        template_service: TemplateService,
+        head_icon: HeadIconService,
+        phone_theme: PhoneThemeService,
     ):
         self.helper = helper
         self.action_log_service = action_log_service

@@ -106,10 +106,12 @@ class ActionLogAnalyse(DateUtils):
         }
         datas = []
         for k, v in data.items():
-            datas.append({
-                "name": k,
-                "value": self.format_sec(v),
-            })
+            datas.append(
+                {
+                    "name": k,
+                    "value": self.format_sec(v),
+                }
+            )
 
         max_hour = max(self.data2, key=self.data2.get)
         min_hour = min(self.data2, key=self.data2.get)
@@ -121,10 +123,12 @@ class ActionLogAnalyse(DateUtils):
     def get_line_data(self) -> List[Dict[str, str]]:
         data = []
         for k, v in self.data2.items():
-            data.append({
-                "month": f"{k}点",
-                "value": v,
-            })
+            data.append(
+                {
+                    "month": f"{k}点",
+                    "value": v,
+                }
+            )
         return data
 
     def get_record_data(self) -> List[Dict[str, str]]:
@@ -133,8 +137,10 @@ class ActionLogAnalyse(DateUtils):
         data_len = len(self.data) - 1
         for i in range(data_len, data_len - limit, -1):
             record = self.data[i]
-            data.append({
-                "time": record.time.strftime("%Y年%m月%d日 %H:%M:%S"),
-                "reason": record.reason.value,
-            })
+            data.append(
+                {
+                    "time": record.time.strftime("%Y年%m月%d日 %H:%M:%S"),
+                    "reason": record.reason.value,
+                }
+            )
         return data

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from pytz import timezone
 
-TZ = timezone('Asia/Shanghai')
+TZ = timezone("Asia/Shanghai")
 
 
 class DateUtils:
