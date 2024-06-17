@@ -23,6 +23,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("warp_log_import", "导入跃迁记录"),
             BotCommand("warp_log_export", "导出跃迁记录"),
             BotCommand("warp_log_delete", "删除跃迁记录"),
+            BotCommand("action_log_import", "导入登录记录"),
             BotCommand("setuid", "添加/重设UID"),
             BotCommand("setcookie", "添加/重设Cookie"),
             BotCommand("player", "管理用户绑定玩家"),
@@ -32,6 +33,7 @@ class SetCommandPlugin(Plugin):
         group_command = [
             BotCommand("help", "帮助"),
             BotCommand("warp_log", "查看跃迁记录"),
+            BotCommand("action_log", "查询登录记录"),
             BotCommand("dailynote", "查询实时便笺"),
             BotCommand("redeem", "（国际服）兑换 Key"),
             BotCommand("ledger", "查询当月开拓月历"),
@@ -61,6 +63,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("remove_all_entry", "删除全部条目数据"),
             BotCommand("sign_all", "全部账号重新签到"),
             BotCommand("refresh_all_history", "全部账号刷新历史记录"),
+            BotCommand("action_log_import_all", "全部账号导入登录记录"),
             BotCommand("send_log", "发送日志"),
             BotCommand("update", "更新"),
             BotCommand("set_command", "重设命令"),
