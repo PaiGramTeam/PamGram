@@ -43,7 +43,8 @@ class HistoryDataAbyssServices(BaseService, HistoryDataBaseServices):
 
     @staticmethod
     def exists_data(data: HistoryData, old_data: List[HistoryData]) -> bool:
-        return any(d.data == data.data for d in old_data)
+        floors = data.data.get("abyss_data", {}).get("all_floor_detail")
+        return any(d.data.get("abyss_data", {}).get("all_floor_detail") == floors for d in old_data)
 
     @staticmethod
     def create(user_id: int, abyss_data: StarRailChallenge):
@@ -63,7 +64,8 @@ class HistoryDataChallengeStoryServices(BaseService, HistoryDataBaseServices):
 
     @staticmethod
     def exists_data(data: HistoryData, old_data: List[HistoryData]) -> bool:
-        return any(d.data == data.data for d in old_data)
+        floors = data.data.get("story_data", {}).get("all_floor_detail")
+        return any(d.data.get("story_data", {}).get("all_floor_detail") == floors for d in old_data)
 
     @staticmethod
     def create(user_id: int, story_data: StarRailChallengeStory, group: StarRailChallengeStoryGroup):
