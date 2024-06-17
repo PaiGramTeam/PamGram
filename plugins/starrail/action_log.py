@@ -26,9 +26,8 @@ if TYPE_CHECKING:
 class NotSupport(Exception):
     """不支持的服务器"""
 
-    def __str__(self, msg: str = None):
+    def __init__(self, msg: str = None):
         self.msg = msg
-        return self.msg
 
 
 class ActionLogPlugins(Plugin):
@@ -51,7 +50,7 @@ class ActionLogPlugins(Plugin):
         self.phone_theme = phone_theme
 
     @handler.command(command="action_log_import", filters=filters.ChatType.PRIVATE, cookie=True, block=False)
-    async def command_start(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
+    async def action_log_import(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
         uid, offset = self.get_real_uid_or_offset(update)
@@ -102,7 +101,7 @@ class ActionLogPlugins(Plugin):
         return data
 
     @handler.command(command="action_log", cookie=True, block=False)
-    async def command_start(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
+    async def action_log(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
         uid, offset = self.get_real_uid_or_offset(update)
