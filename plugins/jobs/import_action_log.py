@@ -15,7 +15,7 @@ class ImportActionLogJob(Plugin):
     def __init__(self, action_log_system: ActionLogSystem = None):
         self.action_log_system = action_log_system
 
-    @job.run_daily(time=datetime.time(hour=0, minute=1, second=0), name="ImportActionLogJob")
+    @job.run_daily(time=datetime.time(hour=12, minute=1, second=0), name="ImportActionLogJob")
     async def refresh(self, _: "ContextTypes.DEFAULT_TYPE"):
         await self.action_log_system.daily_import_login(_)
 
