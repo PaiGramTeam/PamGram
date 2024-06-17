@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <link rel="shortcut icon" href="#" />
+  <link rel="stylesheet" type="text/css" href="action_log.css" />
+  <link rel="preload" href="../../fonts/tttgbnumber.ttf" as="font">
+  <style>
+        .head_box {
+          background: #fff url("{{ background }}") no-repeat;
+          background-size: cover;
+        }
+  </style>
+  <title></title>
+</head>
+
+<body>
+  <div class="container" id="container">
+    <div class="head_box">
+      <img class="head_box_avatar" src="{{ avatar }}" alt="Avatar">
+      <div>
+        <div class="id_text">ID: {{ uid }}</div>
+        <h2 class="day_text">登录统计</h2>
+      </div>
+      <img class="genshin_logo" src="./../../img/logo.png" alt=""/>
+    </div>
+    <div class="data_box">
+      <div class="tab_lable">数据总览</div>
+      <div class="data_line">
+        {% for data in datas[:4] %}
+        <div class="data_line_item">
+          <div class="num">{{ data.value }}</div>
+          <div class="lable">{{ data.name }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="data_line">
+        {% for data in datas[4:8] %}
+        <div class="data_line_item">
+          <div class="num">{{ data.value }}</div>
+          <div class="lable">{{ data.name }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="data_line">
+        {% for data in datas[8:] %}
+        <div class="data_line_item">
+          <div class="num">{{ data.value }}</div>
+          <div class="lable">{{ data.name }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="data_box">
+      <div class="tab_lable">登录时间点统计</div>
+      <div id="chartContainer"></div>
+    </div>
+    <div class="data_box">
+      <div class="tab_lable">最近日志</div>
+      {% for record in records %}
+      <div class="data_line">
+        <div class="data_line_item">
+          <div class="num small_font">{{ record.time }}</div>
+        </div>
+        <div class="data_line_item">
+          <div class="num small_font">{{ record.reason }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="logo"> Generate by PamGram</div>
+  </div>
+</body>
+
+<script src="../../genshin/pay_log/echarts.min.js"></script>
+
+<script>
+  const barData = {{ line_data | tojson }};
+  const myChart1 = echarts.init(document.querySelector('#chartContainer'), null, {renderer: 'svg'});
+  const xData = barData.map(v => v.month)
+  const yData = barData.map(v => v.value)
+  const option = {
+    animation: false,
+    xAxis: {
+      type: 'category',
+      data: xData
+    },
+    legend: {
+      x:'left',
+      y:'top',
+      show: true,
+      data: [{ name: '次' }]
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        name:'次',
+        data: yData,
+        type: 'line',
+        smooth: true,
+        itemStyle: {
+          normal: {
+            label: {
+              position: 'top',
+              show: true,
+              textStyle: {
+                color: '#1e1f20',
+                fontSize: 14,
+                fontFamily: "tttgbnumber",
+              }
+            },
+            color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
+              offset: 0,
+              color: "#1268f3"
+            }, {
+              offset: 0.6,
+              color: "#08a4fa"
+            }, {
+              offset: 1,
+              color: "#01ccfe"
+            }], false)
+          },
+
+        },
+      }
+    ]
+  };
+  myChart1.setOption(option);
+</script>
+
+</html>

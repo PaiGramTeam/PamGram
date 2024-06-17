@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from telegram.constants import ChatAction
 from telegram.ext import filters
@@ -7,8 +7,13 @@ from simnet import Region
 
 from core.services.self_help.services import ActionLogService
 from gram_core.plugin import Plugin, handler
+from gram_core.services.template.services import TemplateService
+from modules.action_log.client import ActionLogAnalyse
 from plugins.tools.genshin import GenshinHelper
+from plugins.tools.head_icon import HeadIconService
+from plugins.tools.phone_theme import PhoneThemeService
 from utils.log import logger
+from utils.uid import mask_number
 
 if TYPE_CHECKING:
     from telegram import Update
@@ -26,11 +31,21 @@ class NotSupport(Exception):
 
 
 class ActionLogPlugins(Plugin):
-    """玩家活动信息查询"""
+    """登录记录信息查询"""
 
-    def __init__(self, helper: GenshinHelper, action_log_service: ActionLogService):
+    def __init__(
+            self,
+            helper: GenshinHelper,
+            action_log_service: ActionLogService,
+            template_service: TemplateService,
+            head_icon: HeadIconService,
+            phone_theme: PhoneThemeService,
+    ):
         self.helper = helper
         self.action_log_service = action_log_service
+        self.template_service = template_service
+        self.head_icon = head_icon
+        self.phone_theme = phone_theme
 
     async def import_action_log(self, client: "StarRailClient", authkey: str) -> bool:
         data = await client.get_starrail_action_log(authkey=authkey)
@@ -71,7 +86,37 @@ class ActionLogPlugins(Plugin):
                 self.add_delete_message_job(message, delay=60)
                 self.add_delete_message_job(msg, delay=60)
 
-    @handler.command(command="test_get", block=False)
-    async def t(self, _, __):
-        r = await self.action_log_service.test_query()
+    async def get_render_data(self, uid: int):
+        r = await self.action_log_service.get_data(uid, 1)
         breakpoint()
+        r2 = await self.action_log_service.count_uptime_period(uid)
+        if not r or not r2:
+            raise NotSupport("未查询到登录记录")
+        d = ActionLogAnalyse(r, r2)
+        data = d.get_data()
+        line_data = d.get_line_data()
+        records = d.get_record_data()
+        return {
+            "uid": mask_number(uid),
+            "datas": data,
+            "line_data": line_data,
+            "records": records,
+        }
+
+    async def add_theme_data(self, data: Dict, player_id: int):
+        data["avatar"] = (await self.head_icon.get_head_icon(player_id)).as_uri()
+        data["background"] = (await self.phone_theme.get_phone_theme(player_id)).as_uri()
+        return data
+
+    @handler.command(command="test_get", block=False)
+    async def t(self, update: "Update", __):
+        message = update.effective_message
+        uid = 101638913
+        data = await self.get_render_data(uid)
+        render = await self.template_service.render(
+            "starrail/action_log/action_log.html",
+            await self.add_theme_data(data, uid),
+            full_page=True,
+            query_selector=".container",
+        )
+        await render.reply_photo(message)

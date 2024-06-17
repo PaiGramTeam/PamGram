@@ -21,14 +21,40 @@ class ActionLogRepository(BaseService.Component):
             client: "InfluxDBClientAsync"
             return await client.write_api().write(self.bucket, record=p)
 
-    async def test_query(self) -> "FluxTable":
+    async def count_uptime_period(self, uid: int) -> "FluxTable":
         async with self.client() as client:
             client: "InfluxDBClientAsync"
             query = (
-                'from(bucket: "{}") '
-                "|> range(start: -7d) "
+                'import "date"'
+                'from(bucket: "{}")'
+                "|> range(start: -180d)"
+                '|> filter(fn: (r) => r["_measurement"] == "action_log")'
+                '|> filter(fn: (r) => r["_field"] == "status")'
+                '|> filter(fn: (r) => r["_value"] == 1)'
+                '|> filter(fn: (r) => r["uid"] == "{}")'
+                '|> aggregateWindow(every: 1h, fn: count)'
+            ).format(self.bucket, uid)
+            query += (
+                '|> map(fn: (r) => ({'
+                '  r with'
+                '  hour: date.hour(t: r._time)'
+                '}))'
+                '|> yield(name: "hourly_count")'
+            )
+            tables = await client.query_api().query(query)
+            for table in tables:
+                return table
+
+    async def get_data(self, uid: int, day: int = 30) -> "FluxTable":
+        async with self.client() as client:
+            client: "InfluxDBClientAsync"
+            query = (
+                'from(bucket: "{}")'
+                '|> range(start: -{}d)'
+                '|> filter(fn: (r) => r["_measurement"] == "action_log")'
+                '|> filter(fn: (r) => r["uid"] == "{}")'
                 '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-            ).format(self.bucket)
+            ).format(self.bucket, day, uid)
             tables = await client.query_api().query(query)
             for table in tables:
                 return table
