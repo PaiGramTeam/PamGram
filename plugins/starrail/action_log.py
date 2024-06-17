@@ -80,7 +80,7 @@ class ActionLogPlugins(Plugin):
                 self.add_delete_message_job(msg, delay=60)
 
     async def get_render_data(self, uid: int):
-        r = await self.action_log_service.get_data(uid, 1)
+        r = await self.action_log_service.get_data(uid, 63)
         r2 = await self.action_log_service.count_uptime_period(uid)
         if not r or not r2:
             raise NotSupport("未查询到登录记录")

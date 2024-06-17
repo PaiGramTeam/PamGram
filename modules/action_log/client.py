@@ -60,11 +60,13 @@ class ActionLogAnalyse(DateUtils):
 
     def get_this_month_avg_duration(self) -> float:
         """本月平均时长"""
-        return self.get_this_month_duration() / len(self.this_month_data)
+        data_len = len(self.this_month_data)
+        return (self.get_this_month_duration() / data_len) if data_len else 0
 
     def get_last_month_avg_duration(self) -> float:
         """上月平均时长"""
-        return self.get_last_month_duration() / len(self.last_month_data)
+        data_len = len(self.last_month_data)
+        return (self.get_last_month_duration() / data_len) if data_len else 0
 
     def get_this_week_long_duration(self) -> int:
         """周最长会话"""
