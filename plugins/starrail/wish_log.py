@@ -3,9 +3,9 @@ from io import BytesIO
 from typing import Optional, TYPE_CHECKING, List, Union, Tuple, Dict
 
 from simnet.models.starrail.wish import StarRailBannerType
-from telegram import Document, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction
-from telegram.ext import CallbackContext, ConversationHandler, filters
+from telegram.ext import ConversationHandler, filters
 from telegram.helpers import create_deep_linked_url
 
 from core.dependence.assets import AssetsService
@@ -82,7 +82,7 @@ class WishLogPlugin(Plugin.Conversation):
         return player.player_id
 
     async def _refresh_user_data(
-        self, user: User, player_id: int, data: dict = None, authkey: str = None, verify_uid: bool = True
+        self, user: "User", player_id: int, data: dict = None, authkey: str = None, verify_uid: bool = True
     ) -> str:
         """刷新用户数据
         :param user: 用户
@@ -114,7 +114,9 @@ class WishLogPlugin(Plugin.Conversation):
             logger.info("未查询到用户 %s[%s] 所绑定的账号信息", user.full_name, user.id)
             return config.notice.user_not_found
 
-    async def import_from_file(self, user: User, player_id: int, message: Message, document: Document = None) -> None:
+    async def import_from_file(
+        self, user: "User", player_id: int, message: "Message", document: "Document" = None
+    ) -> None:
         if not document:
             document = message.document
         # TODO: 使用 mimetype 判断文件类型
@@ -191,7 +193,7 @@ class WishLogPlugin(Plugin.Conversation):
 
     @conversation.state(state=INPUT_URL)
     @handler.message(filters=~filters.COMMAND, block=False)
-    async def import_data_from_message(self, update: Update, context: CallbackContext) -> int:
+    async def import_data_from_message(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         user = update.effective_user
         player_id = context.chat_data["uid"]
@@ -211,7 +213,7 @@ class WishLogPlugin(Plugin.Conversation):
     @conversation.entry_point
     @handler.command(command="warp_log_delete", filters=filters.ChatType.PRIVATE, block=False)
     @handler.message(filters=filters.Regex("^删除跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
-    async def command_start_delete(self, update: Update, context: CallbackContext) -> int:
+    async def command_start_delete(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         user = update.effective_user
@@ -234,7 +236,7 @@ class WishLogPlugin(Plugin.Conversation):
 
     @conversation.state(state=CONFIRM_DELETE)
     @handler.message(filters=filters.TEXT & ~filters.COMMAND, block=False)
-    async def command_confirm_delete(self, update: Update, context: CallbackContext) -> int:
+    async def command_confirm_delete(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> int:
         message = update.effective_message
         user = update.effective_user
         if message.text == "确定":
@@ -245,7 +247,7 @@ class WishLogPlugin(Plugin.Conversation):
         return ConversationHandler.END
 
     @handler.command(command="warp_log_force_delete", block=False, admin=True)
-    async def command_warp_log_force_delete(self, update: Update, context: CallbackContext):
+    async def command_warp_log_force_delete(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"):
         uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         args = self.get_args(context)
@@ -272,7 +274,7 @@ class WishLogPlugin(Plugin.Conversation):
 
     @handler.command(command="warp_log_export", filters=filters.ChatType.PRIVATE, block=False)
     @handler.message(filters=filters.Regex("^导出跃迁记录(.*)") & filters.ChatType.PRIVATE, block=False)
-    async def command_start_export(self, update: Update, context: CallbackContext) -> None:
+    async def command_start_export(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
         uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
         user = update.effective_user
@@ -375,7 +377,7 @@ class WishLogPlugin(Plugin.Conversation):
 
     @handler.command(command="warp_log", block=False)
     @handler.message(filters=filters.Regex("^跃迁记录?(光锥|角色|常驻|新手)$"), block=False)
-    async def command_start_analysis(self, update: Update, context: CallbackContext) -> None:
+    async def command_start_analysis(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
         user_id = await self.get_real_user_id(update)
         uid, offset = self.get_real_uid_or_offset(update)
         message = update.effective_message
