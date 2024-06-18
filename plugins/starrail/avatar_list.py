@@ -13,6 +13,7 @@ from core.services.cookies import CookiesService
 from core.services.template.models import FileType
 from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
+from gram_core.plugin.methods.inline_use_data import IInlineUseData
 from gram_core.services.template.models import RenderGroupResult
 from plugins.tools.genshin import GenshinHelper, CharacterDetails
 from plugins.tools.head_icon import HeadIconService
@@ -185,6 +186,25 @@ class AvatarListPlugin(Plugin):
         tasks = [render_task(i * image_count, c) for i, c in enumerate(avatar_datas_group)]
         return await asyncio.gather(*tasks)
 
+    async def render(self, client: "StarRailClient", all_avatars: bool = False) -> List["RenderResult"]:
+        characters: List["StarRailDetailCharacter"] = await self.get_avatars_data(client)
+        record_card = await client.get_record_card()
+        nickname = record_card.nickname
+        has_more = (not all_avatars) and len(characters) > MAX_AVATAR_COUNT
+        if has_more:
+            characters = characters[:MAX_AVATAR_COUNT]
+        avatar_datas = await self.get_final_data(characters, client)
+
+        base_render_data = {
+            "uid": mask_number(client.player_id),  # 玩家uid
+            "nickname": nickname,  # 玩家昵称
+            "has_more": has_more,  # 是否显示了全部角色
+            "avatar": (await self.head_icon.get_head_icon(client.player_id)).as_uri(),
+            "background": (await self.phone_theme.get_phone_theme(client.player_id)).as_uri(),
+        }
+
+        return await self.avatar_list_render(base_render_data, avatar_datas, has_more)
+
     @handler.command("avatars", cookie=True, block=False)
     @handler.message(filters.Regex(r"^(全部)?练度统计$"), cookie=True, block=False)
     async def avatar_list(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE"):
@@ -198,23 +218,7 @@ class AvatarListPlugin(Plugin):
         async with self.helper.genshin(user_id, player_id=uid, offset=offset) as client:
             notice = await message.reply_text("彦卿需要收集整理数据，还请耐心等待哦~")
             self.add_delete_message_job(notice, delay=60)
-            characters: List["StarRailDetailCharacter"] = await self.get_avatars_data(client)
-            record_card = await client.get_record_card()
-            nickname = record_card.nickname
-            has_more = (not all_avatars) and len(characters) > MAX_AVATAR_COUNT
-            if has_more:
-                characters = characters[:MAX_AVATAR_COUNT]
-            avatar_datas = await self.get_final_data(characters, client)
-
-        base_render_data = {
-            "uid": mask_number(client.player_id),  # 玩家uid
-            "nickname": nickname,  # 玩家昵称
-            "has_more": has_more,  # 是否显示了全部角色
-            "avatar": (await self.head_icon.get_head_icon(client.player_id)).as_uri(),
-            "background": (await self.phone_theme.get_phone_theme(client.player_id)).as_uri(),
-        }
-
-        images = await self.avatar_list_render(base_render_data, avatar_datas, has_more)
+            images = await self.render(client, all_avatars)
 
         for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
             await RenderGroupResult(results=group).reply_media_group(message, write_timeout=60)
@@ -225,3 +229,27 @@ class AvatarListPlugin(Plugin):
             "[bold]练度统计[/bold]发送图片成功",
             extra={"markup": True},
         )
+
+    async def avatar_list_use_by_inline(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
+        callback_query = update.callback_query
+        user = update.effective_user
+        user_id = user.id
+        uid = IInlineUseData.get_uid_from_context(context)
+        self.log_user(update, logger.info, "查询练度统计")
+
+        async with self.helper.genshin(user_id, player_id=uid) as client:
+            client: "StarRailClient"
+            images = await self.render(client)
+            render = images[0]
+        await render.edit_inline_media(callback_query)
+
+    async def get_inline_use_data(self) -> List[Optional[IInlineUseData]]:
+        return [
+            IInlineUseData(
+                text="练度统计",
+                hash="avatar_list",
+                callback=self.avatar_list_use_by_inline,
+                cookie=True,
+                player=True,
+            )
+        ]
