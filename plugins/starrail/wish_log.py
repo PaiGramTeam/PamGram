@@ -1,3 +1,4 @@
+from functools import partial
 from io import BytesIO
 from typing import Optional, TYPE_CHECKING, List, Union, Tuple, Dict
 
@@ -14,6 +15,7 @@ from core.services.players import PlayersService
 from core.services.template.models import FileType
 from core.services.template.services import TemplateService
 from gram_core.config import config
+from gram_core.plugin.methods.inline_use_data import IInlineUseData
 from modules.gacha_log.const import SRGF_VERSION, GACHA_TYPE_LIST_REVERSE
 from modules.gacha_log.error import (
     GachaLogAccountNotFound,
@@ -513,3 +515,44 @@ class WishLogPlugin(Plugin.Conversation):
         old_user_id: int, new_user_id: int, old_players: List["Player"]
     ) -> Optional[GachaLogMigrate]:
         return await GachaLogMigrate.create(old_user_id, new_user_id, old_players)
+
+    async def wish_log_use_by_inline(
+        self, update: "Update", context: "ContextTypes.DEFAULT_TYPE", pool_type: "StarRailBannerType"
+    ):
+        callback_query = update.callback_query
+        user = update.effective_user
+        user_id = user.id
+        uid = IInlineUseData.get_uid_from_context(context)
+
+        self.log_user(update, logger.info, "跃迁记录命令请求 || 参数 %s", pool_type.name if pool_type else None)
+        notice = None
+        try:
+            render_result = await self.rander_wish_log_analysis(user_id, uid, pool_type)
+            if isinstance(render_result, str):
+                notice = render_result
+            else:
+                await render_result.edit_inline_media(callback_query, filename="跃迁统计.png")
+        except GachaLogNotFound:
+            self.log_user(update, logger.info, "未找到跃迁记录")
+            notice = "未找到跃迁记录"
+        if notice:
+            await callback_query.answer(notice, show_alert=True)
+
+    async def get_inline_use_data(self) -> List[Optional[IInlineUseData]]:
+        types = {
+            "角色": StarRailBannerType.CHARACTER,
+            "武器": StarRailBannerType.WEAPON,
+            "常驻": StarRailBannerType.STANDARD,
+            "新手": StarRailBannerType.NOVICE,
+        }
+        data = []
+        for k, v in types.items():
+            data.append(
+                IInlineUseData(
+                    text=f"{k}跃迁",
+                    hash=f"wish_log_{v.value}",
+                    callback=partial(self.wish_log_use_by_inline, pool_type=v),
+                    player=True,
+                )
+            )
+        return data

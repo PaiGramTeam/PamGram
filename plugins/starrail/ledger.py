@@ -321,7 +321,7 @@ class LedgerPlugin(Plugin):
         user_id = user.id
         uid = IInlineUseData.get_uid_from_context(context)
 
-        self.log_user(update, logger.info, "查询旅行札记")
+        self.log_user(update, logger.info, "查询开拓月历")
         now = datetime.now()
         now_time = (now - timedelta(days=1)) if now.day == 1 and now.hour <= 4 else now
         year, month = now_time.year, now_time.month
@@ -330,14 +330,14 @@ class LedgerPlugin(Plugin):
                 render_result = await self._start_get_ledger(client, year, month)
         except DataNotPublic:
             await callback_query.answer(
-                "查询失败惹，可能是旅行札记功能被禁用了？请先通过米游社或者 hoyolab 获取一次旅行札记后重试。",
+                "查询失败惹，可能是开拓月历功能被禁用了？请先通过米游社或者 hoyolab 获取一次开拓月历后重试。",
                 show_alert=True,
             )
             return
         except SimnetBadRequest as exc:
             if exc.ret_code == -120:
                 await callback_query.answer(
-                    "当前角色冒险等阶不足，暂时无法获取信息",
+                    "当前角色开拓等级不足，暂时无法获取信息",
                     show_alert=True,
                 )
                 return
@@ -348,7 +348,7 @@ class LedgerPlugin(Plugin):
     async def get_inline_use_data(self) -> List[Optional[IInlineUseData]]:
         return [
             IInlineUseData(
-                text="当月旅行札记",
+                text="当月开拓月历",
                 hash="ledger",
                 callback=self.ledger_use_by_inline,
                 cookie=True,

@@ -3,7 +3,7 @@
 import asyncio
 import math
 import re
-from functools import lru_cache
+from functools import lru_cache, partial
 from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 
 from arkowrapper import ArkoWrapper
@@ -21,6 +21,7 @@ from core.services.template.models import RenderGroupResult, RenderResult
 from core.services.template.services import TemplateService
 from gram_core.config import config
 from gram_core.dependence.redisdb import RedisDB
+from gram_core.plugin.methods.inline_use_data import IInlineUseData
 from plugins.tools.genshin import GenshinHelper
 from utils.enkanetwork import RedisCache
 from utils.log import logger
@@ -600,3 +601,47 @@ class ChallengeStoryPlugin(Plugin):
             await self.get_challenge_story_history_floor(update, data_id, detail)
             return
         await self.get_challenge_story_history_season(update, data_id)
+
+    async def challenge_story_use_by_inline(
+        self, update: "Update", context: "ContextTypes.DEFAULT_TYPE", previous: bool
+    ):
+        callback_query = update.callback_query
+        user = update.effective_user
+        user_id = user.id
+        uid = IInlineUseData.get_uid_from_context(context)
+
+        self.log_user(update, logger.info, "查询虚构叙事挑战总览数据 previous[%s]", previous)
+        notice = None
+        try:
+            async with self.helper.genshin_or_public(user_id, uid=uid) as client:
+                if not client.public:
+                    await client.get_record_cards()
+                abyss_data, season = await self.get_rendered_pic_data(client, uid, previous)
+                images = await self.get_rendered_pic(abyss_data, season, uid, 0, False)
+                image = images[0]
+        except AbyssUnlocked:  # 若深渊未解锁
+            notice = "还未解锁虚构叙事哦~"
+        except TooManyRequestPublicCookies:
+            notice = "查询次数太多，请您稍后重试"
+
+        if notice:
+            await callback_query.answer(notice, show_alert=True)
+            return
+
+        await image.edit_inline_media(callback_query)
+
+    async def get_inline_use_data(self) -> List[Optional[IInlineUseData]]:
+        return [
+            IInlineUseData(
+                text="本期虚构叙事总览",
+                hash="challenge_story_current",
+                callback=partial(self.challenge_story_use_by_inline, previous=False),
+                player=True,
+            ),
+            IInlineUseData(
+                text="上期虚构叙事总览",
+                hash="challenge_story_previous",
+                callback=partial(self.challenge_story_use_by_inline, previous=True),
+                player=True,
+            ),
+        ]

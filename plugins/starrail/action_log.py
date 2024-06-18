@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from telegram.constants import ChatAction
 from telegram.ext import filters
@@ -7,6 +7,7 @@ from simnet import Region
 
 from core.services.self_help.services import ActionLogService
 from gram_core.plugin import Plugin, handler
+from gram_core.plugin.methods.inline_use_data import IInlineUseData
 from gram_core.services.template.services import TemplateService
 from modules.action_log.client import ActionLogAnalyse
 from plugins.tools.action_log_system import ActionLogSystem
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
     from telegram.ext import ContextTypes
 
     from simnet import StarRailClient
+
+    from gram_core.services.template.models import RenderResult
 
 
 class NotSupport(Exception):
@@ -100,6 +103,15 @@ class ActionLogPlugins(Plugin):
         data["background"] = (await self.phone_theme.get_phone_theme(player_id)).as_uri()
         return data
 
+    async def render(self, client: "StarRailClient") -> "RenderResult":
+        data = await self.get_render_data(client.player_id)
+        return await self.template_service.render(
+            "starrail/action_log/action_log.html",
+            await self.add_theme_data(data, client.player_id),
+            full_page=True,
+            query_selector=".container",
+        )
+
     @handler.command(command="action_log", cookie=True, block=False)
     async def action_log(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
         user_id = await self.get_real_user_id(update)
@@ -110,16 +122,37 @@ class ActionLogPlugins(Plugin):
         try:
             async with self.helper.genshin(user_id, player_id=uid, offset=offset) as client:
                 client: "StarRailClient"
-                data = await self.get_render_data(client.player_id)
-                render = await self.template_service.render(
-                    "starrail/action_log/action_log.html",
-                    await self.add_theme_data(data, client.player_id),
-                    full_page=True,
-                    query_selector=".container",
-                )
+                render = await self.render(client)
                 await render.reply_photo(message)
         except NotSupport as e:
             msg = await message.reply_text(e.msg)
             if filters.ChatType.GROUPS.filter(message):
                 self.add_delete_message_job(message, delay=60)
                 self.add_delete_message_job(msg, delay=60)
+
+    async def action_log_use_by_inline(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
+        callback_query = update.callback_query
+        user = update.effective_user
+        user_id = user.id
+        uid = IInlineUseData.get_uid_from_context(context)
+        self.log_user(update, logger.info, "查询登录记录")
+
+        try:
+            async with self.helper.genshin(user_id, player_id=uid) as client:
+                client: "StarRailClient"
+                render = await self.render(client)
+        except NotSupport as e:
+            await callback_query.answer(e.msg, show_alert=True)
+            return
+        await render.edit_inline_media(callback_query)
+
+    async def get_inline_use_data(self) -> List[Optional[IInlineUseData]]:
+        return [
+            IInlineUseData(
+                text="登录统计",
+                hash="action_log",
+                callback=self.action_log_use_by_inline,
+                cookie=True,
+                player=True,
+            )
+        ]
