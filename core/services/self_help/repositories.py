@@ -26,6 +26,8 @@ class ActionLogRepository(BaseService.Component):
             client: "InfluxDBClientAsync"
             query = (
                 'import "date"'
+                'import "timezone"'
+                'option location = timezone.location(name: "Asia/Shanghai")'
                 'from(bucket: "{}")'
                 "|> range(start: -180d)"
                 '|> filter(fn: (r) => r["_measurement"] == "action_log")'
