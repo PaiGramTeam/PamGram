@@ -44,19 +44,19 @@ class ActionLogAnalyse(DateUtils):
 
     def get_this_week_duration(self) -> int:
         """本周时长"""
-        return sum(d.duration.seconds for d in self.this_week_data)
+        return (sum(d.duration.seconds for d in self.this_week_data)) if self.this_week_data else 0
 
     def get_last_week_duration(self) -> int:
         """上周时长"""
-        return sum(d.duration.seconds for d in self.last_week_data)
+        return (sum(d.duration.seconds for d in self.last_week_data)) if self.last_week_data else 0
 
     def get_this_month_duration(self) -> int:
         """本月时长"""
-        return sum(d.duration.seconds for d in self.this_month_data)
+        return (sum(d.duration.seconds for d in self.this_month_data)) if self.this_month_data else 0
 
     def get_last_month_duration(self) -> int:
         """上月时长"""
-        return sum(d.duration.seconds for d in self.last_month_data)
+        return (sum(d.duration.seconds for d in self.last_month_data)) if self.last_month_data else 0
 
     def get_this_month_avg_duration(self) -> float:
         """本月平均时长"""
@@ -70,19 +70,19 @@ class ActionLogAnalyse(DateUtils):
 
     def get_this_week_long_duration(self) -> int:
         """周最长会话"""
-        return max(d.duration.seconds for d in self.this_week_data)
+        return (max(d.duration.seconds for d in self.this_week_data)) if self.this_week_data else 0
 
     def get_this_week_short_duration(self) -> int:
         """周最短会话"""
-        return min(d.duration.seconds for d in self.this_week_data)
+        return (min(d.duration.seconds for d in self.this_week_data)) if self.this_week_data else 0
 
     def get_this_month_long_duration(self) -> int:
         """月最长会话"""
-        return max(d.duration.seconds for d in self.this_month_data)
+        return (max(d.duration.seconds for d in self.this_month_data)) if self.this_month_data else 0
 
     def get_this_month_short_duration(self) -> int:
         """月最短会话"""
-        return min(d.duration.seconds for d in self.this_month_data)
+        return (min(d.duration.seconds for d in self.this_month_data)) if self.this_month_data else 0
 
     @staticmethod
     def format_sec(sec: Union[int, float]) -> str:
