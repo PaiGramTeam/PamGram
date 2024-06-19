@@ -46,7 +46,7 @@ body {
 /* 概览 */
 
 .overview {
-    height: 250px;
+    /*height: 250px;*/
     padding: 20px 40px;
     background-size: cover;
     background-repeat: no-repeat;
@@ -64,6 +64,10 @@ body {
     background-image: linear-gradient(to top, rgb(0 0 0 / 10%), rgb(0 0 0 / 10%)), url("./background/abyss-story-bg-grad.png");
 }
 
+.overview-abyss-boss {
+    background-image: linear-gradient(to top, rgb(0 0 0 / 10%), rgb(0 0 0 / 10%)), url("./background/abyss-boss-bg-grad.png");
+}
+
 .summarize {
     font-size: 20px;
     width: calc(100% - 90px);
@@ -79,6 +83,14 @@ body {
     background-position: right, left;
     background-size: auto 100%, auto 100%;
     backdrop-filter: blur(5px);
+}
+
+.summarize-boss {
+    height: 200px;
+}
+
+.summarize-boss > div {
+    height: 25%!important;
 }
 
 .summarize > div {
@@ -263,6 +275,12 @@ body {
 
 .floor-abyss-story {
     background-image: url('./background/abyss-story-bg-grad.png');
+    background-size: contain;
+    background-color: #1c232c;
+}
+
+.floor-abyss-boss {
+        background-image: url('./background/abyss-boss-bg-grad.png');
     background-size: contain;
     background-color: #1c232c;
 }

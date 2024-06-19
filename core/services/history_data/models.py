@@ -2,6 +2,7 @@ import enum
 
 from pydantic import BaseModel
 from simnet.models.starrail.chronicle.challenge import StarRailChallenge
+from simnet.models.starrail.chronicle.challenge_boss import StarRailChallengeBoss, StarRailChallengeBossGroup
 from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory, StarRailChallengeStoryGroup
 from simnet.models.starrail.diary import StarRailDiary
 
@@ -12,6 +13,7 @@ __all__ = (
     "HistoryDataTypeEnum",
     "HistoryDataAbyss",
     "HistoryDataChallengeStory",
+    "HistoryDataChallengeBoss",
     "HistoryDataLedger",
 )
 
@@ -20,6 +22,7 @@ class HistoryDataTypeEnum(int, enum.Enum):
     ABYSS = 0  # 混沌回忆
     CHALLENGE_STORY = 1  # 虚构叙事
     LEDGER = 2  # 开拓月历
+    CHALLENGE_BOSS = 3  # 末日幻影
 
 
 class HistoryDataAbyss(BaseModel):
@@ -36,6 +39,15 @@ class HistoryDataChallengeStory(BaseModel):
 
     @classmethod
     def from_data(cls, data: HistoryData) -> "HistoryDataChallengeStory":
+        return cls.parse_obj(data.data)
+
+
+class HistoryDataChallengeBoss(BaseModel):
+    boss_data: StarRailChallengeBoss
+    group: StarRailChallengeBossGroup
+
+    @classmethod
+    def from_data(cls, data: HistoryData) -> "HistoryDataChallengeBoss":
         return cls.parse_obj(data.data)
 
 

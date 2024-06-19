@@ -14,18 +14,34 @@
         .overview {
             border-radius: unset;
         }
+
+        {% if title == '末日幻影' %}
+        .boss-upper::before {
+            background-image: url("{{ upper_boss.icon }}");
+        }
+
+        .boss-lower::before {
+            background-image: url("{{ lower_boss.icon }}");
+        }
+        {% endif %}
     </style>
 </head>
 <body>
 <div class="container">
+    {% set summarize_class = '' %}
     {% if title == '混沌回忆' %}
     {% set overview_class = 'overview-abyss' %}
-    {% else %}
+    {% endif %}
+    {% if title == '虚构叙事' %}
     {% set overview_class = 'overview-abyss-story' %}
+    {% endif %}
+    {% if title == '末日幻影' %}
+    {% set overview_class = 'overview-abyss-boss' %}
+    {% set summarize_class = 'summarize-boss' %}
     {% endif %}
     <div class="overview {{ overview_class }}">
         <div class="title">{{ title }}挑战回顾</div>
-        <div class="summarize">
+        <div class="summarize  {{ summarize_class }}">
             <div>
                 <div>UID: {{ uid }}</div>
                 <div class="star">
@@ -40,6 +56,16 @@
                 <div>本期结束: {{ end_time }}</div>
                 <div>战斗次数: {{ total_battles }}</div>
             </div>
+            {% if title == '末日幻影' %}
+            <div>
+                <div class="star boss-upper">
+                    <span>{{ upper_boss.name_mi18n }}</span>
+                </div>
+                <div class="star boss-lower">
+                    <span>{{ lower_boss.name_mi18n }}</span>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@ from typing import List
 
 from pytz import timezone
 from simnet.models.starrail.chronicle.challenge import StarRailChallenge
+from simnet.models.starrail.chronicle.challenge_boss import StarRailChallengeBoss, StarRailChallengeBossGroup
 from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory, StarRailChallengeStoryGroup
 from simnet.models.starrail.diary import StarRailDiary
 
@@ -12,6 +13,7 @@ from core.services.history_data.models import (
     HistoryDataAbyss,
     HistoryDataChallengeStory,
     HistoryDataLedger,
+    HistoryDataChallengeBoss,
 )
 from gram_core.base_service import BaseService
 from gram_core.services.history_data.services import HistoryDataBaseServices
@@ -26,6 +28,7 @@ __all__ = (
     "HistoryDataBaseServices",
     "HistoryDataAbyssServices",
     "HistoryDataChallengeStoryServices",
+    "HistoryDataChallengeBossServices",
     "HistoryDataLedgerServices",
 )
 
@@ -78,6 +81,38 @@ class HistoryDataChallengeStoryServices(BaseService, HistoryDataBaseServices):
             data_id=group.season,
             time_created=datetime.datetime.now(),
             type=HistoryDataChallengeStoryServices.DATA_TYPE,
+            data=dict_data,
+        )
+
+
+class HistoryDataChallengeBossServices(BaseService, HistoryDataBaseServices):
+    DATA_TYPE = HistoryDataTypeEnum.CHALLENGE_BOSS.value
+
+    @staticmethod
+    def exists_data(data: HistoryData, old_data: List[HistoryData]) -> bool:
+
+        def _get_data(_data: HistoryData):
+            detail = _data.data.get("boss_data", {}).get("all_floor_detail")
+            _avatars = []
+            for floor in detail:
+                for avatar in floor.get("avatars", []):
+                    _avatars.append(avatar["id"])
+            return _avatars
+
+        avatars = _get_data(data)
+        return any(_get_data(d) == avatars for d in old_data)
+
+    @staticmethod
+    def create(user_id: int, boss_data: StarRailChallengeBoss, group: StarRailChallengeBossGroup):
+        data = HistoryDataChallengeBoss(boss_data=boss_data, group=group)
+        json_data = data.json(by_alias=True, encoder=json_encoder)
+        dict_data = jsonlib.loads(json_data)
+        dict_data["boss_data"]["groups"] = []
+        return HistoryData(
+            user_id=user_id,
+            data_id=group.season,
+            time_created=datetime.datetime.now(),
+            type=HistoryDataChallengeBossServices.DATA_TYPE,
             data=dict_data,
         )
 

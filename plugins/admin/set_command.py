@@ -50,6 +50,8 @@ class SetCommandPlugin(Plugin):
             BotCommand("challenge_history", "混沌回忆历史信息查询"),
             BotCommand("challenge_story", "虚构叙事信息查询"),
             BotCommand("challenge_story_history", "虚构叙事历史信息查询"),
+            BotCommand("challenge_boss", "末日幻想信息查询"),
+            BotCommand("challenge_boss_history", "末日幻想历史信息查询"),
             BotCommand("rogue", "模拟宇宙信息查询"),
             BotCommand("rogue_locust", "寰宇蝗灾信息查询"),
             BotCommand("cookies_import", "从其他 BOT 导入账号信息"),
