@@ -38,6 +38,8 @@ class ActionLogSystem(Plugin):
     async def import_action_log(self, client: "StarRailClient", authkey: str) -> bool:
         data = await client.get_starrail_action_log(authkey=authkey)
         # 确保第一个数据为登出、最后一条数据为登入
+        if not data:
+            return False
         if data[0].status == 1:
             data.pop(0)
         if data[-1].status == 0:
