@@ -481,6 +481,7 @@ class RenderTemplate:
 
         score = self.cal_avatar_relic_score()
         artifact_total_score: float = 0
+        artifact_total_score_label = "N/A"
         artifacts = self.find_artifacts()
         if score and score.relics:
             relic_map = {relic.tid: relic for relic in artifacts}
@@ -490,8 +491,8 @@ class RenderTemplate:
                     artifact.set_score(relic)
 
             artifact_total_score = score.total_score
-        artifact_total_score = round(artifact_total_score, 1)
-        artifact_total_score_label: str = score.total_rating
+            artifact_total_score = round(artifact_total_score, 1)
+            artifact_total_score_label: str = score.total_rating
 
         weapon = None
         weapon_detail = None
