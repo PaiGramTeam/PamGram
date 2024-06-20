@@ -74,12 +74,16 @@ class DailyNotePlugin(Plugin):
             "max_weekly_discounts": daily_info.max_weekly_discounts,
             "current_rogue_score": daily_info.current_rogue_score,
             "max_rogue_score": daily_info.max_rogue_score,
+            "rogue_tourn_weekly_unlocked": daily_info.rogue_tourn_weekly_unlocked,
+            "rogue_tourn_weekly_max": daily_info.rogue_tourn_weekly_max,
+            "rogue_tourn_weekly_cur": daily_info.rogue_tourn_weekly_cur,
         }
         render_result = await self.template_service.render(
             "starrail/daily_note/daily_note.html",
             render_data,
-            {"width": 600, "height": 530},
+            {"width": 600, "height": 1000},
             full_page=False,
+            query_selector=".container",
             ttl=8 * 60,
         )
         return render_result
@@ -87,7 +91,12 @@ class DailyNotePlugin(Plugin):
     @staticmethod
     def get_task_button(bot_username: str) -> InlineKeyboardMarkup:
         return InlineKeyboardMarkup(
-            [[InlineKeyboardButton(">> 设置状态提醒 <<", url=create_deep_linked_url(bot_username, "daily_note_tasks"))]]
+            [
+                [
+                    InlineKeyboardButton("设置状态提醒", url=create_deep_linked_url(bot_username, "daily_note_tasks")),
+                    InlineKeyboardButton("在其他对话使用", switch_inline_query="功能"),
+                ]
+            ]
         )
 
     @handler.command("dailynote", cookie=True, block=False)
