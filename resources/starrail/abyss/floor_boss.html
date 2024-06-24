@@ -56,7 +56,7 @@
                     </div>
                 </div>
                 <div class="battles">
-                    {% for node in floor_nodes %}
+                    {% for node in floor_nodes if node.has_data %}
                     <div class="battle">
                         {% for character in node.avatars %}
                             <div class="character">
@@ -75,7 +75,6 @@
                                 <div class="caption">Lv.{{ character.level }}</div>
                             </div>
                         {% endfor %}
-                        {% if loop.length > 1 %}
                             <div class="battle-info">
                                 <div>节点{{ loop.index }}</div>
                                 <br/>
@@ -87,7 +86,6 @@
                                 <div>未击败首领</div>
                                 {% endif %}
                             </div>
-                        {% endif %}
                     </div>
                     <div class="buffs">
                         <div class="buff-item">
