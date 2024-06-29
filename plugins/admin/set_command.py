@@ -29,6 +29,8 @@ class SetCommandPlugin(Plugin):
             BotCommand("player", "管理用户绑定玩家"),
             BotCommand("verify", "手动验证"),
             BotCommand("daily_note_tasks", "自动便笺提醒"),
+            BotCommand("cookies_import", "从其他 BOT 导入账号信息"),
+            BotCommand("cookies_export", "导出账号信息给其他 BOT"),
         ]
         group_command = [
             BotCommand("help", "帮助"),
@@ -55,8 +57,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("rogue", "模拟宇宙信息查询"),
             BotCommand("rogue_locust", "寰宇蝗灾信息查询"),
             BotCommand("rogue_tourn", "差分宇宙信息查询"),
-            BotCommand("cookies_import", "从其他 BOT 导入账号信息"),
-            BotCommand("cookies_export", "导出账号信息给其他 BOT"),
+            BotCommand("activity_export", "活动数据导出"),
         ]
         admin_command = [
             BotCommand("add_admin", "添加管理员"),
