@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/pc.css" rel="stylesheet">
+    <link href="css/rogue_tourn.css" rel="stylesheet">
+</head>
+<body>
+<div>
+    <div data-v-5dedbd3c="" data-v-0d3913e0="" class="simulate">
+        <div data-v-5dedbd3c="" class="simulate-box">
+            <div data-v-5dedbd3c="" class="simulate-box-title">差分宇宙•人间喜剧  -  UID {{ uid }}</div>
+            <div data-v-5dedbd3c="" class="simulate-box-head">
+                <div data-v-5dedbd3c="" class="simulate-box-head_list">
+                    <div data-v-5dedbd3c="" class="simulate-box-head_image">
+                        <img data-v-5dedbd3c="" src="img/level-icon.f3d1f752.png" alt="">
+                        <div data-v-5dedbd3c="" class="simulate-box-head_name">拟合等级</div>
+                    </div>
+                    <div data-v-5dedbd3c="" class="simulate-box-head_desc">
+                        <div data-v-5dedbd3c="" class="simulate-box-head_num g--font-hsr">{{ basic.season_level }}</div>
+                    </div>
+                </div>
+                <div data-v-5dedbd3c="" class="simulate-box-head_list">
+                    <div data-v-5dedbd3c="" class="simulate-box-head_image">
+                        <img data-v-5dedbd3c="" src="img/score-icon.1742263a.png" alt="">
+                        <div data-v-5dedbd3c="" class="simulate-box-head_name">本周额外拟合值</div>
+                    </div>
+                    <div data-v-5dedbd3c="" class="simulate-box-head_desc">
+                        <div data-v-5dedbd3c="" class="simulate-box-head_num g--font-hsr score">
+                            {{ basic.weekly_score }}/{{ basic.weekly_score_max }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div data-v-5dedbd3c="" class="simulate-box-center">
+                <div data-v-5dedbd3c="" class="simulate-box-center_title">
+                    <div data-v-5dedbd3c="" class="title-left">数据一览</div>
+                </div>
+                <div data-v-5dedbd3c="" class="simulate-box-center_content info">
+                    <div data-v-5dedbd3c="" class="info-list">
+                        <div data-v-5dedbd3c="" class="info-num g--font-hsr">{{ basic.possibility_gallery_progress }}%</div>
+                        <img data-v-5dedbd3c="" src="img/info-border.4ea24bf7.png" class="info-border" alt="">
+                        <div data-v-5dedbd3c="" class="info-name">可能性画廊</div>
+                    </div>
+                    <div data-v-5dedbd3c="" class="info-list">
+                        <div data-v-5dedbd3c="" class="info-num g--font-hsr">{{ basic.skill_tree_activated }}</div>
+                        <img data-v-5dedbd3c="" src="img/info-border.4ea24bf7.png" class="info-border" alt="">
+                        <div data-v-5dedbd3c="" class="info-name">已激活结点</div>
+                    </div>
+                    <div data-v-5dedbd3c="" class="info-list">
+                        <div data-v-5dedbd3c="" class="info-num g--font-hsr">
+                            {{ basic.season_task_finished }}/{{ basic.season_task_total }}
+                        </div>
+                        <img data-v-5dedbd3c="" src="img/info-border.4ea24bf7.png" class="info-border" alt="">
+                        <div data-v-5dedbd3c="" class="info-name">稳态数组</div>
+                    </div>
+                </div>
+            </div>
+            <div data-v-5dedbd3c="" class="simulate-box-center">
+                <div data-v-5dedbd3c="" class="simulate-box-center_title">
+                    <div data-v-5dedbd3c="" class="title-left">常规演算</div>
+                </div>
+                {% set record = basic.normal_record_brief %}
+                <div data-v-5dedbd3c="" class="simulate-box-center_content daily">
+                    <div data-v-5dedbd3c="" class="content-left">最高通关难度</div>
+                    {% if record.exist_data %}
+                    <div data-v-15e079f7="" data-v-5dedbd3c="" class="content-right-wrap content-right-undefined">
+                        <div data-v-15e079f7="" class="content-right-image">
+                            <div data-v-15e079f7="" class="content-right">
+                                {% set level = record.common_info.floor + 1 %}
+                                {% set diff = record.common_info.difficulty %}
+                                <img data-v-15e079f7="" src="img/level-{{ level }}.png" class="difficult-level-img" alt="">
+                                {% if level == 6 and diff > 0 %}
+                                <p data-v-15e079f7="" class="difficult-num g--font-hsr">
+                                    {{ diff }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            {% if record.icon %}
+                            <img data-v-15e079f7="" src="{{ record.icon }}" class="difficult-icon" alt="">
+                            {% endif %}
+                        </div>
+                        {% if record.title %}
+                        <div data-v-15e079f7="" class="difficult-desc" style="color: {{ record.color }};">{{ record.title }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div data-v-15e079f7="" data-v-5dedbd3c="" class="content-right-wrap">
+                        <p data-v-15e079f7="" class="finish-name">尚未挑战</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div data-v-5dedbd3c="" class="simulate-box-center">
+                <div data-v-5dedbd3c="" class="simulate-box-center_title">
+                    <div data-v-5dedbd3c="" class="title-left">周期演算</div>
+                </div>
+                <div data-v-5dedbd3c="" class="simulate-box-center_content week">
+                    <div data-v-5dedbd3c="" class="content-left">本周首通奖励</div>
+                    {% set finish_css = '' %}
+                    {% set finish_text = '未领取' %}
+                    {% if basic.finished_weekly %}
+                    {% set finish_css = 'finish' %}
+                    {% set finish_text = '已领取' %}
+                    {% endif %}
+                    <div data-v-5dedbd3c="" class="content-right {{ finish_css }}"><p data-v-5dedbd3c="" class="finish-name">
+                        {{ finish_text }}
+                    </p>
+                        <div data-v-5dedbd3c="" class="finish-icon"></div>
+                    </div>
+                </div>
+                {% set record = basic.weekly_record_brief %}
+                <div data-v-5dedbd3c="" class="simulate-box-center_content week">
+                    <div data-v-5dedbd3c="" class="content-left">本周最高通关难度</div>
+                    {% if record.exist_data %}
+                    <div data-v-15e079f7="" data-v-5dedbd3c="" size="" class="content-right-wrap content-right-detail">
+                        <div data-v-15e079f7="" class="content-right-image">
+                            <div data-v-15e079f7="" class="content-right">
+                                {% set level = record.common_info.floor + 1 %}
+                                {% set diff = record.common_info.difficulty %}
+                                <img data-v-15e079f7="" src="img/level-{{ level }}.png" class="difficult-level-img" alt="">
+                                {% if level == 6 and diff > 0 %}
+                                <p data-v-15e079f7="" class="difficult-num g--font-hsr">
+                                    {{ diff }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            {% if record.icon %}
+                            <img data-v-15e079f7="" src="{{ record.icon }}" class="difficult-icon" alt="">
+                            {% endif %}
+                        </div>
+                        {% if record.title %}
+                        <div data-v-15e079f7="" class="difficult-desc" style="color: {{ record.color }};">{{ record.title }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div data-v-15e079f7="" data-v-5dedbd3c="" class="content-right-wrap">
+                        <p data-v-15e079f7="" class="finish-name">尚未挑战</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -7,7 +7,7 @@ aiohttp==3.9.5
 aiolimiter==1.1.0
 aiosignal==1.3.1
 aiosqlite[sqlite]==0.20.0
-alembic==1.13.1
+alembic==1.13.2
 anyio==4.4.0
 apscheduler==3.10.4
 arko-wrapper==0.2.8
@@ -56,7 +56,7 @@ mdurl==0.1.2
 msgspec==0.18.6
 multidict==6.0.5
 mypy-extensions==1.0.0
-openpyxl==3.1.4
+openpyxl==3.1.5
 orjson==3.10.5
 packaging==24.1
 pathspec==0.12.1
@@ -84,10 +84,10 @@ rapidfuzz==3.9.3
 reactivex==4.0.4
 redis==5.0.7
 rich==13.7.1
-sentry-sdk==2.7.0
+sentry-sdk==2.7.1
 setuptools==70.1.1
 shellingham==1.5.4
-simnet @ git+https://github.com/PaiGramTeam/SIMNet@277a33321a20909541b46bf4ecf794fd47e19fb1
+simnet @ git+https://github.com/PaiGramTeam/SIMNet@10654fc90012ab97288c21f58b7091fd16c301f7
 six==1.16.0
 smmap==5.0.1
 sniffio==1.3.1

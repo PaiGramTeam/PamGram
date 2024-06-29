@@ -93,19 +93,10 @@ class PlayerRoguePlugins(Plugin):
             uid, pre = await self.get_uid(user_id, context.args, message.reply_to_message, uid, offset)
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
                 render_result = await self.render(client, pre, uid)
-        except TooManyRequestPublicCookies:
-            await message.reply_text("用户查询次数过多 请稍后重试")
-            return
         except AttributeError as exc:
             logger.error("模拟宇宙数据有误")
             logger.exception(exc)
             await message.reply_text("模拟宇宙数据有误 估计是彦卿晕了")
-            return
-        except NotSupport:
-            reply_message = await message.reply_text("暂不支持该服务器查询模拟宇宙数据")
-            if filters.ChatType.GROUPS.filter(reply_message):
-                self.add_delete_message_job(message)
-                self.add_delete_message_job(reply_message)
             return
         except NotHaveData:
             reply_message = await message.reply_text("没有查找到模拟宇宙数据")
@@ -154,6 +145,38 @@ class PlayerRoguePlugins(Plugin):
             {"width": 520, "height": 1000},
             full_page=True,
             query_selector="#new-container",
+        )
+
+    @handler.command("rogue_tourn", block=False)
+    @handler.message(filters.Regex("^差分宇宙信息查询(.*)"), block=False)
+    async def rogue_tourn_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
+        user_id = await self.get_real_user_id(update)
+        message = update.effective_message
+        uid, offset = self.get_real_uid_or_offset(update)
+        self.log_user(update, logger.info, "查询差分宇宙信息命令请求")
+        try:
+            async with self.helper.genshin_or_public(user_id, uid=uid, offset=offset) as client:
+                render_result = await self.render_rogue_tourn(client)
+        except AttributeError as exc:
+            logger.error("差分宇宙数据有误")
+            logger.exception(exc)
+            await message.reply_text("差分宇宙数据有误 估计是彦卿晕了")
+            return
+        await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
+        await render_result.reply_photo(message, filename=f"{user_id}.png")
+
+    async def render_rogue_tourn(self, client: "StarRailClient") -> RenderResult:
+        rogue = await client.get_starrail_rogue_tourn()
+        data = {
+            "uid": mask_number(client.player_id),
+            "basic": rogue.basic,
+        }
+        return await self.template_service.render(
+            "starrail/rogue/rogue_tourn.html",
+            data,
+            {"width": 1000, "height": 700},
+            full_page=True,
+            query_selector=".simulate",
         )
 
     @handler.command("rogue_locust", block=False)

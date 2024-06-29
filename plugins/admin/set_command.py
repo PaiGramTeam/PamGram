@@ -54,6 +54,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("challenge_boss_history", "末日幻想历史信息查询"),
             BotCommand("rogue", "模拟宇宙信息查询"),
             BotCommand("rogue_locust", "寰宇蝗灾信息查询"),
+            BotCommand("rogue_tourn", "差分宇宙信息查询"),
             BotCommand("cookies_import", "从其他 BOT 导入账号信息"),
             BotCommand("cookies_export", "导出账号信息给其他 BOT"),
         ]
@@ -75,6 +76,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("add_block", "添加黑名单"),
             BotCommand("del_block", "移除黑名单"),
         ]
+        await context.bot.delete_my_commands()
         await context.bot.set_my_commands(commands=group_command)
         await context.bot.set_my_commands(commands=group_command + user_command, scope=BotCommandScopeAllPrivateChats())
         if config.error.notification_chat_id:
