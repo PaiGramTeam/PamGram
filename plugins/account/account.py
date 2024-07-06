@@ -74,10 +74,7 @@ class BindAccountPlugin(Plugin.Conversation):
             context.chat_data["bind_account_plugin_data"] = bind_account_plugin_data
         else:
             bind_account_plugin_data.reset()
-        text = (
-            f"你好 {user.mention_markdown_v2()} "
-            f'{escape_markdown("！请选择要绑定的服务器！或回复退出取消操作")}'
-        )
+        text = f"你好 {user.mention_markdown_v2()} " f'{escape_markdown("！请选择要绑定的服务器！或回复退出取消操作")}'
         reply_keyboard = [["米游社", "HoYoLab"], ["退出"]]
         await message.reply_markdown_v2(text, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         return CHECK_SERVER
