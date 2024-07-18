@@ -19,7 +19,7 @@ dependencies = [
     "ujson<6.0.0,>=5.9.0",
     "Jinja2<4.0.0,>=3.1.2",
     "python-telegram-bot[ext,rate-limiter]<22.0,>=21.3",
-    "sqlmodel<1.0.0,>=0.0.16",
+    "sqlmodel<1.0.0,>=0.0.20",
     "colorlog<7.0.0,>=6.8.0",
     "fakeredis<3.0.0,>=2.19.0",
     "redis<6.0.0,>=5.0.1",
@@ -45,7 +45,7 @@ dependencies = [
     "aiosqlite[sqlite]<1.0.0,>=0.20.0",
     "simnet @ git+https://github.com/PaiGramTeam/SIMNet",
     "psutil<7.0.0,>=6.0.0",
-    "starrail-damage-cal<2.0.0,>=1.6.1",
+    "starrail-damage-cal<2.0.0,>=1.7.0",
     "starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore",
     "influxdb-client[async,ciso]>=1.43.0",
 ]
@@ -62,9 +62,6 @@ distribution = false
 
 [tool.pdm.build]
 includes = []
-
-[tool.pdm.resolution.overrides]
-httpx = "<1.0.0,>=0.25.0"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
