@@ -31,6 +31,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("daily_note_tasks", "自动便笺提醒"),
             BotCommand("cookies_import", "从其他 BOT 导入账号信息"),
             BotCommand("cookies_export", "导出账号信息给其他 BOT"),
+            BotCommand("privacy", "隐私政策"),
         ]
         group_command = [
             BotCommand("help", "帮助"),
