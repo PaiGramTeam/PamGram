@@ -24,6 +24,7 @@ from modules.gacha_log.error import (
     GachaLogInvalidAuthkey,
     GachaLogMixedProvider,
     GachaLogNotFound,
+    GachaLogWebError,
 )
 from modules.gacha_log.helpers import from_url_get_authkey
 from modules.gacha_log.log import GachaLog
@@ -49,7 +50,12 @@ if TYPE_CHECKING:
 
 INPUT_URL, INPUT_FILE, CONFIRM_DELETE = range(10100, 10103)
 WAITING = f"小{config.notice.bot_name}正在从服务器获取数据，请稍后"
-WISHLOG_NOT_FOUND = f"{config.notice.bot_name}没有找到你的抽卡记录，快来私聊{config.notice.bot_name}导入吧~"
+WISHLOG_NOT_FOUND = f"{config.notice.bot_name}没有找到你的跃迁记录，快来私聊{config.notice.bot_name}导入吧~"
+WISHLOG_WEB = """<b>跃迁记录详细信息查询</b>
+
+已为您创建一枚令牌，点击下方按钮可直接进行查询。
+
+有效期为 1 小时，过期需重新申请。如怀疑泄漏请立即重新申请。"""
 
 
 class WishLogPlugin(Plugin.Conversation):
@@ -360,7 +366,9 @@ class WishLogPlugin(Plugin.Conversation):
         if reply_message.photo:
             self.wish_photo = reply_message.photo[-1].file_id
 
-    async def wish_log_pool_send(self, user_id: int, uid: int, pool_type: "StarRailBannerType", message: "Message"):
+    async def wish_log_pool_send(
+        self, user_id: int, uid: int, pool_type: "StarRailBannerType", message: "Message", bot_username: str
+    ):
         await message.reply_chat_action(ChatAction.TYPING)
         png_data = await self.rander_wish_log_analysis(user_id, uid, pool_type)
         if isinstance(png_data, str):
@@ -371,9 +379,11 @@ class WishLogPlugin(Plugin.Conversation):
         else:
             await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
             if png_data.file_type == FileType.DOCUMENT:
-                await png_data.reply_document(message, filename="抽卡统计.png")
+                await png_data.reply_document(
+                    message, filename="抽卡统计.png", reply_markup=self.gacha_log.get_web_upload_button(bot_username)
+                )
             else:
-                await png_data.reply_photo(message)
+                await png_data.reply_photo(message, reply_markup=self.gacha_log.get_web_upload_button(bot_username))
 
     @handler.command(command="warp_log", block=False)
     @handler.message(filters=filters.Regex("^跃迁记录?(光锥|角色|常驻|新手)$"), block=False)
@@ -397,7 +407,7 @@ class WishLogPlugin(Plugin.Conversation):
             if pool_type is None:
                 await self.wish_log_pool_choose(user_id, player_id, message)
             else:
-                await self.wish_log_pool_send(user_id, player_id, pool_type, message)
+                await self.wish_log_pool_send(user_id, player_id, pool_type, message, context.bot.username)
         except GachaLogNotFound:
             self.log_user(update, logger.info, "未找到跃迁记录")
             buttons = [
@@ -409,7 +419,7 @@ class WishLogPlugin(Plugin.Conversation):
             )
 
     @handler.callback_query(pattern=r"^get_wish_log\|", block=False)
-    async def get_wish_log(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE") -> None:
+    async def get_wish_log(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
         callback_query = update.callback_query
         user = callback_query.from_user
         message = callback_query.message
@@ -441,11 +451,13 @@ class WishLogPlugin(Plugin.Conversation):
             await callback_query.answer(text="这不是你的按钮！\n" + config.notice.user_mismatch, show_alert=True)
             return
         if show_type == "count":
-            await self.get_wish_log_count(update, user_id, uid, pool)
+            await self.get_wish_log_count(update, context, user_id, uid, pool)
         else:
-            await self.get_wish_log_log(update, user_id, uid, pool)
+            await self.get_wish_log_log(update, context, user_id, uid, pool)
 
-    async def get_wish_log_log(self, update: "Update", user_id: int, uid: int, pool: str):
+    async def get_wish_log_log(
+        self, update: "Update", context: "ContextTypes.DEFAULT_TYPE", user_id: int, uid: int, pool: str
+    ):
         callback_query = update.callback_query
         message = callback_query.message
 
@@ -462,12 +474,20 @@ class WishLogPlugin(Plugin.Conversation):
             await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
             await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
             if png_data.file_type == FileType.DOCUMENT:
-                await png_data.reply_document(message, filename="抽卡统计.png")
+                await png_data.reply_document(
+                    message,
+                    filename="抽卡统计.png",
+                    reply_markup=self.gacha_log.get_web_upload_button(context.bot.username),
+                )
                 self.add_delete_message_job(message, delay=1)
             else:
-                await png_data.edit_media(message)
+                await png_data.edit_media(
+                    message, reply_markup=self.gacha_log.get_web_upload_button(context.bot.username)
+                )
 
-    async def get_wish_log_count(self, update: "Update", user_id: int, uid: int, pool: str):
+    async def get_wish_log_count(
+        self, update: "Update", context: "ContextTypes.DEFAULT_TYPE", user_id: int, uid: int, pool: str
+    ):
         callback_query = update.callback_query
         message = callback_query.message
 
@@ -502,15 +522,44 @@ class WishLogPlugin(Plugin.Conversation):
             )
             await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
             if document:
-                await png.reply_document(message, filename="抽卡统计.png")
+                await png.reply_document(
+                    message,
+                    filename="抽卡统计.png",
+                    reply_markup=self.gacha_log.get_web_upload_button(context.bot.username),
+                )
                 self.add_delete_message_job(message, delay=1)
             else:
-                await png.edit_media(message)
+                await png.edit_media(message, reply_markup=self.gacha_log.get_web_upload_button(context.bot.username))
 
     async def add_theme_data(self, data: Dict, player_id: int):
         data["avatar"] = (await self.head_icon.get_head_icon(player_id)).as_uri()
         data["background"] = (await self.phone_theme.get_phone_theme(player_id)).as_uri()
         return data
+
+    @handler.command(command="warp_log_online_view", block=False)
+    @handler.command(command="start", filters=filters.Regex(r"gacha_log_online_view$"), block=False)
+    async def command_start_upload_web(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
+        user_id = await self.get_real_user_id(update)
+        uid, offset = self.get_real_uid_or_offset(update)
+        message = update.effective_message
+        self.log_user(update, logger.info, "跃迁记录在线浏览命令请求")
+        try:
+            player_id = await self.get_player_id(user_id, uid, offset)
+            url = await self.gacha_log.web_upload(user_id, str(player_id))
+            await message.reply_text(
+                WISHLOG_WEB,
+                parse_mode="html",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("点我查看", url=url)]]),
+            )
+        except GachaLogNotFound:
+            self.log_user(update, logger.info, "未找到跃迁记录")
+            buttons = [
+                [InlineKeyboardButton("点我导入", url=create_deep_linked_url(context.bot.username, "gacha_log_import"))]
+            ]
+            await message.reply_text(WISHLOG_NOT_FOUND, reply_markup=InlineKeyboardMarkup(buttons))
+        except GachaLogWebError as e:
+            logger.error("申请在线查看跃迁记录失败", exc_info=e)
+            await message.reply_text("申请在线查看跃迁记录失败，请联系管理员")
 
     @staticmethod
     async def get_migrate_data(
