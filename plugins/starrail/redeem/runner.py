@@ -84,7 +84,7 @@ class RedeemRunner:
             ) as client:
                 client: "StarRailClient"
                 result.uid = client.player_id
-                await client.redeem_code_by_hoyolab(result.code)
+                await client.redeem_code(result.code)
         except RegionNotSupported:
             error = "此服务器暂不支持进行兑换哦~"
         except RedemptionInvalid:
