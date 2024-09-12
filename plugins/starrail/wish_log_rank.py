@@ -107,7 +107,7 @@ class WishLogRankPlugin(Plugin):
     @staticmethod
     def get_desc_type(query_type: "GachaLogQueryTypeEnum") -> bool:
         desc = True
-        if query_type != GachaLogQueryTypeEnum.TOTAL and query_type != GachaLogQueryTypeEnum.NO_WARP:
+        if query_type not in (GachaLogQueryTypeEnum.TOTAL, GachaLogQueryTypeEnum.NO_WARP):
             desc = False
         return desc
 
