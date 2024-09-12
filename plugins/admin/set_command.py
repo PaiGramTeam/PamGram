@@ -37,6 +37,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("help", "帮助"),
             BotCommand("warp_log", "查看跃迁记录"),
             BotCommand("warp_log_online_view", "抽卡记录在线浏览"),
+            BotCommand("warp_log_rank", "抽卡排行榜"),
             BotCommand("action_log", "查询登录记录"),
             BotCommand("dailynote", "查询实时便笺"),
             BotCommand("redeem", "（国际服）兑换 Key"),
@@ -78,6 +79,7 @@ class SetCommandPlugin(Plugin):
             BotCommand("get_chat", "获取会话信息"),
             BotCommand("add_block", "添加黑名单"),
             BotCommand("del_block", "移除黑名单"),
+            BotCommand("warp_log_rank_recount", "重新统计抽卡排行榜"),
         ]
         await context.bot.delete_my_commands()
         await context.bot.set_my_commands(commands=group_command)

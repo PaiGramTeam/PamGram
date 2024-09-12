@@ -12,6 +12,7 @@ from simnet.errors import AuthkeyTimeout, InvalidAuthkey
 from simnet.models.starrail.wish import StarRailBannerType
 from simnet.utils.player import recognize_starrail_server
 
+from gram_core.services.gacha_log_rank.services import GachaLogRankService
 from metadata.pool.pool import get_pool_by_id
 from modules.gacha_log.const import GACHA_TYPE_LIST
 from modules.gacha_log.error import (
@@ -35,6 +36,7 @@ from modules.gacha_log.models import (
     SRGFModel,
 )
 from modules.gacha_log.online_view import GachaLogOnlineView
+from modules.gacha_log.ranks import GachaLogRanks
 from utils.const import PROJECT_ROOT
 from utils.uid import mask_number
 
@@ -46,8 +48,14 @@ GACHA_LOG_PATH = PROJECT_ROOT.joinpath("data", "apihelper", "warp_log")
 GACHA_LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 
-class GachaLog(GachaLogOnlineView):
-    def __init__(self, gacha_log_path: Path = GACHA_LOG_PATH):
+class GachaLog(GachaLogOnlineView, GachaLogRanks):
+    def __init__(
+        self,
+        gacha_log_path: Path = GACHA_LOG_PATH,
+        gacha_log_rank_service: GachaLogRankService = None,
+    ):
+        GachaLogOnlineView.__init__(self)
+        GachaLogRanks.__init__(self, gacha_log_rank_service)
         self.gacha_log_path = gacha_log_path
 
     @staticmethod
@@ -232,6 +240,7 @@ class GachaLog(GachaLogOnlineView):
             gacha_log.update_time = datetime.datetime.now()
             gacha_log.import_type = import_type.value
             await self.save_gacha_log_info(str(user_id), uid, gacha_log)
+            await self.recount_one_from_uid(user_id, player_id)
             return new_num
         except GachaLogAccountNotFound as e:
             raise GachaLogAccountNotFound("导入失败，文件包含的祈愿记录所属 uid 与你当前绑定的 uid 不同") from e
@@ -337,7 +346,7 @@ class GachaLog(GachaLogOnlineView):
                         isUp, isBig = False, False
                     data = {
                         "name": item.name,
-                        "icon": assets.avatar.square(item.name).as_uri(),
+                        "icon": assets.avatar.square(item.name).as_uri() if assets else "",
                         "count": count,
                         "type": "角色",
                         "isUp": isUp,
@@ -348,7 +357,7 @@ class GachaLog(GachaLogOnlineView):
                 elif item.item_type == "光锥" and pool_name in {"光锥跃迁", "常驻跃迁"}:
                     data = {
                         "name": item.name,
-                        "icon": assets.light_cone.icon(item.name).as_uri(),
+                        "icon": assets.light_cone.icon(item.name).as_uri() if assets else "",
                         "count": count,
                         "type": "光锥",
                         "isUp": False,
@@ -376,7 +385,7 @@ class GachaLog(GachaLogOnlineView):
                 if item.item_type == "角色":
                     data = {
                         "name": item.name,
-                        "icon": assets.avatar.square(item.name).as_uri(),
+                        "icon": assets.avatar.square(item.name).as_uri() if assets else "",
                         "count": count,
                         "type": "角色",
                         "time": item.time,
@@ -385,7 +394,7 @@ class GachaLog(GachaLogOnlineView):
                 elif item.item_type == "光锥":
                     data = {
                         "name": item.name,
-                        "icon": assets.light_cone.icon(item.name).as_uri(),
+                        "icon": assets.light_cone.icon(item.name).as_uri() if assets else "",
                         "count": count,
                         "type": "光锥",
                         "time": item.time,
@@ -532,6 +541,19 @@ class GachaLog(GachaLogOnlineView):
         gacha_log, status = await self.load_history_info(str(user_id), str(player_id))
         if not status:
             raise GachaLogNotFound
+        return await self.get_analysis_data(gacha_log, pool, assets)
+
+    async def get_analysis_data(
+        self, gacha_log: "GachaLogInfo", pool: StarRailBannerType, assets: Optional["AssetsService"]
+    ):
+        """
+        获取抽卡记录分析数据
+        :param gacha_log: 抽卡记录
+        :param pool: 池子类型
+        :param assets: 资源服务
+        :return: 分析数据
+        """
+        player_id = int(gacha_log.uid)
         pool_name = GACHA_TYPE_LIST[pool]
         if pool_name not in gacha_log.item_list:
             raise GachaLogNotFound
