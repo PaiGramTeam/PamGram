@@ -13,7 +13,12 @@
         <div class="player">
             <div>
                 <div class="nickname">抽卡排行榜 - {{ pool_name }}</div>
-                <div class="uid">共 {{ count }} 条数据</div>
+                {% if desc %}
+                {% set rank_name = "非酋榜" %}
+                {% else %}
+                {% set rank_name = "欧皇榜" %}
+                {% endif %}
+                <div class="uid">{{ rank_name }} - 共 {{ count }} 条数据</div>
             </div>
         </div>
         <div class="logo"></div>

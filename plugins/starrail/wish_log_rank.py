@@ -107,16 +107,17 @@ class WishLogRankPlugin(Plugin):
     @staticmethod
     def get_desc_type(query_type: "GachaLogQueryTypeEnum") -> bool:
         desc = True
-        if query_type != GachaLogQueryTypeEnum.TOTAL:
+        if query_type != GachaLogQueryTypeEnum.TOTAL and query_type != GachaLogQueryTypeEnum.NO_WARP:
             desc = False
         return desc
 
     async def get_first_rank_players_from_sql(
-        self, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum"
+        self, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum", desc: bool
     ) -> RankDataModel:
-        ranks_uids = await self.gacha_log_rank_service.get_ranks_cache(
-            rank_type, query_type, desc=self.get_desc_type(query_type)
-        )
+        real_desc = self.get_desc_type(query_type)
+        if desc:
+            real_desc = not real_desc
+        ranks_uids = await self.gacha_log_rank_service.get_ranks_cache(rank_type, query_type, desc=real_desc)
         count = await self.gacha_log_rank_service.get_ranks_length_cache(rank_type, query_type)
         uid_list = [int(uid) for uid, _ in ranks_uids]
         ranks = await self.gacha_log_rank_service.get_ranks_by_ids(rank_type, uid_list)
@@ -128,25 +129,29 @@ class WishLogRankPlugin(Plugin):
         return RankDataModel(players=players, count=count)
 
     async def get_first_rank_players_from_cache(
-        self, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum"
+        self, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum", desc: bool
     ) -> RankDataModel:
-        key = f"{self.key}:{rank_type.value}:{query_type.value}:total"
+        desc_int = 1 if desc else 0
+        key = f"{self.key}:{rank_type.value}:{query_type.value}:{desc_int}:total"
         data = await self.redis.get(key)
         if data:
             return RankDataModel.parse_raw(str(data, encoding="utf-8"))
-        data = await self.get_first_rank_players_from_sql(rank_type, query_type)
+        data = await self.get_first_rank_players_from_sql(rank_type, query_type, desc)
         await self.redis.set(key, data.json(by_alias=True), ex=self.expire)
         return data
 
     async def get_my_players_from_sql(
-        self, user_id: int, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum"
+        self, user_id: int, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum", desc: bool
     ) -> RankDataModel:
         players1 = await self.player_service.get_all_by_user_id(user_id)
         ranks = await self.gacha_log_rank_service.get_ranks_by_ids(rank_type, [player.player_id for player in players1])
         players = []
+        real_desc = self.get_desc_type(query_type)
+        if desc:
+            real_desc = not real_desc
         for rank in ranks:
             num = await self.gacha_log_rank_service.get_rank_by_player_id_cache(
-                rank_type, query_type, rank.player_id, desc=self.get_desc_type(query_type)
+                rank_type, query_type, rank.player_id, desc=real_desc
             )
             if num is None:
                 continue
@@ -156,13 +161,14 @@ class WishLogRankPlugin(Plugin):
         return RankDataModel(players=players, count=len(players))
 
     async def get_my_players_from_cache(
-        self, user_id: int, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum"
+        self, user_id: int, rank_type: "GachaLogTypeEnum", query_type: "GachaLogQueryTypeEnum", desc: bool
     ) -> RankDataModel:
-        key = f"{self.key}:{rank_type.value}:{query_type.value}:{user_id}"
+        desc_int = 1 if desc else 0
+        key = f"{self.key}:{rank_type.value}:{query_type.value}:{desc_int}:{user_id}"
         data = await self.redis.get(key)
         if data:
             return RankDataModel.parse_raw(str(data, encoding="utf-8"))
-        data = await self.get_my_players_from_sql(user_id, rank_type, query_type)
+        data = await self.get_my_players_from_sql(user_id, rank_type, query_type, desc)
         await self.redis.set(key, data.json(by_alias=True), ex=self.expire2)
         return data
 
@@ -181,18 +187,28 @@ class WishLogRankPlugin(Plugin):
             )
         return data
 
-    def gen_button(self, user_id: int) -> List[List[InlineKeyboardButton]]:
+    def gen_button(self, user_id: int, desc: bool = False) -> List[List[InlineKeyboardButton]]:
         types = [self.TYPES[i : i + 2] for i in range(0, len(self.TYPES), 2)]
-        return [
+        if desc:
+            now_bind, new_bind, now_int, new_int = "非酋榜", "欧皇榜", 1, 0
+        else:
+            now_bind, new_bind, now_int, new_int = "欧皇榜", "非酋榜", 0, 1
+        data = [
             [
                 InlineKeyboardButton(
                     idx[0],
-                    callback_data=f"wish_log_rank|{user_id}|{idx[1].value}|{idx[2].value}",
+                    callback_data=f"wish_log_rank|{user_id}|{idx[1].value}|{idx[2].value}|{now_int}",
                 )
                 for idx in id1
             ]
             for id1 in types
         ]
+        page_button = [
+            InlineKeyboardButton(f"当前是{now_bind}", callback_data=f"wish_log_rank_button|{user_id}|ignore"),
+            InlineKeyboardButton(f"切换到{new_bind}", callback_data=f"wish_log_rank_button|{user_id}|{new_int}"),
+        ]
+        data.append(page_button)
+        return data
 
     @handler.command("warp_log_rank", block=False)
     @handler.message(filters.Regex(r"^抽卡排行榜(.*)$"), block=False)
@@ -222,21 +238,23 @@ class WishLogRankPlugin(Plugin):
 
         async def get_wish_log_rank_callback(
             callback_query_data: str,
-        ) -> Tuple[int, GachaLogTypeEnum, GachaLogQueryTypeEnum]:
+        ) -> Tuple[int, GachaLogTypeEnum, GachaLogQueryTypeEnum, bool]:
             _data = callback_query_data.split("|")
             _user_id = int(_data[1])
             _rank_type = GachaLogTypeEnum(int(_data[2]))
             _query_type = GachaLogQueryTypeEnum(_data[3])
+            _desc = bool(int(_data[4]))
             logger.debug(
-                "callback_query_data函数返回 user_id[%s] rank_type[%s] query_type[%s]",
+                "callback_query_data函数返回 user_id[%s] rank_type[%s] query_type[%s] desc[%s]",
                 _user_id,
                 _rank_type,
                 _query_type,
+                _desc,
             )
-            return _user_id, _rank_type, _query_type
+            return _user_id, _rank_type, _query_type, _desc
 
         try:
-            user_id, rank_type, query_type = await get_wish_log_rank_callback(callback_query.data)
+            user_id, rank_type, query_type, desc = await get_wish_log_rank_callback(callback_query.data)
         except IndexError:
             await callback_query.answer("按钮数据已过期，请重新获取。", show_alert=True)
             self.add_delete_message_job(message, delay=1)
@@ -244,16 +262,17 @@ class WishLogRankPlugin(Plugin):
         if user.id != user_id:
             await callback_query.answer(text="这不是你的按钮！\n" + config.notice.user_mismatch, show_alert=True)
             return
-        await self.render(update, context, user_id, rank_type, query_type)
+        await self.render(update, context, user_id, rank_type, query_type, desc)
 
     async def get_render_data(
         self,
         user_id: int,
         rank_type: "GachaLogTypeEnum",
         query_type: "GachaLogQueryTypeEnum",
+        desc: bool,
     ) -> Dict:
-        my_data = await self.get_my_players_from_cache(user_id, rank_type, query_type)
-        list_data = await self.get_first_rank_players_from_cache(rank_type, query_type)
+        my_data = await self.get_my_players_from_cache(user_id, rank_type, query_type, desc)
+        list_data = await self.get_first_rank_players_from_cache(rank_type, query_type, desc)
         name_card = self.phone_theme_service.get_default_phone_theme().as_uri()
         return {
             "data_list": [my_data, list_data],
@@ -262,6 +281,7 @@ class WishLogRankPlugin(Plugin):
             "pool_name": GachaLogRanks.ITEM_LIST_MAP_REV.get(rank_type),
             "data_key_map": self.get_data_key_map_by_type(rank_type),
             "main_key": query_type,
+            "desc": desc,
         }
 
     async def render(
@@ -271,12 +291,13 @@ class WishLogRankPlugin(Plugin):
         user_id: int,
         rank_type: "GachaLogTypeEnum",
         query_type: "GachaLogQueryTypeEnum",
+        desc: bool = False,
     ):
         callback_query = update.callback_query
         message = callback_query.message
 
         await message.reply_chat_action(ChatAction.TYPING)
-        render_data = await self.get_render_data(user_id, rank_type, query_type)
+        render_data = await self.get_render_data(user_id, rank_type, query_type, desc)
         try:
             await callback_query.answer(text="正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
         except BadRequest:
@@ -291,3 +312,40 @@ class WishLogRankPlugin(Plugin):
             ttl=1 * 60 * 60,
         )
         await png_data.edit_media(message)
+
+    @handler.callback_query(pattern=r"^wish_log_rank_button\|", block=False)
+    async def wish_log_rank_button_callback(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
+        callback_query = update.callback_query
+        user = callback_query.from_user
+        message = callback_query.message
+
+        async def get_wish_log_rank_button_callback(
+            callback_query_data: str,
+        ) -> Tuple[int, bool, bool]:
+            _data = callback_query_data.split("|")
+            _user_id = int(_data[1])
+            _ignore = _data[2] == "ignore"
+            _desc = False if _ignore else bool(int(_data[2]))
+            logger.debug(
+                "callback_query_data函数返回 user_id[%s] ignore[%s] desc[%s]",
+                _user_id,
+                _ignore,
+                _desc,
+            )
+            return _user_id, _ignore, _desc
+
+        try:
+            user_id, ignore, desc = await get_wish_log_rank_button_callback(callback_query.data)
+        except IndexError:
+            await callback_query.answer("按钮数据已过期，请重新获取。", show_alert=True)
+            self.add_delete_message_job(message, delay=1)
+            return
+        if user.id != user_id:
+            await callback_query.answer(text="这不是你的按钮！\n" + config.notice.user_mismatch, show_alert=True)
+            return
+        if ignore:
+            await callback_query.answer("无效按钮", show_alert=False)
+            return
+        buttons = self.gen_button(user_id, desc)
+        await message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+        await callback_query.answer("已切换", show_alert=False)
