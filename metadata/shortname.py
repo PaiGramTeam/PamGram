@@ -92,7 +92,7 @@ roles = {
     1314: ["翡翠", "jade"],
     1315: ["波提欧", "boothill"],
 }
-not_real_roles = [1222]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
