@@ -137,7 +137,7 @@ class AccompanySystem(Plugin):
         accompany_list = await self.cookies_service.get_all(region=RegionEnum.HOYOLAB)
         await self._do_accompany_job(context, accompany_list)
 
-    @job.run_daily(time=datetime.time(hour=1, minute=1, second=0), name="AccompanyJob")
+    @job.run_daily(time=datetime.time(hour=2, minute=1, second=0), name="AccompanyJob")
     async def accompany(self, context: "ContextTypes.DEFAULT_TYPE"):
         logger.info("正在执行自动角色陪伴")
         await self.do_accompany_job(context)
