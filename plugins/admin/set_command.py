@@ -62,7 +62,6 @@ class SetCommandPlugin(Plugin):
             BotCommand("rogue", "模拟宇宙信息查询"),
             BotCommand("rogue_locust", "寰宇蝗灾信息查询"),
             BotCommand("rogue_tourn", "差分宇宙信息查询"),
-            BotCommand("activity_export", "活动数据导出"),
         ]
         admin_command = [
             BotCommand("add_admin", "添加管理员"),
