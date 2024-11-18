@@ -12,7 +12,7 @@ from core.plugin import Plugin, handler
 from core.services.task.models import Task as SignUser, TaskStatusEnum
 from core.services.task.services import SignServices
 from core.services.users.services import UserAdminService
-from plugins.tools.genshin import GenshinHelper, CookiesNotFoundError, PlayerNotFoundError
+from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNotFoundError
 from plugins.tools.sign import SignSystem, NeedChallenge
 from utils.log import logger
 
