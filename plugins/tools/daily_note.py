@@ -52,6 +52,9 @@ class DailyData(TaskDataBase):
 
 
 class WebAppData(BaseModel):
+    user_id: int
+    player_id: int
+
     resin: Optional[ResinData]
     expedition: Optional[ExpeditionData]
     daily: Optional[DailyData]
@@ -61,11 +64,13 @@ class DailyNoteTaskUser:
     def __init__(
         self,
         user_id: int,
+        player_id: int,
         resin_db: Optional[TaskUser] = None,
         expedition_db: Optional[TaskUser] = None,
         daily_db: Optional[TaskUser] = None,
     ):
         self.user_id = user_id
+        self.player_id = player_id
         self.resin_db = resin_db
         self.expedition_db = expedition_db
         self.daily_db = daily_db
@@ -107,6 +112,8 @@ class DailyNoteTaskUser:
         return base64.b64encode(
             (
                 WebAppData(
+                    user_id=self.user_id,
+                    player_id=self.player_id,
                     resin=self.set_model_noticed(self.resin) if self.resin else None,
                     expedition=self.set_model_noticed(self.expedition) if self.expedition else None,
                     daily=self.set_model_noticed(self.daily) if self.daily else None,
@@ -136,12 +143,13 @@ class DailyNoteSystem(Plugin):
         self.expedition_service = expedition_service
         self.daily_service = daily_service
 
-    async def get_single_task_user(self, user_id: int) -> DailyNoteTaskUser:
-        resin_db = await self.resin_service.get_by_user_id(user_id)
-        expedition_db = await self.expedition_service.get_by_user_id(user_id)
-        daily_db = await self.daily_service.get_by_user_id(user_id)
+    async def get_single_task_user(self, user_id: int, player_id: int) -> DailyNoteTaskUser:
+        resin_db = await self.resin_service.get_by_user_id(user_id, player_id)
+        expedition_db = await self.expedition_service.get_by_user_id(user_id, player_id)
+        daily_db = await self.daily_service.get_by_user_id(user_id, player_id)
         return DailyNoteTaskUser(
             user_id=user_id,
+            player_id=player_id,
             resin_db=resin_db,
             expedition_db=expedition_db,
             daily_db=daily_db,
@@ -216,20 +224,17 @@ class DailyNoteSystem(Plugin):
         expedition_list = await self.expedition_service.get_all()
         daily_list = await self.daily_service.get_all()
         user_list = set()
-        for i in resin_list:
-            user_list.add(i.user_id)
-        for i in expedition_list:
-            user_list.add(i.user_id)
-        for i in daily_list:
-            user_list.add(i.user_id)
+        for i in resin_list + expedition_list + daily_list:
+            user_list.add((i.user_id, i.player_id))
         return [
             DailyNoteTaskUser(
                 user_id=i,
-                resin_db=next((x for x in resin_list if x.user_id == i), None),
-                expedition_db=next((x for x in expedition_list if x.user_id == i), None),
-                daily_db=next((x for x in daily_list if x.user_id == i), None),
+                player_id=p,
+                resin_db=next((x for x in resin_list if x.user_id == i and x.player_id == p), None),
+                expedition_db=next((x for x in expedition_list if x.user_id == i and x.player_id == p), None),
+                daily_db=next((x for x in daily_list if x.user_id == i and x.player_id == p), None),
             )
-            for i in user_list
+            for i, p in user_list
         ]
 
     async def remove_task_user(self, user: DailyNoteTaskUser):
@@ -269,11 +274,12 @@ class DailyNoteSystem(Plugin):
         return need_verify
 
     async def import_web_config_resin(self, user: DailyNoteTaskUser, web_config: WebAppData):
-        user_id = user.user_id
+        user_id, player_id = user.user_id, user.player_id
         if web_config.resin.noticed:
             if not user.resin_db:
                 resin = self.resin_service.create(
                     user_id,
+                    player_id,
                     user_id,
                     status=TaskStatusEnum.STATUS_SUCCESS,
                     data=ResinData(notice_num=web_config.resin.notice_num).dict(),
@@ -290,11 +296,12 @@ class DailyNoteSystem(Plugin):
                 user.resin = None
 
     async def import_web_config_expedition(self, user: DailyNoteTaskUser, web_config: WebAppData):
-        user_id = user.user_id
+        user_id, player_id = user.user_id, user.player_id
         if web_config.expedition.noticed:
             if not user.expedition_db:
                 expedition = self.expedition_service.create(
                     user_id,
+                    player_id,
                     user_id,
                     status=TaskStatusEnum.STATUS_SUCCESS,
                     data=ExpeditionData().dict(),
@@ -310,11 +317,12 @@ class DailyNoteSystem(Plugin):
                 user.expedition = None
 
     async def import_web_config_daily(self, user: DailyNoteTaskUser, web_config: WebAppData):
-        user_id = user.user_id
+        user_id, player_id = user.user_id, user.player_id
         if web_config.daily.noticed:
             if not user.daily_db:
                 daily = self.daily_service.create(
                     user_id,
+                    player_id,
                     user_id,
                     status=TaskStatusEnum.STATUS_SUCCESS,
                     data=DailyData(notice_hour=web_config.daily.notice_hour).dict(),
@@ -329,8 +337,9 @@ class DailyNoteSystem(Plugin):
                 user.daily_db = None
                 user.daily = None
 
-    async def import_web_config(self, user_id: int, web_config: WebAppData):
-        user = await self.get_single_task_user(user_id)
+    async def import_web_config(self, web_config: WebAppData):
+        user_id, player_id = web_config.user_id, web_config.player_id
+        user = await self.get_single_task_user(user_id, player_id)
         if web_config.resin:
             await self.import_web_config_resin(user, web_config)
         if web_config.expedition:
@@ -350,9 +359,10 @@ class DailyNoteSystem(Plugin):
             if task_db.status not in include_status:
                 continue
             user_id = task_db.user_id
-            logger.debug("自动便签提醒 - 请求便签信息 user_id[%s]", user_id)
+            player_id = task_db.player_id
+            logger.debug("自动便签提醒 - 请求便签信息 user_id[%s] player_id[%s]", user_id, player_id)
             try:
-                async with self.genshin_helper.genshin(user_id) as client:
+                async with self.genshin_helper.genshin(user_id, player_id=player_id) as client:
                     text = await self.start_get_notes(client, task_db)
             except InvalidCookies:
                 text = "自动便签提醒执行失败，Cookie无效"
