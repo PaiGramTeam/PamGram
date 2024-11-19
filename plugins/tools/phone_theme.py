@@ -5,16 +5,19 @@ from core.dependence.assets import AssetsService, AssetsCouldNotFound
 from core.services.players.services import PlayerInfoService
 from gram_core.dependence.redisdb import RedisDB
 from gram_core.plugin import Plugin
+from gram_core.services.players import PlayersService
 from utils.log import logger
 
 
 class PhoneThemeService(Plugin):
     def __init__(
         self,
+        players_service: PlayersService,
         player_info_service: PlayerInfoService,
         asset_service: AssetsService,
         redis: RedisDB,
     ) -> None:
+        self.players_service = players_service
         self.player_info_service = player_info_service
         self.assets = asset_service
         self.redis = redis.client
@@ -55,8 +58,13 @@ class PhoneThemeService(Plugin):
             return phone_theme
         return None
 
-    async def get_phone_theme(self, player_id: int):
+    async def get_phone_theme(self, player_id: Optional[int], user_id: Optional[int] = None):
         try:
+            if not player_id and user_id is not None:
+                player = await self.players_service.get_player(user_id)
+                if player is None:
+                    return self.get_default_phone_theme()
+                player_id = player.player_id
             phone_theme = await self.get_phone_theme_id(player_id)
             return self.assets.phone_theme.icon(phone_theme)
         except AssetsCouldNotFound as e:
