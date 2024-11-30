@@ -7,7 +7,6 @@ from functools import lru_cache, partial
 from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 
 from arkowrapper import ArkoWrapper
-from pytz import timezone
 from telegram import Message, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction, ParseMode
 from telegram.ext import CallbackContext, filters, ContextTypes
@@ -37,7 +36,6 @@ if TYPE_CHECKING:
     from simnet import StarRailClient
     from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory, StarRailChallengeStoryGroup
 
-TZ = timezone("Asia/Shanghai")
 cmd_pattern = r"(?i)^/challenge_story(?:@[\w]+)?\s*((?:\d+)|(?:all))?\s*(pre)?"
 msg_pattern = r"^虚构叙事数据((?:查询)|(?:总览))(上期)?\D?(\d*)?.*?$"
 MAX_FLOOR = 4
@@ -204,7 +202,7 @@ class ChallengeStoryPlugin(Plugin):
             raise AbyssFastPassed()
         render_data = {
             "floor": floor_data,
-            "floor_time": floor_data.node_1.challenge_time.datetime.astimezone(TZ).strftime("%Y-%m-%d %H:%M:%S"),
+            "floor_time": floor_data.node_1.challenge_time.datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "floor_nodes": [floor_data.node_1, floor_data.node_2],
             "floor_num": floor,
         }
@@ -256,8 +254,8 @@ class ChallengeStoryPlugin(Plugin):
             raise AbyssUnlocked()
         if not season:
             raise AbyssUnlocked()
-        start_time = season.begin_time.datetime.astimezone(TZ).strftime("%m月%d日 %H:%M")
-        end_time = season.end_time.datetime.astimezone(TZ).strftime("%m月%d日 %H:%M")
+        start_time = season.begin_time.datetime.strftime("%m月%d日 %H:%M")
+        end_time = season.end_time.datetime.strftime("%m月%d日 %H:%M")
         total_stars = f"{abyss_data.total_stars}"
 
         render_data = {
@@ -360,7 +358,7 @@ class ChallengeStoryPlugin(Plugin):
     @staticmethod
     def get_season_data_name(data: "HistoryDataChallengeStory"):
         last_battles = data.story_data.floors[0]
-        start_time = last_battles.node_1.challenge_time.datetime.astimezone(TZ)
+        start_time = last_battles.node_1.challenge_time.datetime
         time = start_time.strftime("%Y.%m.%d")
         name = ""
         if "其" in last_battles.name:

@@ -1,7 +1,6 @@
 import datetime
 from typing import List
 
-from pytz import timezone
 from simnet.models.starrail.chronicle.challenge import StarRailChallenge
 from simnet.models.starrail.chronicle.challenge_boss import StarRailChallengeBoss, StarRailChallengeBossGroup
 from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory, StarRailChallengeStoryGroup
@@ -32,14 +31,6 @@ __all__ = (
     "HistoryDataLedgerServices",
 )
 
-TZ = timezone("Asia/Shanghai")
-
-
-def json_encoder(value):
-    if isinstance(value, datetime.datetime):
-        return value.astimezone(TZ).strftime("%Y-%m-%d %H:%M:%S")
-    return value
-
 
 class HistoryDataAbyssServices(BaseService, HistoryDataBaseServices):
     DATA_TYPE = HistoryDataTypeEnum.ABYSS.value
@@ -52,7 +43,7 @@ class HistoryDataAbyssServices(BaseService, HistoryDataBaseServices):
     @staticmethod
     def create(user_id: int, abyss_data: StarRailChallenge):
         data = HistoryDataAbyss(abyss_data=abyss_data)
-        json_data = data.json(by_alias=True, encoder=json_encoder)
+        json_data = data.model_dump_json(by_alias=True)
         return HistoryData(
             user_id=user_id,
             data_id=abyss_data.season,
@@ -73,7 +64,7 @@ class HistoryDataChallengeStoryServices(BaseService, HistoryDataBaseServices):
     @staticmethod
     def create(user_id: int, story_data: StarRailChallengeStory, group: StarRailChallengeStoryGroup):
         data = HistoryDataChallengeStory(story_data=story_data, group=group)
-        json_data = data.json(by_alias=True, encoder=json_encoder)
+        json_data = data.model_dump_json(by_alias=True)
         dict_data = jsonlib.loads(json_data)
         dict_data["story_data"]["groups"] = []
         return HistoryData(
@@ -105,7 +96,7 @@ class HistoryDataChallengeBossServices(BaseService, HistoryDataBaseServices):
     @staticmethod
     def create(user_id: int, boss_data: StarRailChallengeBoss, group: StarRailChallengeBossGroup):
         data = HistoryDataChallengeBoss(boss_data=boss_data, group=group)
-        json_data = data.json(by_alias=True, encoder=json_encoder)
+        json_data = data.model_dump_json(by_alias=True)
         dict_data = jsonlib.loads(json_data)
         dict_data["boss_data"]["groups"] = []
         return HistoryData(
@@ -123,7 +114,7 @@ class HistoryDataLedgerServices(BaseService, HistoryDataBaseServices):
     @staticmethod
     def create(user_id: int, diary_data: StarRailDiary):
         data = HistoryDataLedger(diary_data=diary_data)
-        json_data = data.json(by_alias=True, encoder=json_encoder)
+        json_data = data.model_dump_json(by_alias=True)
         return HistoryData(
             user_id=user_id,
             data_id=diary_data.data_id,

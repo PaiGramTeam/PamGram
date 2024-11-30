@@ -37,7 +37,7 @@ class Relic(BaseModel):
     tid: int
     level: Optional[int] = 0
     mainAffixId: int
-    subAffixList: Optional[List[SubAffix]]
+    subAffixList: Optional[List[SubAffix]] = None
     type: int
 
 
@@ -57,12 +57,12 @@ class Property(BaseModel):
 class Avatar(BaseModel):
     avatarId: int
     skillTreeList: List[SkillTreePoint]
-    equipment: Optional[Equipment]
+    equipment: Optional[Equipment] = None
     level: int
     promotion: Optional[int] = 4
     rank: Optional[int] = 0
-    relicList: Optional[List[Relic]]
-    property: Optional[List[Property]]
+    relicList: Optional[List[Relic]] = None
+    property: Optional[List[Property]] = None
 
 
 class RecordInfo(BaseModel):
@@ -76,15 +76,15 @@ class RecordInfo(BaseModel):
 
 
 class PlayerBaseInfo(BaseModel):
-    platform: Optional[str]
-    friendCount: Optional[int]
-    headIcon: Optional[int]
+    platform: Optional[str] = None
+    friendCount: Optional[int] = None
+    headIcon: Optional[int] = None
     isDisplayAvatar: bool
     level: int
-    worldLevel: Optional[int]
+    worldLevel: Optional[int] = None
     nickname: str
     recordInfo: RecordInfo
-    signature: Optional[str]
+    signature: Optional[str] = None
     uid: int
 
 
