@@ -51,7 +51,7 @@ class WeaponEntry(BaseEntry):
 
 
 class WeaponsEntry(BaseModel):
-    data: Optional[List[WeaponEntry]]
+    data: Optional[List[WeaponEntry]] = None
 
 
 class StrategyEntry(BaseEntry):
@@ -70,4 +70,4 @@ class StrategyEntry(BaseEntry):
 
 
 class StrategyEntryList(BaseModel):
-    data: Optional[List[StrategyEntry]]
+    data: Optional[List[StrategyEntry]] = None
