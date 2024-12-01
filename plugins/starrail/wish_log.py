@@ -77,11 +77,13 @@ class WishLogPluginData(TelegramObject):
 class WishLogPlugin(Plugin.Conversation):
     """跃迁记录导入/导出/分析"""
 
-    IMPORT_HINT =                 ("<b>开始导入跃迁历史记录：请通过 https://starrailstation.com/cn/warp#import 获取跃迁记录链接后发送给我"
-                "（非 starrailstation.com 导出的文件数据）</b>\n\n"
-                f"> 你还可以向彦卿发送从其他工具导出的 SRGF {SRGF_VERSION} 标准的记录文件\n"
-                # "> 在绑定 Cookie 时添加 stoken 可能有特殊效果哦（仅限国服）\n"
-                "<b>注意：导入的数据将会与旧数据进行合并。</b>")
+    IMPORT_HINT = (
+        "<b>开始导入跃迁历史记录：请通过 https://starrailstation.com/cn/warp#import 获取跃迁记录链接后发送给我"
+        "（非 starrailstation.com 导出的文件数据）</b>\n\n"
+        f"> 你还可以向彦卿发送从其他工具导出的 SRGF {SRGF_VERSION} 标准的记录文件\n"
+        # "> 在绑定 Cookie 时添加 stoken 可能有特殊效果哦（仅限国服）\n"
+        "<b>注意：导入的数据将会与旧数据进行合并。</b>"
+    )
 
     def __init__(
         self,
