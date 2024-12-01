@@ -32,12 +32,10 @@ from modules.gacha_log.models import (
     GachaLogInfo,
     ImportType,
     Pool,
-    SRGFInfo,
-    SRGFItem,
-    SRGFModel,
 )
 from modules.gacha_log.online_view import GachaLogOnlineView
 from modules.gacha_log.ranks import GachaLogRanks
+from modules.gacha_log.uigf import GachaLogUigfConverter
 from utils.const import PROJECT_ROOT
 from utils.uid import mask_number
 
@@ -49,7 +47,7 @@ GACHA_LOG_PATH = PROJECT_ROOT.joinpath("data", "apihelper", "warp_log")
 GACHA_LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 
-class GachaLog(GachaLogOnlineView, GachaLogRanks):
+class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
     def __init__(
         self,
         gacha_log_path: Path = GACHA_LOG_PATH,
@@ -145,34 +143,6 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
         # 写入数据
         await self.save_json(save_path, info.json())
 
-    async def gacha_log_to_srgf(self, user_id: str, uid: str) -> Optional[Path]:
-        """跃迁日记转换为 SRGF 格式
-        :param user_id: 用户ID
-        :param uid: 游戏UID
-        :return: 转换是否成功、转换信息、SRGF 文件目录
-        """
-        data, state = await self.load_history_info(user_id, uid)
-        if not state:
-            raise GachaLogNotFound
-        save_path = self.gacha_log_path / f"{user_id}-{uid}-srgf.json"
-        info = SRGFModel(info=SRGFInfo(uid=uid, export_app=ImportType.PaiGram.value, export_app_version="v3"), list=[])
-        for items in data.item_list.values():
-            for item in items:
-                info.list.append(
-                    SRGFItem(
-                        id=item.id,
-                        name=item.name,
-                        gacha_id=item.gacha_id,
-                        gacha_type=item.gacha_type,
-                        item_id=item.item_id,
-                        item_type=item.item_type,
-                        rank_type=item.rank_type,
-                        time=item.time.strftime("%Y-%m-%d %H:%M:%S"),
-                    )
-                )
-        await self.save_json(save_path, json.loads(info.json()))
-        return save_path
-
     @staticmethod
     async def verify_data(data: List[GachaItem]) -> bool:
         try:
@@ -210,17 +180,20 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
     async def import_gacha_log_data(self, user_id: int, player_id: int, data: dict, verify_uid: bool = True) -> int:
         new_num = 0
         try:
-            uid = data["info"]["uid"]
-            if not verify_uid:
-                uid = player_id
-            elif int(uid) != player_id:
+            _data, uid = None, None
+            for _i in data.get("hkrpg", []):
+                uid = _i.get("uid", "0")
+                if (not verify_uid) or int(uid) == player_id:
+                    _data = _i
+                    break
+            if not _data or not uid:
                 raise GachaLogAccountNotFound
             try:
                 import_type = ImportType(data["info"]["export_app"])
             except ValueError:
                 import_type = ImportType.UNKNOWN
             # 检查导入数据是否合法
-            all_items = [GachaItem(**i) for i in data["list"]]
+            all_items = [GachaItem(**i) for i in _data["list"]]
             await self.verify_data(all_items)
             gacha_log, status = await self.load_history_info(str(user_id), uid)
             # 将唯一 id 放入临时数据中，加快查找速度

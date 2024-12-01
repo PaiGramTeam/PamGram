@@ -1,6 +1,6 @@
 from simnet.models.starrail.wish import StarRailBannerType
 
-SRGF_VERSION = "v1.0"
+UIGF_VERSION = "v4.0"
 
 
 GACHA_TYPE_LIST = {

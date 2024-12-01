@@ -23,7 +23,7 @@ from core.services.template.services import TemplateService
 from gram_core.config import config
 from gram_core.plugin.methods.inline_use_data import IInlineUseData
 from gram_core.services.gacha_log_rank.services import GachaLogRankService
-from modules.gacha_log.const import SRGF_VERSION, GACHA_TYPE_LIST_REVERSE
+from modules.gacha_log.const import GACHA_TYPE_LIST_REVERSE, UIGF_VERSION
 from modules.gacha_log.error import (
     GachaLogAccountNotFound,
     GachaLogAuthkeyTimeout,
@@ -56,7 +56,7 @@ if TYPE_CHECKING:
     from gram_core.services.template.models import RenderResult
 
 INPUT_URL, INPUT_LAZY, CONFIRM_DELETE = range(10100, 10103)
-WAITING = f"小{config.notice.bot_name}正在从服务器获取数据，请稍后"
+WAITING = f"小{config.notice.bot_name}正在从服务器获取数据，请稍候"
 WISHLOG_NOT_FOUND = f"{config.notice.bot_name}没有找到你的跃迁记录，快来私聊{config.notice.bot_name}导入吧~"
 WISHLOG_WEB = """<b>跃迁记录详细信息查询</b>
 
@@ -80,7 +80,7 @@ class WishLogPlugin(Plugin.Conversation):
     IMPORT_HINT = (
         "<b>开始导入跃迁历史记录：请通过 https://starrailstation.com/cn/warp#import 获取跃迁记录链接后发送给我"
         "（非 starrailstation.com 导出的文件数据）</b>\n\n"
-        f"> 你还可以向彦卿发送从其他工具导出的 SRGF {SRGF_VERSION} 标准的记录文件\n"
+        f"> 你还可以向彦卿发送从其他工具导出的 UIGF {UIGF_VERSION} 标准的记录文件\n"
         # "> 在绑定 Cookie 时添加 stoken 可能有特殊效果哦（仅限国服）\n"
         "<b>注意：导入的数据将会与旧数据进行合并。</b>"
     )
@@ -160,10 +160,12 @@ class WishLogPlugin(Plugin.Conversation):
         if document.file_name.endswith(".json"):
             file_type = "json"
         else:
-            await message.reply_text("文件格式错误，请发送符合 SRGF 标准的跃迁记录文件")
+            await message.reply_text(
+                "文件格式错误，请发送符合 UIGF 标准的跃迁记录文件", reply_markup=ReplyKeyboardRemove()
+            )
             return
         if document.file_size > 5 * 1024 * 1024:
-            await message.reply_text("文件过大，请发送小于 5 MB 的文件")
+            await message.reply_text("文件过大，请发送小于 5 MB 的文件", reply_markup=ReplyKeyboardRemove())
             return
         try:
             out = BytesIO()
@@ -172,27 +174,35 @@ class WishLogPlugin(Plugin.Conversation):
                 # bytesio to json
                 data = jsonlib.loads(out.getvalue().decode("utf-8"))
             else:
-                await message.reply_text("文件解析失败，请检查文件")
+                await message.reply_text("文件解析失败，请检查文件", reply_markup=ReplyKeyboardRemove())
                 return
         except GachaLogFileError:
-            await message.reply_text("文件解析失败，请检查文件是否符合 SRGF 标准")
+            await message.reply_text(
+                f"文件解析失败，请检查文件是否符合 UIGF {UIGF_VERSION} 标准", reply_markup=ReplyKeyboardRemove()
+            )
             return
         except (KeyError, IndexError, ValueError):
-            await message.reply_text("文件解析失败，请检查文件编码是否正确或符合 SRGF 标准")
+            await message.reply_text(
+                f"文件解析失败，请检查文件编码是否正确或符合 UIGF {UIGF_VERSION} 标准",
+                reply_markup=ReplyKeyboardRemove(),
+            )
             return
         except Exception as exc:
             logger.error("文件解析失败 %s", repr(exc))
-            await message.reply_text("文件解析失败，请检查文件是否符合 SRGF 标准")
+            await message.reply_text(
+                f"文件解析失败，请检查文件是否符合 UIGF {UIGF_VERSION} 标准", reply_markup=ReplyKeyboardRemove()
+            )
             return
         await message.reply_chat_action(ChatAction.TYPING)
-        reply = await message.reply_text("文件解析成功，正在导入数据")
+        reply = await message.reply_text("文件解析成功，正在导入数据", reply_markup=ReplyKeyboardRemove())
         await message.reply_chat_action(ChatAction.TYPING)
         try:
             text = await self._refresh_user_data(user, player_id, data=data, verify_uid=file_type == "json")
         except Exception as exc:  # pylint: disable=W0703
             logger.error("文件解析失败 %s", repr(exc))
-            text = "文件解析失败，请检查文件是否符合 SRGF 标准"
-        await reply.edit_text(text)
+            text = f"文件解析失败，请检查文件是否符合 UIGF {UIGF_VERSION} 标准"
+        self.add_delete_message_job(reply, delay=1)
+        await message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
     async def can_gen_authkey(self, user_id: int, player_id: int) -> bool:
         return False
@@ -355,9 +365,9 @@ class WishLogPlugin(Plugin.Conversation):
         try:
             await message.reply_chat_action(ChatAction.TYPING)
             player_id = await self.get_player_id(user.id, uid, offset)
-            path = await self.gacha_log.gacha_log_to_srgf(str(user.id), str(player_id))
+            path = await self.gacha_log.gacha_log_to_uigf(str(user.id), str(player_id))
             await message.reply_chat_action(ChatAction.UPLOAD_DOCUMENT)
-            await message.reply_document(document=open(path, "rb+"), caption=f"跃迁记录导出文件 - SRGF {SRGF_VERSION}")
+            await message.reply_document(document=open(path, "rb+"), caption=f"跃迁记录导出文件 - UIGF {UIGF_VERSION}")
         except GachaLogNotFound:
             logger.info("未找到用户 %s[%s] 的跃迁记录", user.full_name, user.id)
             buttons = [
