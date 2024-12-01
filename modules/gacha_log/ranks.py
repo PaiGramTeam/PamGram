@@ -18,11 +18,11 @@ if TYPE_CHECKING:
 
 
 class GachaLogError(Exception):
-    """抽卡记录异常"""
+    """跃迁记录异常"""
 
 
 class GachaLogRanks:
-    """抽卡记录排行榜"""
+    """跃迁记录排行榜"""
 
     gacha_log_path: Path
     ITEM_LIST_MAP = {
@@ -62,8 +62,8 @@ class GachaLogRanks:
         self, gacha_log: "GachaLogInfo", pool: StarRailBannerType, assets: Optional["AssetsService"]
     ):
         """
-        获取抽卡记录分析数据
-        :param gacha_log: 抽卡记录
+        获取跃迁记录分析数据
+        :param gacha_log: 跃迁记录
         :param pool: 池子类型
         :param assets: 资源服务
         :return: 分析数据
@@ -87,7 +87,7 @@ class GachaLogRanks:
         try:
             gacha_log = GachaLogInfo.parse_obj(await self.load_json(file_path))
             if gacha_log.get_import_type != ImportType.PaiGram:
-                raise GachaLogError("不支持的抽卡记录类型")
+                raise GachaLogError("不支持的跃迁记录类型")
         except ValueError as e:
             raise GachaLogError from e
         player_id = int(gacha_log.uid)

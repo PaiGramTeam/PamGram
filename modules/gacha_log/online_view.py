@@ -12,7 +12,7 @@ from modules.gacha_log.error import GachaLogWebNotConfigError, GachaLogWebUpload
 
 
 class GachaLogWebConfig(Settings):
-    """抽卡记录在线查询配置"""
+    """跃迁记录在线查询配置"""
 
     url: Optional[str] = ""
     token: Optional[str] = ""
@@ -25,7 +25,7 @@ DEFAULT_POOL = "角色跃迁"
 
 
 class GachaLogOnlineView:
-    """抽卡记录在线查询"""
+    """跃迁记录在线查询"""
 
     gacha_log_path: Path
 
