@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 import aiofiles
 from simnet import StarRailClient, Region
 from simnet.errors import AuthkeyTimeout, InvalidAuthkey
+from simnet.models.base import add_timezone
 from simnet.models.starrail.wish import StarRailBannerType
 from simnet.utils.player import recognize_starrail_server
 
@@ -111,7 +112,7 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
         return False
 
     async def move_history_info(self, user_id: str, uid: str, new_user_id: str) -> bool:
-        """移动历史抽卡记录数据
+        """移动历史跃迁记录数据
         :param user_id: 用户id
         :param uid: 原神uid
         :param new_user_id: 新用户id
@@ -237,7 +238,7 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
                 # 检查导入后的数据是否合法
                 await self.verify_data(i)
                 i.sort(key=lambda x: (x.time, x.id))
-            gacha_log.update_time = datetime.datetime.now()
+            gacha_log.update_time = add_timezone(datetime.datetime.now())
             gacha_log.import_type = import_type.value
             await self.save_gacha_log_info(str(user_id), uid, gacha_log)
             await self.recount_one_from_uid(user_id, player_id)
@@ -256,21 +257,38 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
         else:
             return StarRailClient(player_id=player_id, region=Region.OVERSEAS, lang="zh-cn")
 
-    async def get_gacha_log_data(self, user_id: int, player_id: int, authkey: str) -> int:
+    async def get_gacha_log_data(self, user_id: int, player_id: int, authkey: str, is_lazy: bool) -> int:
         """使用authkey获取跃迁记录数据，并合并旧数据
         :param user_id: 用户id
         :param player_id: 玩家id
         :param authkey: authkey
+        :param is_lazy: 是否快速导入
         :return: 更新结果
         """
         new_num = 0
         gacha_log, _ = await self.load_history_info(str(user_id), str(player_id))
         # 将唯一 id 放入临时数据中，加快查找速度
-        temp_id_data = {pool_name: {i.id: i for i in pool_data} for pool_name, pool_data in gacha_log.item_list.items()}
+        temp_id_data = {pool_name: [i.id for i in pool_data] for pool_name, pool_data in gacha_log.item_list.items()}
         client = self.get_game_client(player_id)
         try:
             for pool_id, pool_name in GACHA_TYPE_LIST.items():
-                wish_history = await client.wish_history(pool_id.value, authkey=authkey)
+                if pool_name not in temp_id_data:
+                    temp_id_data[pool_name] = []
+                if pool_name not in gacha_log.item_list:
+                    gacha_log.item_list[pool_name] = []
+                min_id = 0
+                if is_lazy and gacha_log.item_list[pool_name]:
+                    with contextlib.suppress(ValueError):
+                        min_id = int(gacha_log.item_list[pool_name][-1].id)
+
+                wish_history = await client.wish_history(pool_id.value, authkey=authkey, min_id=min_id)
+
+                if not is_lazy:
+                    min_id = wish_history[0].id if wish_history else min_id
+                    if min_id:
+                        gacha_log.item_list[pool_name][:] = filter(
+                            lambda i: int(i.id) < min_id, gacha_log.item_list[pool_name]
+                        )
                 for data in wish_history:
                     item = GachaItem(
                         id=str(data.id),
@@ -280,28 +298,15 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
                         item_id=str(data.item_id),
                         item_type=data.type,
                         rank_type=str(data.rarity),
-                        time=datetime.datetime(
-                            data.time.year,
-                            data.time.month,
-                            data.time.day,
-                            data.time.hour,
-                            data.time.minute,
-                            data.time.second,
-                        ),
+                        time=data.time,
                     )
 
-                    if pool_name not in temp_id_data:
-                        temp_id_data[pool_name] = {}
-                    if pool_name not in gacha_log.item_list:
-                        gacha_log.item_list[pool_name] = []
-                    if item.id not in temp_id_data[pool_name].keys():
+                    if item.id not in temp_id_data[pool_name] or (not is_lazy and min_id):
                         gacha_log.item_list[pool_name].append(item)
-                        temp_id_data[pool_name][item.id] = item
+                        temp_id_data[pool_name].append(item.id)
                         new_num += 1
-                    else:
-                        old_item: GachaItem = temp_id_data[pool_name][item.id]
-                        old_item.gacha_id = item.gacha_id
-                        old_item.item_id = item.item_id
+
+                await asyncio.sleep(1)
         except AuthkeyTimeout as exc:
             raise GachaLogAuthkeyTimeout from exc
         except InvalidAuthkey as exc:
@@ -310,10 +315,14 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
             await client.shutdown()
         for i in gacha_log.item_list.values():
             i.sort(key=lambda x: (x.time, x.id))
-        gacha_log.update_time = datetime.datetime.now()
+        gacha_log.update_time = add_timezone(datetime.datetime.now())
         gacha_log.import_type = ImportType.PaiGram.value
         await self.save_gacha_log_info(str(user_id), str(player_id), gacha_log)
         return new_num
+
+    @staticmethod
+    def format_time(time: str) -> datetime.datetime:
+        return add_timezone(datetime.datetime.strptime(time, "%Y-%m-%d %H:%M:%S"))
 
     @staticmethod
     def check_avatar_up(name: str, gacha_time: datetime.datetime) -> bool:
@@ -547,8 +556,8 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks):
         self, gacha_log: "GachaLogInfo", pool: StarRailBannerType, assets: Optional["AssetsService"]
     ):
         """
-        获取抽卡记录分析数据
-        :param gacha_log: 抽卡记录
+        获取跃迁记录分析数据
+        :param gacha_log: 跃迁记录
         :param pool: 池子类型
         :param assets: 资源服务
         :return: 分析数据
