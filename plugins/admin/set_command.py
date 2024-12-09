@@ -50,6 +50,8 @@ class SetCommandPlugin(Plugin):
             BotCommand("player_card", "角色卡片"),
             BotCommand("role_detail", "角色详细信息"),
             BotCommand("sign", "米游社星穹铁道每日签到"),
+            BotCommand("cloud_game_sign", "（国服）云游戏每日签到"),
+            BotCommand("cloud_game_wallet", "（国服）云游戏钱包查询"),
             BotCommand("light_cone", "光锥图鉴查询"),
             BotCommand("relics", "遗器套装查询"),
             BotCommand("strategy", "角色攻略查询"),
