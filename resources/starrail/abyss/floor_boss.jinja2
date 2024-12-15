@@ -1,45 +1,17 @@
-<!DOCTYPE html>
-<html lang="zh-cn">
-<head>
-    <meta charset="UTF-8">
-    <title>floor</title>
-    <link type="text/css" href="./style.css" rel="stylesheet"/>
-    <link type="text/css" href="../../styles/public.css" rel="stylesheet"/>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        .floors, .floor {
-            border-radius: unset;
-            margin: 0;
-        }
-
-        .floor-num > div:last-child {
-            display: flex;
-            flex-flow: column;
-            justify-content: center;
-            align-content: center;
-        }
-    </style>
-</head>
-<body>
-<div class="container2">
-    <div class="floors">
+<div class="floors">
         <div class="floor floor-abyss-boss">
             <div class="head">
                 <div class="floor-name">
-                    <div class="floor-num"></div>
+                    <div class="floor_num"></div>
                     <div>
                         <div>UID: {{ uid }}</div>
-                        <div>{{ title }}·{{ floor.name }}</div>
+                        <div>{{ title }}·{{ data.floor.name }}</div>
                     </div>
                 </div>
                 <div class="star">
                     <div>
-                        <div>{{ floor.star_num }}</div>
-                        <div class="score">总分：{{ floor.score }}</div>
+                        <div>{{ data.floor.star_num }}</div>
+                        <div class="score">总分：{{ data.floor.score }}</div>
                     </div>
                 </div>
             </div>
@@ -47,16 +19,16 @@
             <div class="chamber">
                 <div class="chamber-info">
                     <div>
-                        <span style="color: #A3A3A3">{{ floor_time }}</span>
+                        <span style="color: #A3A3A3">{{ data.floor_time }}</span>
                     </div>
                     <div class="stars">
-                        {% for n in range(floor.star_num) %}
+                        {% for n in range(data.floor.star_num) %}
                             <div class="star"></div>
                         {% endfor %}
                     </div>
                 </div>
                 <div class="battles">
-                    {% for node in floor_nodes if node.has_data %}
+                    {% for node in data.floor_nodes if node.has_data %}
                     <div class="battle">
                         {% for character in node.avatars %}
                             <div class="character">
@@ -103,7 +75,4 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
-</body>
-</html>

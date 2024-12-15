@@ -31,13 +31,16 @@
     {% set summarize_class = '' %}
     {% if title == '混沌回忆' %}
     {% set overview_class = 'overview-abyss' %}
+    {% set floor_page = 'starrail/abyss/floor.jinja2' %}
     {% endif %}
     {% if title == '虚构叙事' %}
     {% set overview_class = 'overview-abyss-story' %}
+    {% set floor_page = 'starrail/abyss/floor_story.jinja2' %}
     {% endif %}
     {% if title == '末日幻影' %}
     {% set overview_class = 'overview-abyss-boss' %}
     {% set summarize_class = 'summarize-boss' %}
+    {% set floor_page = 'starrail/abyss/floor_boss.jinja2' %}
     {% endif %}
     <div class="overview {{ overview_class }}">
         <div class="title">{{ title }}挑战回顾</div>
@@ -68,6 +71,15 @@
             {% endif %}
         </div>
     </div>
+        {% for data in floors %}
+        {% if loop.index % 4 == 1 %}
+            <div class="floors_row">
+        {% endif %}
+        {% include floor_page %}
+        {% if loop.index % 4 == 0 or loop.index == loop.length %}
+            </div>
+        {% endif %}
+        {% endfor %}
 </div>
 </body>
 </html>

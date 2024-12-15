@@ -19,20 +19,18 @@ body {
 }
 
 .container {
-    width: 750px;
     position: relative;
     filter: drop-shadow(2px 2px 5px rgb(0 0 0 /70%));
 }
 
 .container2 {
-    width: 850px;
     position: relative;
     filter: drop-shadow(2px 2px 5px rgb(0 0 0 /70%));
 }
 
 .title {
     text-align: center;
-    font-size: 27px;
+    font-size: 30px;
     font-weight: bold;
     color: var(--h-color);
 }
@@ -46,8 +44,7 @@ body {
 /* 概览 */
 
 .overview {
-    /*height: 250px;*/
-    padding: 20px 40px;
+    padding: 20px 540px;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -69,9 +66,8 @@ body {
 }
 
 .summarize {
-    font-size: 20px;
+    font-size: 30px;
     width: calc(100% - 90px);
-    height: calc(150px - 20px);
     margin: 20px 0;
     padding: 10px 0 10px 80px;
     border-radius: 5px;
@@ -299,12 +295,12 @@ body {
     color: var(--white);
 }
 
-.floor-name > div:not(.floor-num) {
+.floor-name > div:not(.floor_num) {
     margin-left: 20px;
     text-shadow: 1px 1px 5px rgb(0 0 0/50%);
 }
 
-.floor-num {
+.floor_num {
     color: black;
     width: 100px;
     height: 100px;
@@ -436,4 +432,24 @@ body {
 
 .buffs > .buff-item > p > .buff-item-name {
     color: #f9c87e;
+}
+
+.floors_row {
+    display: flex;
+}
+
+.floors {
+    flex: 1;
+}
+
+.floors, .floor {
+    border-radius: unset;
+    margin: 0;
+}
+
+.floor_num > div:last-child {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-content: center;
 }

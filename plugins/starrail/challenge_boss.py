@@ -1,12 +1,9 @@
 """末日幻影数据查询"""
 
-import asyncio
 import math
-import re
 from functools import lru_cache, partial
-from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
-from arkowrapper import ArkoWrapper
 from telegram import Message, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ChatAction, ParseMode
 from telegram.ext import CallbackContext, filters, ContextTypes
@@ -16,7 +13,7 @@ from core.plugin import Plugin, handler
 from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.history_data.models import HistoryDataChallengeBoss
 from core.services.history_data.services import HistoryDataChallengeBossServices
-from core.services.template.models import RenderGroupResult, RenderResult
+from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from gram_core.config import config
 from gram_core.dependence.redisdb import RedisDB
@@ -42,18 +39,9 @@ MAX_FLOOR = 4
 
 
 @lru_cache
-def get_args(text: str) -> Tuple[int, bool, bool]:
-    if text.startswith("/"):
-        result = re.match(cmd_pattern, text).groups()
-        try:
-            floor = int(result[0] or 0)
-            if floor > 100:
-                floor = 0
-        except ValueError:
-            floor = 0
-        return floor, result[0] == "all", bool(result[1])
-    result = re.match(msg_pattern, text).groups()
-    return int(result[2] or 0), result[0] == "总览", result[1] == "上期"
+def get_args(text: str) -> bool:
+    prev = "pre" in text or "上期" in text
+    return prev
 
 
 class AbyssUnlocked(Exception):
@@ -101,10 +89,11 @@ class ChallengeBossPlugin(Plugin):
 
     @handler.command("challenge_boss", block=False)
     @handler.message(filters.Regex(msg_pattern), block=False)
-    async def command_start(self, update: Update, _: CallbackContext) -> None:
+    async def command_start(self, update: Update, context: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
-        message = update.effective_message
         uid, offset = self.get_real_uid_or_offset(update)
+        args = self.get_args(context)
+        message = update.effective_message
         uid: int = await self.get_uid(user_id, message.reply_to_message, uid, offset)
 
         # 若查询帮助
@@ -122,24 +111,13 @@ class ChallengeBossPlugin(Plugin):
             return
 
         # 解析参数
-        floor, total, previous = get_args(message.text)
-
-        if floor > MAX_FLOOR or floor < 0:
-            reply_msg = await message.reply_text(
-                f"末日幻影层数输入错误，请重新输入。支持的参数为： 1-{MAX_FLOOR} 或 all"
-            )
-            if filters.ChatType.GROUPS.filter(message):
-                self.add_delete_message_job(reply_msg)
-                self.add_delete_message_job(message)
-            return
+        previous = get_args(" ".join([i for i in args if not i.startswith("@")]))
 
         self.log_user(
             update,
             logger.info,
-            "[bold]末日幻影挑战数据[/bold]请求: uid=%s floor=%s total=%s previous=%s",
+            "[bold]末日幻影挑战数据[/bold]请求: uid=%s previous=%s",
             uid,
-            floor,
-            total,
             previous,
             extra={"markup": True},
         )
@@ -151,11 +129,10 @@ class ChallengeBossPlugin(Plugin):
 
         try:
             async with self.helper.genshin_or_public(user_id, uid=uid) as client:
-                if total:
-                    reply_text = await message.reply_text("彦卿需要时间整理末日幻影数据，还请耐心等待哦~")
+                reply_text = await message.reply_text("彦卿需要时间整理末日幻影数据，还请耐心等待哦~")
                 await message.reply_chat_action(ChatAction.TYPING)
                 abyss_data, season = await self.get_rendered_pic_data(client, uid, previous)
-                images = await self.get_rendered_pic(abyss_data, season, uid, floor, total)
+                images = await self.get_rendered_pic(abyss_data, season, uid)
         except TooManyRequestPublicCookies:
             reply_message = await message.reply_text("查询次数太多，请您稍后重试")
             if filters.ChatType.GROUPS.filter(message):
@@ -176,14 +153,9 @@ class ChallengeBossPlugin(Plugin):
                 await reply_message_func("UID 输入错误，请重新输入")
                 return
             raise e
-        if images is None:
-            await reply_message_func(f"还没有第 {floor} 层的挑战数据")
-            return
 
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-
-        for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
-            await RenderGroupResult(results=group).reply_media_group(message, write_timeout=60)
+        await images.reply_photo(message)
 
         if reply_text is not None:
             await reply_text.delete()
@@ -227,19 +199,7 @@ class ChallengeBossPlugin(Plugin):
         abyss_data: "StarRailChallengeBoss",
         season: "StarRailChallengeBossGroup",
         uid: int,
-        floor: int,
-        total: bool,
-    ) -> Union[
-        Tuple[
-            Union[BaseException, Any],
-            Union[BaseException, Any],
-            Union[BaseException, Any],
-            Union[BaseException, Any],
-            Union[BaseException, Any],
-        ],
-        List[RenderResult],
-        None,
-    ]:
+    ) -> RenderResult:
         """
         获取渲染后的图片
 
@@ -247,8 +207,6 @@ class ChallengeBossPlugin(Plugin):
             abyss_data (StarRailChallengeStory): 末日幻影数据
             season (StarRailChallengeStoryGroup): 末日幻影组数据
             uid (int): 需要查询的 uid
-            floor (int): 层数
-            total (bool): 是否为总览
 
         Returns:
             bytes格式的图片
@@ -287,61 +245,21 @@ class ChallengeBossPlugin(Plugin):
                 12: "#1D2A4A",
             },
         }
-        if total:
-            overview = await self.template_service.render(
-                "starrail/abyss/overview.html", render_data, viewport={"width": 750, "height": 250}
-            )
 
-            def floor_task(floor_index: int):
-                _abyss_data = self.get_floor_data(abyss_data, floor_index)
-                return (
-                    floor_index,
-                    self.template_service.render(
-                        "starrail/abyss/floor_boss.html",
-                        {
-                            **render_data,
-                            **_abyss_data,
-                        },
-                        viewport={"width": 690, "height": 500},
-                        full_page=True,
-                        ttl=15 * 24 * 60 * 60,
-                    ),
-                )
-
-            render_inputs = []
-            floors = abyss_data.floors[::-1]
-            for i in range(len(floors)):
-                try:
-                    render_inputs.append(floor_task(i + 1))
-                except AbyssFastPassed:
-                    pass
-
-            render_group_inputs = list(map(lambda x: x[1], sorted(render_inputs, key=lambda x: x[0])))
-
-            render_group_outputs = await asyncio.gather(*render_group_inputs)
-            render_group_outputs.insert(0, overview)
-            return render_group_outputs
-
-        if floor < 1:
-            return [
-                await self.template_service.render(
-                    "starrail/abyss/overview.html", render_data, viewport={"width": 750, "height": 250}
-                )
-            ]
-        try:
-            floor_data = abyss_data.floors[-floor]
-        except IndexError:
-            return None
-        if not floor_data:
-            return None
-        if floor_data.is_fast:
-            raise AbyssFastPassed()
-        render_data.update(self.get_floor_data(abyss_data, floor))
-        return [
-            await self.template_service.render(
-                "starrail/abyss/floor_boss.html", render_data, viewport={"width": 690, "height": 500}
-            )
-        ]
+        floors_data = []
+        floors = abyss_data.floors[::-1]
+        for i in range(len(floors)):
+            try:
+                floors_data.append(self.get_floor_data(abyss_data, i + 1))
+            except AbyssFastPassed:
+                pass
+        render_data["floors"] = floors_data
+        return await self.template_service.render(
+            "starrail/abyss/overview.html",
+            render_data,
+            viewport={"width": 2745, "height": 4000},
+            query_selector=".container",
+        )
 
     @staticmethod
     async def save_abyss_data(
@@ -452,40 +370,6 @@ class ChallengeBossPlugin(Plugin):
             send_buttons.append(last_button)
         return send_buttons
 
-    @staticmethod
-    async def gen_floor_button(
-        data_id: int,
-        abyss_data: "HistoryDataChallengeBoss",
-        user_id: int,
-        uid: int,
-    ) -> List[List[InlineKeyboardButton]]:
-        max_floors = len(abyss_data.boss_data.floors)
-        buttons = [
-            InlineKeyboardButton(
-                f"第 {i + 1} 层",
-                callback_data=f"get_challenge_boss_history|{user_id}|{uid}|{data_id}|{i + 1}",
-            )
-            for i in range(0, max_floors)
-            if not abyss_data.boss_data.floors[max_floors - 1 - i].is_fast
-        ]
-        send_buttons = [buttons[i : i + 4] for i in range(0, len(buttons), 4)]
-        all_buttons = [
-            InlineKeyboardButton(
-                "<< 返回",
-                callback_data=f"get_challenge_boss_history|{user_id}|{uid}|p_1",
-            ),
-            InlineKeyboardButton(
-                "总览",
-                callback_data=f"get_challenge_boss_history|{user_id}|{uid}|{data_id}|total",
-            ),
-            InlineKeyboardButton(
-                "所有",
-                callback_data=f"get_challenge_boss_history|{user_id}|{uid}|{data_id}|all",
-            ),
-        ]
-        send_buttons.append(all_buttons)
-        return send_buttons
-
     @handler.command("challenge_boss_history", block=False)
     @handler.message(filters.Regex(r"^末日幻影历史数据"), block=False)
     async def challenge_boss_history_command_start(self, update: Update, _: CallbackContext) -> None:
@@ -518,23 +402,7 @@ class ChallengeBossPlugin(Plugin):
         await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
         await callback_query.answer(f"已切换到第 {page} 页", show_alert=False)
 
-    async def get_challenge_boss_history_season(self, update: "Update", data_id: int):
-        """进入选择层数"""
-        callback_query = update.callback_query
-        user = callback_query.from_user
-
-        self.log_user(update, logger.info, "切换末日幻影历史数据到层数页 data_id[%s]", data_id)
-        data = await self.history_data_abyss.get_by_id(data_id)
-        if not data:
-            await callback_query.answer("数据不存在，请尝试重新发送命令~", show_alert=True)
-            await callback_query.edit_message_text("数据不存在，请尝试重新发送命令~")
-            return
-        abyss_data = HistoryDataChallengeBoss.from_data(data)
-        buttons = await self.gen_floor_button(data_id, abyss_data, user.id, data.user_id)
-        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
-        await callback_query.answer("已切换到层数页", show_alert=False)
-
-    async def get_challenge_boss_history_floor(self, update: "Update", data_id: int, detail: str):
+    async def get_challenge_boss_history_floor(self, update: "Update", data_id: int):
         """渲染层数数据"""
         callback_query = update.callback_query
         message = callback_query.message
@@ -542,14 +410,6 @@ class ChallengeBossPlugin(Plugin):
         if message.reply_to_message:
             reply = message.reply_to_message
 
-        floor = 0
-        total = False
-        if detail == "total":
-            floor = 0
-        elif detail == "all":
-            total = True
-        else:
-            floor = int(detail)
         data = await self.history_data_abyss.get_by_id(data_id)
         if not data:
             await callback_query.answer("数据不存在，请尝试重新发送命令", show_alert=True)
@@ -557,16 +417,13 @@ class ChallengeBossPlugin(Plugin):
             return
         abyss_data = HistoryDataChallengeBoss.from_data(data)
 
-        images = await self.get_rendered_pic(abyss_data.boss_data, abyss_data.group, data.user_id, floor, total)
-        if images is None:
-            await callback_query.answer(f"还没有第 {floor} 层的挑战数据", show_alert=True)
-            return
         await callback_query.answer("正在渲染图片中 请稍等 请不要重复点击按钮", show_alert=False)
+
+        images = await self.get_rendered_pic(abyss_data.boss_data, abyss_data.group, data.user_id)
 
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
 
-        for group in ArkoWrapper(images).group(10):  # 每 10 张图片分一个组
-            await RenderGroupResult(results=group).reply_media_group(reply or message, write_timeout=60)
+        await images.reply_photo(reply or message)
         self.log_user(update, logger.info, "[bold]末日幻影挑战数据[/bold]: 成功发送图片", extra={"markup": True})
         self.add_delete_message_job(message, delay=1)
 
@@ -577,22 +434,20 @@ class ChallengeBossPlugin(Plugin):
 
         async def get_challenge_boss_history_callback(
             callback_query_data: str,
-        ) -> Tuple[str, str, int, int]:
+        ) -> Tuple[str, int, int]:
             _data = callback_query_data.split("|")
             _user_id = int(_data[1])
             _uid = int(_data[2])
             _result = _data[3]
-            _detail = _data[4] if len(_data) > 4 else None
             logger.debug(
-                "callback_query_data函数返回 detail[%s] result[%s] user_id[%s] uid[%s]",
-                _detail,
+                "callback_query_data函数返回 result[%s] user_id[%s] uid[%s]",
                 _result,
                 _user_id,
                 _uid,
             )
-            return _detail, _result, _user_id, _uid
+            return _result, _user_id, _uid
 
-        detail, result, user_id, uid = await get_challenge_boss_history_callback(callback_query.data)
+        result, user_id, uid = await get_challenge_boss_history_callback(callback_query.data)
         if user.id != user_id:
             await callback_query.answer(text="这不是你的按钮！\n" + config.notice.user_mismatch, show_alert=True)
             return
@@ -603,10 +458,7 @@ class ChallengeBossPlugin(Plugin):
             await self.get_challenge_boss_history_page(update, user_id, uid, result)
             return
         data_id = int(result)
-        if detail:
-            await self.get_challenge_boss_history_floor(update, data_id, detail)
-            return
-        await self.get_challenge_boss_history_season(update, data_id)
+        await self.get_challenge_boss_history_floor(update, data_id)
 
     async def challenge_boss_use_by_inline(
         self, update: "Update", context: "ContextTypes.DEFAULT_TYPE", previous: bool
@@ -623,8 +475,7 @@ class ChallengeBossPlugin(Plugin):
                 if not client.public:
                     await client.get_record_cards()
                 abyss_data, season = await self.get_rendered_pic_data(client, uid, previous)
-                images = await self.get_rendered_pic(abyss_data, season, uid, 0, False)
-                image = images[0]
+                image = await self.get_rendered_pic(abyss_data, season, uid)
         except AbyssUnlocked:  # 若深渊未解锁
             notice = "还未解锁末日幻影哦~"
         except TooManyRequestPublicCookies:
