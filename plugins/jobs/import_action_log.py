@@ -17,13 +17,15 @@ class ImportActionLogJob(Plugin):
 
     @job.run_daily(time=datetime.time(hour=12, minute=1, second=0), name="ImportActionLogJob")
     async def refresh(self, _: "ContextTypes.DEFAULT_TYPE"):
-        await self.action_log_system.daily_import_login(_)
+        await self.action_log_system.daily_import_login(True)
 
     @handler.command(command="action_log_import_all", block=False, admin=True)
     async def action_log_import_all(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"):
         user = update.effective_user
-        logger.info("用户 %s[%s] action_log_import_all 命令请求", user.full_name, user.id)
+        args = self.get_args(context)
+        is_lazy = "full" not in args
+        logger.info("用户 %s[%s] action_log_import_all 命令请求 is_lazy[%s]", user.full_name, user.id, is_lazy)
         message = update.effective_message
         reply = await message.reply_text("正在执行导入登录记录任务，请稍后...")
-        await self.refresh(context)
+        await self.action_log_system.daily_import_login(is_lazy)
         await reply.edit_text("全部账号导入登录记录任务完成")

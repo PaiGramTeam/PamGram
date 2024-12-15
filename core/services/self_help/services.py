@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING, Dict
+from typing import List, TYPE_CHECKING, Dict, Optional
 
 from core.services.self_help.models import ActionLogModel
 from core.services.self_help.repositories import ActionLogRepository
@@ -14,6 +14,12 @@ class ActionLogService(BaseService):
 
     async def add(self, p: List["StarRailSelfHelpActionLog"]) -> bool:
         return await self.repository.add([ActionLogModel.en(data) for data in p])
+
+    async def get_latest_record(self, uid: int) -> Optional["StarRailSelfHelpActionLog"]:
+        r = await self.repository.get_latest_record(uid)
+        if not r:
+            return None
+        return ActionLogModel.de(r.records[0])
 
     async def count_uptime_period(self, uid: int) -> Dict[int, int]:
         """计算最近一个月不同时间点的登录次数"""

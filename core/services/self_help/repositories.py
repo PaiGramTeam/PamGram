@@ -21,6 +21,22 @@ class ActionLogRepository(BaseService.Component):
             client: "InfluxDBClientAsync"
             return await client.write_api().write(self.bucket, record=p)
 
+    async def get_latest_record(self, uid: int) -> "FluxTable":
+        async with self.client() as client:
+            client: "InfluxDBClientAsync"
+            query = (
+                'from(bucket: "{}")'
+                "|> range(start: 0)"
+                '|> filter(fn: (r) => r["_measurement"] == "action_log")'
+                '|> filter(fn: (r) => r["uid"] == "{}")'
+                '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
+                '|> sort(columns: ["_time"], desc: true)'
+                "|> limit(n: 1)"
+            ).format(self.bucket, uid)
+            tables = await client.query_api().query(query)
+            for table in tables:
+                return table
+
     async def count_uptime_period(self, uid: int) -> "FluxTable":
         async with self.client() as client:
             client: "InfluxDBClientAsync"

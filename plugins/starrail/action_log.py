@@ -72,7 +72,7 @@ class ActionLogPlugins(Plugin):
 
                 notice = await message.reply_text("彦卿需要收集整理数据，还请耐心等待哦~")
 
-                bo = await self.action_log_system.import_action_log(client, authkey)
+                bo = await self.action_log_system.import_action_log(client, authkey, True)
                 text = "导入登录记录成功" if bo else "导入登录记录失败，可能没有新记录"
                 await notice.edit_text(text)
                 self.log_user(update, logger.success, text)

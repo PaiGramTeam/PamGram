@@ -17,8 +17,6 @@ from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNot
 from utils.log import logger
 
 if TYPE_CHECKING:
-    from telegram.ext import ContextTypes
-
     from simnet import StarRailClient
 
 
@@ -35,8 +33,13 @@ class ActionLogSystem(Plugin):
         self.helper = helper
         self.action_log_service = action_log_service
 
-    async def import_action_log(self, client: "StarRailClient", authkey: str) -> bool:
-        data = await client.get_starrail_action_log(authkey=authkey)
+    async def import_action_log(self, client: "StarRailClient", authkey: str, is_lazy: bool) -> bool:
+        min_id = 0
+        if is_lazy:
+            record = await self.action_log_service.get_latest_record(client.player_id)
+            if record:
+                min_id = record.id
+        data = await client.get_starrail_action_log(authkey=authkey, min_id=min_id)
         # 确保第一个数据为登出、最后一条数据为登入
         if not data:
             return False
@@ -46,7 +49,7 @@ class ActionLogSystem(Plugin):
             data.pop(-1)
         return await self.action_log_service.add(data)
 
-    async def daily_import_login(self, _: "ContextTypes.DEFAULT_TYPE"):
+    async def daily_import_login(self, is_lazy: bool):
         logger.info("正在执行每日刷新登录记录任务")
         for cookie_model in await self.cookies.get_all(
             region=RegionEnum.HYPERION, status=CookiesStatusEnum.STATUS_SUCCESS
@@ -63,7 +66,7 @@ class ActionLogSystem(Plugin):
                     except ValueError:
                         logger.warning("用户 user_id[%s] 请求登录记录失败 无 stoken", user_id)
                         continue
-                    await self.import_action_log(client, authkey)
+                    await self.import_action_log(client, authkey, is_lazy)
             except (InvalidCookies, PlayerNotFoundError, CookiesNotFoundError):
                 continue
             except SimnetBadRequest as exc:
