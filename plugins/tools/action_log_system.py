@@ -45,6 +45,8 @@ class ActionLogSystem(Plugin):
             return False
         if data[0].status == 1:
             data.pop(0)
+        if not data:
+            return False
         if data[-1].status == 0:
             data.pop(-1)
         return await self.action_log_service.add(data)
