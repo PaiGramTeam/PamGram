@@ -91,8 +91,9 @@ soupsieve==2.6
 sqlalchemy==2.0.36
 sqlmodel==0.0.22
 starlette==0.41.3
-starrail-damage-cal==1.9.6
+starrail-damage-cal==2.0.0
 starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore@e13ce94d738f85cbde641535dc80b8cecc2e3eac
+starrailres @ git+https://github.com/PaiGramTeam/starrailres.py@b4641973bb8804ec52e0ebf1d3670ea8cc69165f
 tgcrypto==1.2.5
 thefuzz==0.22.1
 tomli==2.2.1 ; python_full_version < '3.11'
