@@ -27,7 +27,29 @@ relic_affix_map = {
     RelicAffix.ThunderAddedRatio: "雷属性伤害提高百分比",
     RelicAffix.WindAddedRatio: "风属性伤害提高百分比",
 }
-relic_affix_name_map = {v: k for k, v in relic_affix_map.items()}
+relic_affix_name_map = {
+    "攻击力百分比": RelicAffix.AttackAddedRatio,
+    "攻击力": RelicAffix.AttackDelta,
+    "击破特攻": RelicAffix.BreakDamageAddedRatioBase,
+    "暴击率": RelicAffix.CriticalChanceBase,
+    "暴击伤害": RelicAffix.CriticalDamageBase,
+    "防御力百分比": RelicAffix.DefenceAddedRatio,
+    "防御力": RelicAffix.DefenceDelta,
+    "火属性伤害提高": RelicAffix.FireAddedRatio,
+    "生命值百分比": RelicAffix.HPAddedRatio,
+    "生命值": RelicAffix.HPDelta,
+    "治疗量加成": RelicAffix.HealRatioBase,
+    "冰属性伤害提高": RelicAffix.IceAddedRatio,
+    "虚数属性伤害提高": RelicAffix.ImaginaryAddedRatio,
+    "物理属性伤害提高": RelicAffix.PhysicalAddedRatio,
+    "量子属性伤害提高": RelicAffix.QuantumAddedRatio,
+    "速度": RelicAffix.SpeedDelta,
+    "能量恢复效率": RelicAffix.SPRatioBase,
+    "效果命中": RelicAffix.StatusProbabilityBase,
+    "效果抵抗": RelicAffix.StatusResistanceBase,
+    "雷属性伤害提高": RelicAffix.ThunderAddedRatio,
+    "风属性伤害提高": RelicAffix.WindAddedRatio,
+}
 # default score based on 666bj relic theory https://www.miyoushe.com/sr/article/40136882
 relic_affix_score_map = {
     RelicAffix.AttackAddedRatio: 1.5,

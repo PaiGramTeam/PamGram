@@ -2,6 +2,7 @@ from core.base_service import BaseService
 from modules.wiki.character import Character
 from modules.wiki.light_cone import LightCone
 from modules.wiki.material import Material
+from modules.wiki.mihomo_map import MihomoMap
 from modules.wiki.raider import Raider
 from modules.wiki.relic import Relic
 from utils.log import logger
@@ -16,6 +17,7 @@ class WikiService(BaseService):
         self.material = Material()
         self.raider = Raider()
         self.relic = Relic()
+        self.mihomo_map = MihomoMap()
 
     async def initialize(self) -> None:
         logger.info("正在加载 Wiki 数据")
@@ -25,6 +27,7 @@ class WikiService(BaseService):
             await self.material.read()
             await self.raider.read()
             await self.relic.read()
+            await self.mihomo_map.read()
         except Exception as e:
             logger.error("加载 Wiki 数据失败", exc_info=e)
         logger.info("加载 Wiki 数据完成")
@@ -41,4 +44,6 @@ class WikiService(BaseService):
         await self.raider.refresh()
         logger.info("正在重新获取遗器信息")
         await self.relic.refresh()
+        logger.info("正在重新获取 mihomo map 数据")
+        await self.mihomo_map.refresh()
         logger.info("刷新成功")
