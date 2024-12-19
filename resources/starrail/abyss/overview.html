@@ -72,11 +72,11 @@
         </div>
     </div>
         {% for data in floors %}
-        {% if loop.index % 4 == 1 %}
+        {% if loop.index % 2 == 1 %}
             <div class="floors_row">
         {% endif %}
         {% include floor_page %}
-        {% if loop.index % 4 == 0 or loop.index == loop.length %}
+        {% if loop.index % 2 == 0 or loop.index == loop.length %}
             </div>
         {% endif %}
         {% endfor %}

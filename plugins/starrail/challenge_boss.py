@@ -257,7 +257,7 @@ class ChallengeBossPlugin(Plugin):
         return await self.template_service.render(
             "starrail/abyss/overview.html",
             render_data,
-            viewport={"width": 2745, "height": 4000},
+            viewport={"width": 1893, "height": 4000},
             query_selector=".container",
         )
 
