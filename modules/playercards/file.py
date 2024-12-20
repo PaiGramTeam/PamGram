@@ -60,6 +60,7 @@ class PlayerCardsFile:
         uid: Union[str, int],
         data: Dict,
         props: Dict,
+        use_old: bool = False,
     ) -> Dict:
         assistAvatarList = "assistAvatarList"
         avatarId = "avatarId"
@@ -68,6 +69,8 @@ class PlayerCardsFile:
         async with self._lock:
             old_data = await self.load_history_info(uid)
             if old_data is None:
+                if use_old:
+                    raise FileNotFoundError
                 old_data = {}
             avatars = []
             avatar_ids = []
@@ -87,6 +90,9 @@ class PlayerCardsFile:
             for i in old_data.get(avatarList, []):
                 if i.get(avatarId, 0) not in avatar_ids:
                     data[avatarList].append(i)
+            if use_old:
+                old_data[avatarList] = data[avatarList]
+                data = old_data
             for i in data[avatarList]:
                 if property_ := props.get(i.get(avatarId, 0)):
                     i["property"] = property_

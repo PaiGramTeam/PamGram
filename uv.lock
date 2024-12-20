@@ -1307,6 +1307,7 @@ dependencies = [
     { name = "sqlmodel" },
     { name = "starrail-damage-cal" },
     { name = "starrailrelicscore" },
+    { name = "starrailres" },
     { name = "thefuzz" },
     { name = "ujson" },
     { name = "uvicorn", extra = ["standard"] },
@@ -1359,8 +1360,9 @@ requires-dist = [
     { name = "sentry-sdk", specifier = ">=2.7.0,<3.0.0" },
     { name = "simnet", git = "https://github.com/PaiGramTeam/SIMNet" },
     { name = "sqlmodel", specifier = ">=0.0.22,<1.0.0" },
-    { name = "starrail-damage-cal", specifier = ">=1.7.0,<2.0.0" },
+    { name = "starrail-damage-cal", specifier = ">=2.0.0,<3.0.0" },
     { name = "starrailrelicscore", git = "https://github.com/PaiGramTeam/StarRailRelicScore" },
+    { name = "starrailres", git = "https://github.com/PaiGramTeam/starrailres.py" },
     { name = "tgcrypto", marker = "extra == 'pyro'", specifier = ">=1.2.5,<2.0.0" },
     { name = "thefuzz", specifier = ">=0.22.1,<1.0.0" },
     { name = "ujson", specifier = ">=5.9.0,<6.0.0" },
@@ -2201,15 +2203,15 @@ wheels = [
 
 [[package]]
 name = "starrail-damage-cal"
-version = "1.9.6"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "msgspec" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d6/1c/bbc600b7cd020b8b6419ce8ab53bd3af86f6dcde5fb6f361560fd197ad49/starrail_damage_cal-1.9.6.tar.gz", hash = "sha256:50fa3c621a7813a5aa60edc0d6eb808a8e4b084529508a59031f6f48aa2a775f", size = 192048 }
+sdist = { url = "https://files.pythonhosted.org/packages/71/e2/f69cd01b558bc6f4e58ad768d06bd3dd2a7a7443a806dfeb6efc9b36b513/starrail_damage_cal-2.0.0.tar.gz", hash = "sha256:afbd779d369483b013b21e902fe51056c75813693045e510cf6c6e711242335a", size = 198878 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/aa/05/3189d0960215b961c462b9010d7d60ec6261cde3acf065c510fd499928f8/starrail_damage_cal-1.9.6-py3-none-any.whl", hash = "sha256:03ef82359f48ffa315772337a789920a656e8725be42f8136a4151348bfb028a", size = 219240 },
+    { url = "https://files.pythonhosted.org/packages/4f/52/96991d629100b756fdeb143cf0d87245ce7310c3f7603ea92fb8864420e9/starrail_damage_cal-2.0.0-py3-none-any.whl", hash = "sha256:ed345b500c8f066ab859f08663c456552889f3afef8d68a7ad2417325c022714", size = 226748 },
 ]
 
 [[package]]
@@ -2218,6 +2220,14 @@ version = "0.2.0"
 source = { git = "https://github.com/PaiGramTeam/StarRailRelicScore#e13ce94d738f85cbde641535dc80b8cecc2e3eac" }
 dependencies = [
     { name = "pydantic" },
+]
+
+[[package]]
+name = "starrailres"
+version = "2.1.0"
+source = { git = "https://github.com/PaiGramTeam/starrailres.py#b4641973bb8804ec52e0ebf1d3670ea8cc69165f" }
+dependencies = [
+    { name = "msgspec" },
 ]
 
 [[package]]

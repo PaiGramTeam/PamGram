@@ -9,15 +9,15 @@ from telegram.ext import filters
 
 from core.config import config
 from core.dependence.assets import AssetsService, AssetsCouldNotFound
-from core.dependence.redisdb import RedisDB
 from core.plugin import Plugin, handler
 from core.services.players import PlayersService
 from core.services.template.services import TemplateService
 from core.services.wiki.services import WikiService
 from metadata.shortname import roleToName, idToRole
-from modules.apihelper.client.components.player_cards import PlayerCards as PlayerCardsClient, PlayerInfo, Avatar, Relic
 from modules.apihelper.client.components.remote import Remote
-from plugins.tools.genshin import PlayerNotFoundError
+from modules.playercards.client import PlayerCards as PlayerCardsClient
+from modules.playercards.models import Avatar, PlayerInfo, Relic
+from plugins.tools.genshin import PlayerNotFoundError, GenshinHelper, CookiesNotFoundError
 from utils.log import logger
 from utils.uid import mask_number
 
@@ -39,6 +39,7 @@ except ImportError:
 if TYPE_CHECKING:
     from telegram.ext import ContextTypes
     from telegram import Update
+    from simnet import StarRailClient
 
     from starrailrelicscore.models.relic_scorer import Score, TotalScore
 
@@ -48,9 +49,6 @@ except ImportError:
     import json as jsonlib
 
 
-DEP_MSG = "自 2.0 版本开始，不再推荐使用此功能，推荐使用 /role_detail 查询角色信息。"
-
-
 class PlayerCards(Plugin):
     def __init__(
         self,
@@ -58,23 +56,46 @@ class PlayerCards(Plugin):
         template_service: TemplateService,
         assets_service: AssetsService,
         wiki_service: WikiService,
-        redis: RedisDB,
+        player_cards_client: PlayerCardsClient,
+        helper: GenshinHelper,
     ):
         self.player_service = player_service
-        self.client = PlayerCardsClient(redis)
+        self.client = player_cards_client
         self.cache = self.client.cache
         self.assets_service = assets_service
         self.template_service = template_service
         self.wiki_service = wiki_service
         self.kitsune: Optional[str] = None
         self.fight_prop_rule: Dict[str, Dict[str, float]] = {}
+        self.helper = helper
 
     async def initialize(self):
-        await self.client.async_init()
         await self._refresh()
 
     async def _refresh(self):
         self.fight_prop_rule = await Remote.get_fight_prop_rule_data()
+
+    async def _update_mihoyo_data(self, user_id: int, uid: int) -> Union[PlayerInfo, str]:
+        error = "发生未知错误"
+        try:
+            data = await self.cache.get(str(uid))
+            if data is not None:
+                return PlayerInfo.model_validate(data)
+            async with self.helper.genshin(user_id=user_id, player_id=uid) as client:
+                client: "StarRailClient"
+                raw_details = await client.get_starrail_characters()
+                data = self.client.from_simnet_to_enka(raw_details)
+                with open("test.json", "w", encoding="utf-8") as f:
+                    f.write(jsonlib.dumps(data, ensure_ascii=False, indent=4))
+                props = await self.client.get_property_from_dict(data)
+                data = await self.client.player_cards_file.merge_info(uid, data, props, use_old=True)
+                await self.cache.set(str(uid), data)
+                return PlayerInfo.model_validate(data)
+        except FileNotFoundError:
+            error = "请先通过 Mihomo 更新一次角色列表"
+        except (PlayerNotFoundError, CookiesNotFoundError):
+            error = "请先通过 cookie 绑定账号"
+        return error
 
     async def _load_history(self, uid) -> Optional[PlayerInfo]:
         data = await self.client.player_cards_file.load_history_info(uid)
@@ -140,14 +161,14 @@ class PlayerCards(Plugin):
             buttons = [
                 [
                     InlineKeyboardButton(
-                        "更新面板",
-                        callback_data=f"update_player_card|{user_id}|{uid}",
+                        "更新",
+                        callback_data=f"update_player_card|{user_id}|{uid}|enka",
                     )
                 ]
             ]
             reply_message = await message.reply_photo(
                 photo=photo,
-                caption=f"角色列表未找到，请尝试点击下方按钮更新角色列表 - UID {uid}\n\n{DEP_MSG}",
+                caption=f"角色列表未找到，请尝试点击下方按钮更新角色列表 - UID {uid}",
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
             if reply_message.photo:
@@ -172,7 +193,7 @@ class PlayerCards(Plugin):
                 photo = open("resources/img/aaa.jpg", "rb")
             reply_message = await message.reply_photo(
                 photo=photo,
-                caption=f"请选择你要查询的角色 - UID {uid}\n\n{DEP_MSG}",
+                caption=f"请选择你要查询的角色 - UID {uid}",
                 reply_markup=InlineKeyboardMarkup(buttons),
             )
             if reply_message.photo:
@@ -183,7 +204,7 @@ class PlayerCards(Plugin):
                 break
         else:
             await message.reply_text(
-                f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试\n\n{DEP_MSG}"
+                f"角色展柜中未找到 {ch_name} ，请检查角色是否存在于角色展柜中，或者等待角色数据更新后重试"
             )
             return
         await message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
@@ -208,14 +229,15 @@ class PlayerCards(Plugin):
         message = update.effective_message
         callback_query = update.callback_query
 
-        async def get_player_card_callback(callback_query_data: str) -> Tuple[int, int]:
+        async def get_player_card_callback(callback_query_data: str) -> Tuple[int, int, str]:
             _data = callback_query_data.split("|")
             _user_id = int(_data[1])
             _uid = int(_data[2])
-            logger.debug("callback_query_data函数返回 user_id[%s] uid[%s]", _user_id, _uid)
-            return _user_id, _uid
+            _type = _data[3] if len(_data) > 3 else "enka"
+            logger.debug("callback_query_data函数返回 user_id[%s] uid[%s] type[%s]", _user_id, _uid, _type)
+            return _user_id, _uid, _type
 
-        user_id, uid = await get_player_card_callback(callback_query.data)
+        user_id, uid, update_type = await get_player_card_callback(callback_query.data)
         if user.id != user_id:
             await callback_query.answer(text="这不是你的按钮！\n" + config.notice.user_mismatch, show_alert=True)
             return
@@ -227,8 +249,12 @@ class PlayerCards(Plugin):
             return
 
         await message.reply_chat_action(ChatAction.TYPING)
-        await callback_query.answer(text="正在获取角色列表 请不要重复点击按钮")
-        data = await self.client.update_data(str(uid))
+        if update_type == "enka":
+            data = await self.client.update_data(str(uid))
+            text = "正在从 Mihomo 获取角色列表 请不要重复点击按钮"
+        else:
+            data = await self._update_mihoyo_data(user_id, uid)
+            text = "正在从米忽悠获取角色列表 请不要重复点击按钮"
         if isinstance(data, str):
             await callback_query.answer(text=data, show_alert=True)
             return
@@ -239,6 +265,7 @@ class PlayerCards(Plugin):
                 show_alert=True,
             )
             return
+        await callback_query.answer(text=text)
         buttons = self.gen_button(data, user.id, uid, update_button=False)
         render_data = await self.parse_holder_data(data)
         holder = await self.template_service.render(
@@ -246,7 +273,7 @@ class PlayerCards(Plugin):
             render_data,
             viewport={"width": 750, "height": 380},
             ttl=60 * 10,
-            caption=f"更新角色列表成功，请选择你要查询的角色 - UID {uid}\n\n{DEP_MSG}",
+            caption=f"更新角色列表成功，请选择你要查询的角色 - UID {uid}",
         )
         await holder.edit_media(message, reply_markup=InlineKeyboardMarkup(buttons))
 
@@ -380,8 +407,14 @@ class PlayerCards(Plugin):
         if update_button:
             last_button.append(
                 InlineKeyboardButton(
-                    "更新面板",
-                    callback_data=f"update_player_card|{user_id}|{uid}",
+                    "更新",
+                    callback_data=f"update_player_card|{user_id}|{uid}|enka",
+                )
+            )
+            last_button.append(
+                InlineKeyboardButton(
+                    "更新全部",
+                    callback_data=f"update_player_card|{user_id}|{uid}|mihoyo",
                 )
             )
         if next_page:

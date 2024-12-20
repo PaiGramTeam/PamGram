@@ -5,7 +5,8 @@ from core.base_service import BaseService
 from core.dependence.redisdb import RedisDB
 from core.services.players.models import PlayersDataBase as Player, PlayerInfoSQLModel, PlayerInfo
 from core.services.players.repositories import PlayerInfoRepository
-from modules.apihelper.client.components.player_cards import PlayerCards, PlayerBaseInfo
+from modules.playercards.client import PlayerCards
+from modules.playercards.models import PlayerBaseInfo
 from utils.log import logger
 
 from gram_core.services.players import PlayersService
@@ -14,10 +15,10 @@ __all__ = ("PlayersService", "PlayerInfoService")
 
 
 class PlayerInfoService(BaseService):
-    def __init__(self, redis: RedisDB, players_info_repository: PlayerInfoRepository):
+    def __init__(self, redis: RedisDB, players_info_repository: PlayerInfoRepository, player_cards_client: PlayerCards):
         self.cache = redis.client
         self._players_info_repository = players_info_repository
-        self.client = PlayerCards(redis)
+        self.client = player_cards_client
         self.qname = "players_info"
 
     async def get_form_cache(self, player: Player):
