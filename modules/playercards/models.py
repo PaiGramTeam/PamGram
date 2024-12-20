@@ -54,6 +54,7 @@ class Avatar(BaseModel):
     rank: Optional[int] = 0
     relicList: Optional[List[Relic]] = None
     property: Optional[List[Property]] = None
+    source: str = "mihomo"
 
 
 class RecordInfo(BaseModel):

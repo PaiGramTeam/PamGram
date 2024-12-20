@@ -141,6 +141,7 @@ class SimnetApiDataParser:
             "promotion": 6,
             "rank": avatar_rank,
             "relicList": relic_list,
+            "source": "mihoyo",
         }
 
     def from_simnet_to_enka_loop(self, data: "StarRailDetailCharacters") -> List[Dict]:
