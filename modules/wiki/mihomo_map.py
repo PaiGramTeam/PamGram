@@ -46,7 +46,7 @@ class MihomoMap(WikiModel):
         await self.read()
 
     async def read(self):
-        if not len(list(self.mihomo_map_base_path.glob("*.json"))):
+        if not list(self.mihomo_map_base_path.glob("*.json")):
             await self.refresh()
             return
         self.index = Index(self.mihomo_map_base_path)
