@@ -95,7 +95,7 @@ roles = {
     1315: ["波提欧", "boothill"],
     1317: ["乱破", "rappa", "忍者"],
 }
-not_real_roles = [1225]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
