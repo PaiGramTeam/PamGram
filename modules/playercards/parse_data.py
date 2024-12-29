@@ -34,14 +34,15 @@ class MihomoApiDataParser:
         if data.relicList:
             for relic in data.relicList:
                 sub_affix = []
-                for affix in relic.subAffixList:
-                    sub_affix.append(
-                        SubAffixBasicInfo(
-                            id=str(affix.affixId),
-                            cnt=affix.cnt,
-                            step=affix.step,
+                if relic.subAffixList:
+                    for affix in relic.subAffixList:
+                        sub_affix.append(
+                            SubAffixBasicInfo(
+                                id=str(affix.affixId),
+                                cnt=affix.cnt,
+                                step=affix.step,
+                            )
                         )
-                    )
                 relic_data = RelicBasicInfo(
                     id=str(relic.tid),
                     level=relic.level,
@@ -50,13 +51,14 @@ class MihomoApiDataParser:
                 )
                 relics.append(relic_data)
         skill_tree_levels = []
-        for behavior in data.skillTreeList:
-            skill_tree_levels.append(
-                LevelInfo(
-                    id=str(behavior.pointId),
-                    level=behavior.level,
+        if data.skillTreeList:
+            for behavior in data.skillTreeList:
+                skill_tree_levels.append(
+                    LevelInfo(
+                        id=str(behavior.pointId),
+                        level=behavior.level,
+                    )
                 )
-            )
         character_basic = CharacterBasicInfo(
             id=str(data.avatarId),
             rank=data.rank,
