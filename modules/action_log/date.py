@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 
-from pytz import timezone
+from zoneinfo import ZoneInfo
 
-TZ = timezone("Asia/Shanghai")
+TZ = ZoneInfo("Asia/Shanghai")
 
 
 class DateUtils:
