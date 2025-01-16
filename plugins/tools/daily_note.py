@@ -33,8 +33,8 @@ class ResinData(TaskDataBase):
     @field_validator("notice_num")
     @classmethod
     def notice_num_validator(cls, v):
-        if v < 100 or v > 240:
-            raise ValueError("开拓力提醒数值必须在 100 ~ 240 之间")
+        if v < 40 or v > 300:
+            raise ValueError("开拓力提醒数值必须在 40 ~ 300 之间")
         return v
 
 
