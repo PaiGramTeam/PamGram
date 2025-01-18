@@ -62,16 +62,16 @@ propcache==0.2.1
 psutil==6.1.1
 pyaes==1.6.1
 pycparser==2.22 ; platform_python_implementation != 'PyPy'
-pydantic==2.10.4
+pydantic==2.10.5
 pydantic-core==2.27.2
 pydantic-settings==2.7.1
 pyee==12.0.0
-pygments==2.19.0
+pygments==2.19.1
 pyrogram @ git+https://github.com/TeamPGM/pyrogram@233b3b80f50f50553598fde7959d7d4f664e7f8c
 pyrotgcrypto==1.2.7
 pysocks==1.7.1
 pytest==8.3.4
-pytest-asyncio==0.25.1
+pytest-asyncio==0.25.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-telegram-bot==21.10
@@ -80,19 +80,19 @@ rapidfuzz==3.11.0
 reactivex==4.0.4
 redis==5.2.1
 rich==13.9.4
-sentry-sdk==2.19.2
-setuptools==75.6.0
-simnet @ git+https://github.com/PaiGramTeam/SIMNet@fa37bc072e647c46171c3572a75a12c9ce985ff9
+sentry-sdk==2.20.0
+setuptools==75.8.0
+simnet @ git+https://github.com/PaiGramTeam/SIMNet@f20ce665c1f5f752ffd8f65d5ee2cedfcc6671b7
 six==1.17.0
 smmap==5.0.2
 sniffio==1.3.1
 sortedcontainers==2.4.0
 soupsieve==2.6
-sqlalchemy==2.0.36
+sqlalchemy==2.0.37
 sqlmodel==0.0.22
 starlette==0.41.3
-starrail-damage-cal==2.0.0
-starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore@e13ce94d738f85cbde641535dc80b8cecc2e3eac
+starrail-damage-cal==3.0.4
+starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore@4c2af678f8ec57b9afa34a3808a8a8fa38e1f340
 starrailres @ git+https://github.com/PaiGramTeam/starrailres.py@b4641973bb8804ec52e0ebf1d3670ea8cc69165f
 thefuzz==0.22.1
 tomli==2.2.1 ; python_full_version < '3.11'
@@ -104,6 +104,6 @@ ujson==5.10.0
 urllib3==2.3.0
 uvicorn==0.34.0
 uvloop==0.21.0 ; platform_python_implementation != 'PyPy' and sys_platform != 'cygwin' and sys_platform != 'win32'
-watchfiles==1.0.3
+watchfiles==1.0.4
 websockets==14.1
 yarl==1.18.3
