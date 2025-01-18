@@ -97,6 +97,7 @@ class RoleDetailPlugin(Plugin.Conversation):
         5: "Nihility",  # 虚无
         6: "Preservation",  # 存护
         7: "Abundance",  # 丰饶
+        8: "Memory",  # 记忆
     }
 
     def __init__(
