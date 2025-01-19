@@ -291,6 +291,7 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
         gacha_log.update_time = add_timezone(datetime.datetime.now())
         gacha_log.import_type = ImportType.PaiGram.value
         await self.save_gacha_log_info(str(user_id), str(player_id), gacha_log)
+        await self.recount_one_from_uid(user_id, player_id)
         return new_num
 
     @staticmethod
