@@ -33,13 +33,15 @@ class ActionLogAnalyse(DateUtils):
     @staticmethod
     def init_pair(data: List[StarRailSelfHelpActionLog]) -> List[ActionLogPair]:
         # 确保第一个数据为登入，最后一条数据为登出
-        if data[0].status == 0:
-            data.pop(0)
-        if data[-1].status == 1:
-            data.pop(-1)
         pairs = []
-        for i in range(0, len(data), 2):
-            pairs.append(ActionLogPair(start=data[i], end=data[i + 1]))
+        start = None
+        for i in data:
+            if i.status == 1 and not start:
+                start = i
+            elif i.status == 0 and start:
+                end = i
+                pairs.append(ActionLogPair(start=start, end=end))
+                start = None
         return pairs
 
     def get_this_week_duration(self) -> int:
