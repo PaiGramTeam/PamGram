@@ -99,7 +99,7 @@ roles = {
     1401: ["大黑塔", "theherta"],
     1402: ["阿格莱雅", "aglaea"],
 }
-not_real_roles = [1402]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
