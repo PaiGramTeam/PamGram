@@ -139,15 +139,19 @@
             <div class="info">
                 <div class="name">额外拟合值</div>
                 <div class="time">
-                    {% if rogue_tourn_weekly_cur == rogue_tourn_weekly_max %}本周差分宇宙已完成
+                    {% if rogue_tourn_weekly_cur == rogue_tourn_weekly_max or rogue_tourn_exp_is_full %}本周差分宇宙已完成
                     {% else %}本周差分宇宙未完成{% endif %}
                 </div>
             </div>
         </div>
         <div class="right">
+          {% if rogue_tourn_exp_is_full %}
+            <span>已满级</span>
+          {% else %}
             <span
               class="{% if rogue_tourn_weekly_cur != rogue_tourn_weekly_max %}red{% endif %}"
             >{{ rogue_tourn_weekly_cur }}/{{ rogue_tourn_weekly_max }}</span>
+          {% endif %}
         </div>
       </div>
       {% endif %}

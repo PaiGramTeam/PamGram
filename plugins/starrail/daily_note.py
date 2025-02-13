@@ -77,6 +77,7 @@ class DailyNotePlugin(Plugin):
             "rogue_tourn_weekly_unlocked": daily_info.rogue_tourn_weekly_unlocked,
             "rogue_tourn_weekly_max": daily_info.rogue_tourn_weekly_max,
             "rogue_tourn_weekly_cur": daily_info.rogue_tourn_weekly_cur,
+            "rogue_tourn_exp_is_full": daily_info.rogue_tourn_exp_is_full,
         }
         render_result = await self.template_service.render(
             "starrail/daily_note/daily_note.html",
