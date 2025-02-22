@@ -75,7 +75,8 @@ class SimnetApiDataParser:
         else:
             real_value = float(value)
         real_value -= sub_affix.base_value * cnt
-        return round(real_value / sub_affix.step_value)
+        cnt = round(real_value / sub_affix.step_value)
+        return cnt if cnt >= 0 else 0
 
     def get_relic_list(
         self, properties_map: Dict[int, "PropertyInfo"], data: "StarRailDetailCharacter"
