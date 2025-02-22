@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 
 from httpx import AsyncClient
@@ -10,23 +9,14 @@ from core.dependence.redisdb import RedisDB
 from core.plugin import Plugin, handler
 
 
-class Reward(BaseModel):
-    name: str
-    cnt: int
-
-    @property
-    def text(self) -> str:
-        return f"{self.name} x{self.cnt}"
-
-
 class Code(BaseModel):
     code: str
-    reward: List[Reward]
-    expire: int
+    reward: List[str]
+    expire: bool
 
     @property
     def text(self):
-        reward_text = "，".join([reward.text for reward in self.reward])
+        reward_text = "，".join([reward for reward in self.reward])
         return f"<code>{self.code}</code> - {reward_text}"
 
 
@@ -47,7 +37,7 @@ class GiftCodePlugin(Plugin):
             req = await self.client.get(self.api)
             if req.status_code == 200:
                 await self.redis.set(self.redis_key, req.text, ex=60 * 5)
-                return CodeList.parse_raw(req.text)
+                return CodeList.model_validate_json(req.text)
             return None
         except Exception:
             return None
@@ -56,18 +46,17 @@ class GiftCodePlugin(Plugin):
         data = await self.redis.get(self.redis_key)
         if data is None:
             return await self.get_gift_code()
-        return CodeList.parse_raw(str(data, encoding="utf-8"))
+        return CodeList.model_validate_json(str(data, encoding="utf-8"))
 
     async def get_gift_code_message(self) -> str:
         data = await self.get_gift_code_by_cache()
         if data is None:
             return "请点击下方按钮查询目前可用的兑换码。"
-        now = int(datetime.now().timestamp() * 1000)
         message = "目前可用的兑换码："
-        main_effective_code = [code.text for code in data.main if code.expire > now]
+        main_effective_code = [code.text for code in data.main if not code.expire]
         if main_effective_code:
             message += "\n\n国服：\n" + "\n".join(main_effective_code)
-        over_effective_code = [code.text for code in data.over if code.expire > now]
+        over_effective_code = [code.text for code in data.over if not code.expire]
         if over_effective_code:
             message += "\n\n国际服：\n" + "\n".join(over_effective_code)
         if not main_effective_code and not over_effective_code:
