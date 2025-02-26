@@ -44,7 +44,7 @@ dependencies = [
     "playwright==1.48.0",
     "aiosqlite<1.0.0,>=0.20.0",
     "simnet @ git+https://github.com/PaiGramTeam/SIMNet",
-    "psutil<7.0.0,>=6.0.0",
+    "psutil<8.0.0,>=7.0.0",
     "influxdb-client[async,ciso]>=1.48.0",
     "starrail-damage-cal<4.0.0,>=3.0.0",
     "starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore",
