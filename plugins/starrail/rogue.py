@@ -9,7 +9,6 @@ from telegram.ext import CallbackContext, filters
 
 from core.dependence.assets import AssetsService
 from core.plugin import Plugin, handler
-from core.services.cookies.error import TooManyRequestPublicCookies
 from core.services.template.models import RenderResult
 from core.services.template.services import TemplateService
 from plugins.tools.genshin import GenshinHelper
@@ -84,7 +83,7 @@ class PlayerRoguePlugins(Plugin):
 
     @handler.command("rogue", block=False)
     @handler.message(filters.Regex("^模拟宇宙信息查询(.*)"), block=False)
-    async def command_start(self, update: Update, context: CallbackContext) -> Optional[int]:
+    async def command_start(self, update: Update, context: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
         uid, offset = self.get_real_uid_or_offset(update)
@@ -115,7 +114,7 @@ class PlayerRoguePlugins(Plugin):
         avatars = record.final_lineup
         new_avatars = [None, None, None, None]
         for idx, avatar in enumerate(avatars):
-            old_avatar = avatar.dict()
+            old_avatar = avatar.model_dump()
             old_avatar["icon"] = self.assets.avatar.square(avatar.id).as_uri()
             new_avatars[idx] = RogueCharacter(**old_avatar)
 
@@ -149,7 +148,7 @@ class PlayerRoguePlugins(Plugin):
 
     @handler.command("rogue_tourn", block=False)
     @handler.message(filters.Regex("^差分宇宙信息查询(.*)"), block=False)
-    async def rogue_tourn_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
+    async def rogue_tourn_command_start(self, update: Update, _: CallbackContext) -> None:
         user_id = await self.get_real_user_id(update)
         message = update.effective_message
         uid, offset = self.get_real_uid_or_offset(update)
@@ -181,7 +180,7 @@ class PlayerRoguePlugins(Plugin):
 
     @handler.command("rogue_locust", block=False)
     @handler.message(filters.Regex("^寰宇蝗灾信息查询(.*)"), block=False)
-    async def rogue_locust_command_start(self, update: Update, _: CallbackContext) -> Optional[int]:
+    async def rogue_locust_command_start(self, update: Update, _: CallbackContext) -> None:
         user = update.effective_user
         message = update.effective_message
         logger.info("用户 %s[%s] 查询寰宇蝗灾信息命令请求", user.full_name, user.id)
@@ -205,7 +204,7 @@ class PlayerRoguePlugins(Plugin):
             name = f"{record.name} {self.LUO_MA[record.difficulty]}"
             new_avatars = [None, None, None, None]
             for idx, avatar in enumerate(record.final_lineup):
-                old_avatar = avatar.dict()
+                old_avatar = avatar.model_dump()
                 old_avatar["icon"] = self.assets.avatar.square(avatar.id).as_uri()
                 new_avatars[idx] = RogueCharacter(**old_avatar)
         except ValueError:

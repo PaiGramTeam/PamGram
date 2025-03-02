@@ -10,7 +10,7 @@
 <div>
     <div data-v-5dedbd3c="" data-v-0d3913e0="" class="simulate">
         <div data-v-5dedbd3c="" class="simulate-box">
-            <div data-v-5dedbd3c="" class="simulate-box-title">差分宇宙•人间喜剧  -  UID {{ uid }}</div>
+            <div data-v-5dedbd3c="" class="simulate-box-title">差分宇宙•千面英雄  -  UID {{ uid }}</div>
             <div data-v-5dedbd3c="" class="simulate-box-head">
                 <div data-v-5dedbd3c="" class="simulate-box-head_list">
                     <div data-v-5dedbd3c="" class="simulate-box-head_image">
@@ -39,14 +39,21 @@
                 </div>
                 <div data-v-5dedbd3c="" class="simulate-box-center_content info">
                     <div data-v-5dedbd3c="" class="info-list">
-                        <div data-v-5dedbd3c="" class="info-num g--font-hsr">{{ basic.possibility_gallery_progress }}%</div>
+                        <div data-v-5dedbd3c="" class="info-num g--font-hsr">
+                            {{ basic.titan_current }}/{{ basic.titan_total }}
+                        </div>
                         <img data-v-5dedbd3c="" src="img/info-border.4ea24bf7.png" class="info-border" alt="">
-                        <div data-v-5dedbd3c="" class="info-name">可能性画廊</div>
+                        <div data-v-5dedbd3c="" class="info-name">泰坦颂诗</div>
                     </div>
                     <div data-v-5dedbd3c="" class="info-list">
                         <div data-v-5dedbd3c="" class="info-num g--font-hsr">{{ basic.skill_tree_activated }}</div>
                         <img data-v-5dedbd3c="" src="img/info-border.4ea24bf7.png" class="info-border" alt="">
                         <div data-v-5dedbd3c="" class="info-name">已激活结点</div>
+                    </div>
+                    <div data-v-5dedbd3c="" class="info-list">
+                        <div data-v-5dedbd3c="" class="info-num g--font-hsr">{{ basic.possibility_gallery_progress }}%</div>
+                        <img data-v-5dedbd3c="" src="img/info-border.4ea24bf7.png" class="info-border" alt="">
+                        <div data-v-5dedbd3c="" class="info-name">可能性画廊</div>
                     </div>
                     <div data-v-5dedbd3c="" class="info-list">
                         <div data-v-5dedbd3c="" class="info-num g--font-hsr">
@@ -63,13 +70,13 @@
                 </div>
                 {% set record = basic.normal_record_brief %}
                 <div data-v-5dedbd3c="" class="simulate-box-center_content daily">
-                    <div data-v-5dedbd3c="" class="content-left">最高通关难度</div>
+                    <div data-v-5dedbd3c="" class="content-left">当前星阶</div>
                     {% if record.exist_data %}
                     <div data-v-15e079f7="" data-v-5dedbd3c="" class="content-right-wrap content-right-undefined">
                         <div data-v-15e079f7="" class="content-right-image">
                             <div data-v-15e079f7="" class="content-right">
-                                {% set level = record.common_info.floor + 1 %}
-                                {% set diff = record.common_info.difficulty %}
+                                {% set level = record.common_info_v2.floor %}
+                                {% set diff = record.common_info_v2.level %}
                                 <img data-v-15e079f7="" src="img/level-{{ level }}.png" class="difficult-level-img" alt="">
                                 {% if level == 6 and diff > 0 %}
                                 <p data-v-15e079f7="" class="difficult-num g--font-hsr">
@@ -82,7 +89,7 @@
                             {% endif %}
                         </div>
                         {% if record.title %}
-                        <div data-v-15e079f7="" class="difficult-desc" style="color: {{ record.color }};">{{ record.title }}</div>
+                        <div data-v-15e079f7="" class="difficult-desc" style="color: yellow;">{{ record.title }}</div>
                         {% endif %}
                     </div>
                     {% else %}
@@ -112,13 +119,13 @@
                 </div>
                 {% set record = basic.weekly_record_brief %}
                 <div data-v-5dedbd3c="" class="simulate-box-center_content week">
-                    <div data-v-5dedbd3c="" class="content-left">本周最高通关难度</div>
+                    <div data-v-5dedbd3c="" class="content-left">本周最新通关难度</div>
                     {% if record.exist_data %}
                     <div data-v-15e079f7="" data-v-5dedbd3c="" size="" class="content-right-wrap content-right-detail">
                         <div data-v-15e079f7="" class="content-right-image">
                             <div data-v-15e079f7="" class="content-right">
-                                {% set level = record.common_info.floor + 1 %}
-                                {% set diff = record.common_info.difficulty %}
+                                {% set level = record.common_info_v2.floor %}
+                                {% set diff = record.common_info_v2.level %}
                                 <img data-v-15e079f7="" src="img/level-{{ level }}.png" class="difficult-level-img" alt="">
                                 {% if level == 6 and diff > 0 %}
                                 <p data-v-15e079f7="" class="difficult-num g--font-hsr">
@@ -131,7 +138,7 @@
                             {% endif %}
                         </div>
                         {% if record.title %}
-                        <div data-v-15e079f7="" class="difficult-desc" style="color: {{ record.color }};">{{ record.title }}</div>
+                        <div data-v-15e079f7="" class="difficult-desc" style="color: yellow;">{{ record.title }}</div>
                         {% endif %}
                     </div>
                     {% else %}
