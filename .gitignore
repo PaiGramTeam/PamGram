@@ -156,3 +156,5 @@ paigram.session-journal
 
 ### Docker ###
 docker-compose.yml
+
+core/dependence/assets/
