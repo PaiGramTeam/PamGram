@@ -105,7 +105,7 @@ roles = {
     1407: ["遐蝶", "castorice", "瑕蝶", "死荫的侍女", "冥河的女儿"],
     1409: ["风堇", "hyacine"],
 }
-not_real_roles = [1406]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
