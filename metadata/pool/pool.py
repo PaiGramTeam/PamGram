@@ -14,3 +14,8 @@ def get_pool_by_id(pool_type):
     if pool_type == 12:
         return POOL_12
     return None
+
+
+def get_avatar_pool():
+    """获取角色池"""
+    return [POOL_11]

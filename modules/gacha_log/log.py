@@ -9,12 +9,12 @@ from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 import aiofiles
 from simnet import StarRailClient, Region
 from simnet.errors import AuthkeyTimeout, InvalidAuthkey
-from simnet.models.base import add_timezone
+from simnet.models.base import add_timezone, APIModel, DateTimeField
 from simnet.models.starrail.wish import StarRailBannerType
 from simnet.utils.player import recognize_starrail_server
 
 from gram_core.services.gacha_log_rank.services import GachaLogRankService
-from metadata.pool.pool import get_pool_by_id
+from metadata.pool.pool import get_pool_by_id, get_avatar_pool
 from modules.gacha_log.const import GACHA_TYPE_LIST
 from modules.gacha_log.error import (
     GachaLogAccountNotFound,
@@ -45,6 +45,11 @@ if TYPE_CHECKING:
 
 GACHA_LOG_PATH = PROJECT_ROOT.joinpath("data", "apihelper", "warp_log")
 GACHA_LOG_PATH.mkdir(parents=True, exist_ok=True)
+
+
+class AvatarUpTime(APIModel):
+    start: DateTimeField
+    end: DateTimeField
 
 
 class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
@@ -299,9 +304,35 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
         return add_timezone(datetime.datetime.strptime(time, "%Y-%m-%d %H:%M:%S"))
 
     @staticmethod
+    def get_avatar_up_time(name: str) -> List[AvatarUpTime]:
+        data = []
+        for pool in get_avatar_pool():
+            for d in pool:
+                if name in d["five"] or name in d["four"]:
+                    start = GachaLog.format_time(d["from"])
+                    end = GachaLog.format_time(d["to"])
+                    data.append(AvatarUpTime(start=start, end=end))
+        return data
+
+    @staticmethod
+    def check_avatar_up_time(name: str, gacha_time: datetime.datetime) -> bool:
+        """
+        检查角色是否在UP时间内
+        :param name: 角色名称
+        :param gacha_time: 跃迁时间
+        :return: 是否在UP时间内
+        """
+        for up_time in GachaLog.get_avatar_up_time(name):
+            if up_time.start <= gacha_time <= up_time.end:
+                return True
+        return False
+
+    @staticmethod
     def check_avatar_up(name: str, gacha_time: datetime.datetime) -> bool:
         if name in {"姬子", "瓦尔特", "布洛妮娅", "杰帕德", "克拉拉", "彦卿", "白露"}:
             return False
+        if name in {"希儿", "刃", "符玄"}:
+            return GachaLog.check_avatar_up_time(name, gacha_time)
         return True
 
     async def get_all_5_star_items(self, data: List[GachaItem], assets: "AssetsService", pool_name: str = "角色跃迁"):
