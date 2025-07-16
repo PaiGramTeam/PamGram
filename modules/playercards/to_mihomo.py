@@ -33,9 +33,11 @@ class SimnetApiDataParser:
             skill_tree_levels_map[str(behavior.point_id)] = skill_tree_level
         rank_affected = self.get_mihomo_map().index.get_character_skill_upgrade_from_rank(str(data.id), data.rank)
         for rank in rank_affected:
-            skill_id = rank.id[:4] + "0" + rank.id[4:]
-            if skill_tree_level := skill_tree_levels_map.get(skill_id):
-                skill_tree_level["level"] -= rank.level
+            for i in range(2):
+                pre = "" if i == 0 else "1"
+                skill_id = pre + rank.id[:4] + "0" + rank.id[4:]
+                if skill_tree_level := skill_tree_levels_map.get(skill_id):
+                    skill_tree_level["level"] -= rank.level
         return skill_tree_levels
 
     @staticmethod
