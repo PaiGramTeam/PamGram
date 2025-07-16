@@ -29,16 +29,22 @@ class GachaLogRanks:
         "角色跃迁": GachaLogTypeEnum.CHARACTER,
         "光锥跃迁": GachaLogTypeEnum.WEAPON,
         "常驻跃迁": GachaLogTypeEnum.DEFAULT,
+        "角色联动跃迁": GachaLogTypeEnum.HUN,
+        "光锥联动跃迁": GachaLogTypeEnum.DEFAULT_WEAPON,
     }
     ITEM_LIST_MAP_REV = {
         GachaLogTypeEnum.CHARACTER: "角色跃迁",
         GachaLogTypeEnum.WEAPON: "光锥跃迁",
         GachaLogTypeEnum.DEFAULT: "常驻跃迁",
+        GachaLogTypeEnum.HUN: "角色联动跃迁",
+        GachaLogTypeEnum.DEFAULT_WEAPON: "光锥联动跃迁",
     }
     BANNER_TYPE_MAP = {
         "角色跃迁": StarRailBannerType.CHARACTER,
         "光锥跃迁": StarRailBannerType.WEAPON,
         "常驻跃迁": StarRailBannerType.PERMANENT,
+        "角色联动跃迁": StarRailBannerType.COLLABORATION_CHARACTER,
+        "光锥联动跃迁": StarRailBannerType.COLLABORATION_WEAPON,
     }
     SCORE_TYPE_MAP = {
         "五星平均": GachaLogQueryTypeEnum.FIVE_STAR_AVG,

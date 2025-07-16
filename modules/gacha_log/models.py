@@ -55,8 +55,8 @@ class GachaItem(BaseModel):
     @field_validator("gacha_type")
     @classmethod
     def check_gacha_type(cls, v):
-        if v not in {"1", "2", "11", "12"}:
-            raise ValueError(f"gacha_type must be 1, 2, 11 or 12, invalid value: {v}")
+        if v not in {"1", "2", "11", "12", "21", "22"}:
+            raise ValueError(f"gacha_type must be 1, 2, 11, 12, 21, 22, invalid value: {v}")
         return v
 
     @field_validator("item_type")
@@ -84,6 +84,8 @@ class GachaLogInfo(BaseModel):
         "光锥跃迁": [],
         "常驻跃迁": [],
         "新手跃迁": [],
+        "角色联动跃迁": [],
+        "光锥联动跃迁": [],
     }
 
     @property
@@ -145,6 +147,8 @@ class UIGFGachaType(Enum):
     STANDARD = "1"
     CHARACTER = "11"
     LIGHTCONE = "12"
+    COLLABORATION_CHARACTER = "21"
+    COLLABORATION_LIGHTCONE = "22"
 
 
 class UIGFItem(BaseModel):
