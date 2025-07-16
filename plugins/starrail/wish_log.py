@@ -416,7 +416,7 @@ class WishLogPlugin(Plugin.Conversation):
                 for k, v in {"log": "", "count": "（按卡池）"}.items():
                     row.append(
                         InlineKeyboardButton(
-                            f"{pool.replace('祈愿', '')}{v}",
+                            f"{pool.replace('跃迁', '')}{v}",
                             callback_data=f"get_wish_log|{user_id}|{uid}|{k}|{pool}",
                         )
                     )
@@ -478,6 +478,8 @@ class WishLogPlugin(Plugin.Conversation):
                 pool_type = StarRailBannerType.STANDARD
             elif "新手" in args:
                 pool_type = StarRailBannerType.NOVICE
+            elif "联动" in args:
+                pool_type = StarRailBannerType.COLLABORATION_CHARACTER
         self.log_user(update, logger.info, "跃迁记录命令请求 || 参数 %s", pool_type.name if pool_type else None)
         try:
             player_id = await self.get_player_id(user_id, uid, offset)
@@ -681,6 +683,8 @@ class WishLogPlugin(Plugin.Conversation):
             "武器": StarRailBannerType.WEAPON,
             "常驻": StarRailBannerType.STANDARD,
             "新手": StarRailBannerType.NOVICE,
+            "联动角色": StarRailBannerType.COLLABORATION_CHARACTER,
+            "联动武器": StarRailBannerType.COLLABORATION_WEAPON,
         }
         data = []
         for k, v in types.items():

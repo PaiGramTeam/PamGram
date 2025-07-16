@@ -335,6 +335,12 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
             return GachaLog.check_avatar_up_time(name, gacha_time)
         return True
 
+    @staticmethod
+    def check_avatar_up_21(name: str, _: datetime.datetime) -> bool:
+        if name in {"布洛妮娅", "杰帕德", "克拉拉", "白露", "希儿", "刃", "符玄"}:
+            return False
+        return True
+
     async def get_all_5_star_items(self, data: List[GachaItem], assets: "AssetsService", pool_name: str = "角色跃迁"):
         """
         获取所有5星角色
@@ -348,12 +354,17 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
         for item in data:
             count += 1
             if item.rank_type == "5":
-                if item.item_type == "角色" and pool_name in {"角色跃迁", "常驻跃迁", "新手跃迁"}:
+                if item.item_type == "角色" and pool_name in {"角色跃迁", "常驻跃迁", "新手跃迁", "角色联动跃迁"}:
                     if pool_name == "新手跃迁":
                         isUp, isBig = True, False
                     elif pool_name == "角色跃迁":
                         isUp, isBig = (
                             self.check_avatar_up(item.name, item.time),
+                            (not result[-1].isUp) if result else False,
+                        )
+                    elif pool_name == "角色联动跃迁":
+                        isUp, isBig = (
+                            self.check_avatar_up_21(item.name, item.time),
                             (not result[-1].isUp) if result else False,
                         )
                     else:
@@ -368,7 +379,7 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
                         "time": item.time,
                     }
                     result.append(FiveStarItem.construct(**data))
-                elif item.item_type == "光锥" and pool_name in {"光锥跃迁", "常驻跃迁"}:
+                elif item.item_type == "光锥" and pool_name in {"光锥跃迁", "常驻跃迁", "光锥联动跃迁"}:
                     data = {
                         "name": item.name,
                         "icon": assets.light_cone.icon(item.name).as_uri() if assets else "",
@@ -578,10 +589,10 @@ class GachaLog(GachaLogOnlineView, GachaLogRanks, GachaLogUigfConverter):
         all_five, no_five_star = await self.get_all_5_star_items(data, assets, pool_name)
         all_four, no_four_star = await self.get_all_4_star_items(data, assets)
         summon_data = None
-        if pool in [StarRailBannerType.CHARACTER, StarRailBannerType.NOVICE]:
+        if pool in [StarRailBannerType.CHARACTER, StarRailBannerType.NOVICE, StarRailBannerType.COLLABORATION_CHARACTER]:
             summon_data = self.get_301_pool_data(total, all_five, no_five_star, no_four_star)
             pool_name = self.count_fortune(pool_name, summon_data)
-        elif pool == StarRailBannerType.WEAPON:
+        elif pool in [StarRailBannerType.WEAPON, StarRailBannerType.COLLABORATION_WEAPON]:
             summon_data = self.get_302_pool_data(total, all_five, all_four, no_five_star, no_four_star)
             pool_name = self.count_fortune(pool_name, summon_data, True)
         elif pool == StarRailBannerType.PERMANENT:
