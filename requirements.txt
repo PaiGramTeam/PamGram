@@ -6,7 +6,7 @@ aiofiles==24.1.0
     # via pamgram
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.14
+aiohttp==3.12.15
     # via influxdb-client
 aiolimiter==1.2.1
     # via python-telegram-bot
@@ -77,7 +77,7 @@ exceptiongroup==1.3.0 ; python_full_version < '3.11'
     # via
     #   anyio
     #   pytest
-fakeredis==2.30.1
+fakeredis==2.30.3
     # via pamgram
 fastapi==0.116.1
     # via pamgram
@@ -89,7 +89,7 @@ frozenlist==1.7.0
     #   aiosignal
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.44
+gitpython==3.1.45
     # via pamgram
 greenlet==3.1.1
     # via
@@ -186,7 +186,7 @@ pygments==2.19.2
     # via
     #   pytest
     #   rich
-pyrogram @ git+https://github.com/TeamPGM/pyrogram@ef87901bdcbc94ccc997cb5074159d1e505e04fd
+pyrogram @ git+https://github.com/TeamPGM/pyrogram@d6c55f53f869a88b7b956c803a3619f90dadde75
     # via pamgram
 pyrotgcrypto==1.2.7
     # via pamgram
@@ -205,7 +205,7 @@ python-dotenv==1.1.1
     #   pamgram
     #   pydantic-settings
     #   uvicorn
-python-telegram-bot==22.2
+python-telegram-bot==22.3
     # via pamgram
 pyyaml==6.0.2
     # via uvicorn
@@ -217,13 +217,13 @@ redis==6.2.0
     # via
     #   fakeredis
     #   pamgram
-rich==14.0.0
+rich==14.1.0
     # via pamgram
-sentry-sdk==2.33.0
+sentry-sdk==2.34.0
     # via pamgram
 setuptools==80.9.0
     # via influxdb-client
-simnet @ git+https://github.com/PaiGramTeam/SIMNet@41799b08a25c7f48a02552703b8aad4972471742
+simnet @ git+https://github.com/PaiGramTeam/SIMNet@7ab9821e8121a04e4dad68e5c45f9d7e34374369
     # via pamgram
 six==1.17.0
     # via python-dateutil
@@ -235,15 +235,15 @@ sortedcontainers==2.4.0
     # via fakeredis
 soupsieve==2.7
     # via beautifulsoup4
-sqlalchemy==2.0.41
+sqlalchemy==2.0.42
     # via
     #   alembic
     #   sqlmodel
 sqlmodel==0.0.24
     # via pamgram
-starlette==0.47.1
+starlette==0.47.2
     # via fastapi
-starrail-damage-cal==3.4.1
+starrail-damage-cal==3.4.4
     # via pamgram
 starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore@233e1cdfad080ff75d15667c2d4cd5ea1066f0e6
     # via pamgram
@@ -272,13 +272,13 @@ typing-extensions==4.14.1
     #   exceptiongroup
     #   fakeredis
     #   fastapi
+    #   gitpython
     #   multidict
     #   pydantic
     #   pydantic-core
     #   pyee
     #   pytest-asyncio
     #   reactivex
-    #   rich
     #   sqlalchemy
     #   starlette
     #   typing-inspection
