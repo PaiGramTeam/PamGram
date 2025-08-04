@@ -27,7 +27,6 @@ class SetCommandPlugin(Plugin):
             BotCommand("setuid", "添加/重设UID"),
             BotCommand("setcookie", "添加/重设Cookie"),
             BotCommand("player", "管理用户绑定玩家"),
-            BotCommand("verify", "手动验证"),
             BotCommand("daily_note_tasks", "自动便笺提醒"),
             BotCommand("cookies_import", "从其他 BOT 导入账号信息"),
             BotCommand("cookies_export", "导出账号信息给其他 BOT"),
