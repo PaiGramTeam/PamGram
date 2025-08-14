@@ -24,7 +24,7 @@ class WarpData(BaseModel):
 
     @staticmethod
     def _extract_value(text, key):
-        match = re.search(rf'\|{key}=(.+)', text)
+        match = re.search(rf"\|{key}=(.+)", text)
         text = match.group(1).strip() if match else None
         if text == "长期":
             return "2099/12/31 23:59"
@@ -33,16 +33,16 @@ class WarpData(BaseModel):
     @staticmethod
     def _extract_list(text, key):
         value = WarpData._extract_value(text, key)
-        return [x.strip() for x in value.split('、')] if value else []
+        return [x.strip() for x in value.split("、")] if value else []
 
     @classmethod
     def parse_warp_block(cls, block) -> "WarpData":
         data = {
-            'name': [WarpData._extract_value(block, '名称') or ""],
-            'start_time': WarpData._extract_value(block, '开始时间').replace("/", "-"),
-            'end_time': WarpData._extract_value(block, '结束时间').replace("/", "-"),
-            'five': [WarpData._extract_value(block, '5星角色') or WarpData._extract_value(block, '5星光锥')],
-            'four': WarpData._extract_list(block, '4星角色') or WarpData._extract_list(block, '4星光锥'),
+            "name": [WarpData._extract_value(block, "名称") or ""],
+            "start_time": WarpData._extract_value(block, "开始时间").replace("/", "-"),
+            "end_time": WarpData._extract_value(block, "结束时间").replace("/", "-"),
+            "five": [WarpData._extract_value(block, "5星角色") or WarpData._extract_value(block, "5星光锥")],
+            "four": WarpData._extract_list(block, "4星角色") or WarpData._extract_list(block, "4星光锥"),
         }
         value = cls(**data)
         if value.start_time.hour < 12:
@@ -68,7 +68,7 @@ class WarpData(BaseModel):
 
 def parse_text(text):
     # 分割不同版本
-    version_sections = re.split(r'===(.+?)===', text)[1:]
+    version_sections = re.split(r"===(.+?)===", text)[1:]
 
     for i in range(0, len(version_sections), 2):
         version = version_sections[i].strip()
@@ -78,7 +78,7 @@ def parse_text(text):
         divs = soup.find_all("div")
         for div in divs:
             avatar_pool, weapon_pool = None, None
-            warp_blocks = re.findall(r'\{\{(.+?)}}', div.text, re.DOTALL)
+            warp_blocks = re.findall(r"\{\{(.+?)}}", div.text, re.DOTALL)
             for block in warp_blocks:
                 try:
                     warp_data = WarpData.parse_warp_block(block)
