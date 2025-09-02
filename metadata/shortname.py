@@ -110,7 +110,7 @@ roles = {
     1410: ["海瑟音", "hysilens"],
     1412: ["刻律德菈", "cerydra"],
 }
-not_real_roles = [1412]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
