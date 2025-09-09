@@ -14,7 +14,7 @@ aiosignal==1.4.0
     # via aiohttp
 aiosqlite==0.21.0
     # via pamgram
-alembic==1.16.4
+alembic==1.16.5
     # via pamgram
 annotated-types==0.7.0
     # via pydantic
@@ -37,7 +37,7 @@ asyncmy==0.2.10
     # via pamgram
 attrs==25.3.0
     # via aiohttp
-beautifulsoup4==4.13.4
+beautifulsoup4==4.13.5
     # via pamgram
 black==24.10.0
     # via pamgram
@@ -50,11 +50,11 @@ certifi==2025.8.3
     #   influxdb-client
     #   requests
     #   sentry-sdk
-cffi==1.17.1 ; platform_python_implementation != 'PyPy'
+cffi==2.0.0 ; platform_python_implementation != 'PyPy'
     # via cryptography
 charset-normalizer==3.4.3
     # via requests
-ciso8601==2.3.2
+ciso8601==2.3.3
     # via influxdb-client
 click==8.1.8 ; python_full_version < '3.10'
     # via
@@ -80,7 +80,7 @@ exceptiongroup==1.3.0 ; python_full_version < '3.11'
     # via
     #   anyio
     #   pytest
-fakeredis==2.31.0
+fakeredis==2.31.1
     # via pamgram
 fastapi==0.116.1
     # via pamgram
@@ -124,7 +124,7 @@ iniconfig==2.1.0
     # via pytest
 jinja2==3.1.6
     # via pamgram
-lxml==6.0.0
+lxml==6.0.1
     # via pamgram
 mako==1.3.10
     # via alembic
@@ -161,7 +161,7 @@ pathspec==0.12.1
     # via black
 pillow==10.4.0
     # via pamgram
-platformdirs==4.3.8
+platformdirs==4.4.0
     # via black
 playwright==1.48.0
     # via pamgram
@@ -175,7 +175,7 @@ psutil==7.0.0
     # via pamgram
 pyaes==1.6.1
     # via pyrogram
-pycparser==2.22 ; platform_python_implementation != 'PyPy'
+pycparser==2.22 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
 pydantic==2.11.7
     # via
@@ -195,13 +195,13 @@ pygments==2.19.2
     # via
     #   pytest
     #   rich
-pyrogram @ git+https://github.com/TeamPGM/pyrogram@6cbc94de0b0f70f354355b9c23b650d991b7662b
+pyrogram @ git+https://github.com/TeamPGM/pyrogram@055816d185a7c44c697baf806afb1a20198d4e90
     # via pamgram
 pyrotgcrypto==1.2.7
     # via pamgram
 pysocks==1.7.1
     # via pyrogram
-pytest==8.4.1
+pytest==8.4.2
     # via
     #   pamgram
     #   pytest-asyncio
@@ -218,7 +218,9 @@ python-telegram-bot==22.3
     # via pamgram
 pyyaml==6.0.2
     # via uvicorn
-rapidfuzz==3.13.0
+rapidfuzz==3.13.0 ; python_full_version < '3.10'
+    # via thefuzz
+rapidfuzz==3.14.1 ; python_full_version >= '3.10'
     # via thefuzz
 reactivex==4.0.4
     # via influxdb-client
@@ -226,17 +228,17 @@ redis==6.4.0
     # via
     #   fakeredis
     #   pamgram
-requests==2.32.4
+requests==2.32.5
     # via requests-oauthlib
 requests-oauthlib==2.0.0
     # via mwclient
 rich==14.1.0
     # via pamgram
-sentry-sdk==2.34.1
+sentry-sdk==2.37.0
     # via pamgram
 setuptools==80.9.0
     # via influxdb-client
-simnet @ git+https://github.com/PaiGramTeam/SIMNet@16e87fe75ff12955d88cf2b85552e2bd5476c57c
+simnet @ git+https://github.com/PaiGramTeam/SIMNet@360908e3fb29fab352af4d027154264fd4e4b792
     # via pamgram
 six==1.17.0
     # via python-dateutil
@@ -246,7 +248,7 @@ sniffio==1.3.1
     # via anyio
 sortedcontainers==2.4.0
     # via fakeredis
-soupsieve==2.7
+soupsieve==2.8
     # via beautifulsoup4
 sqlalchemy==2.0.43
     # via
@@ -254,13 +256,13 @@ sqlalchemy==2.0.43
     #   sqlmodel
 sqlmodel==0.0.24
     # via pamgram
-starlette==0.47.2
+starlette==0.47.3
     # via fastapi
 starrail-damage-cal==3.5.1
     # via pamgram
-starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore@7676dbd8d2bfd6202f67aa03ee42066c5e24b655
+starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore@697d23fa303e2113590bbeaa9d294ca9256fb072
     # via pamgram
-starrailres @ git+https://github.com/PaiGramTeam/starrailres.py@fd09a7a173aff0be90a34550c6515306c3dde5b9
+starrailres @ git+https://github.com/PaiGramTeam/starrailres.py@2ff1ae51948eca3838fcb660fbc7a5ae0443fa30
     # via pamgram
 thefuzz==0.22.1
     # via pamgram
@@ -271,7 +273,7 @@ tomli==2.2.1 ; python_full_version < '3.11'
     #   pytest
 tornado==6.5.2
     # via python-telegram-bot
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via
     #   aiocsv
     #   aiosignal
@@ -304,7 +306,7 @@ tzdata==2025.2 ; sys_platform == 'win32'
     # via tzlocal
 tzlocal==5.3.1
     # via apscheduler
-ujson==5.10.0
+ujson==5.11.0
     # via pamgram
 urllib3==2.5.0
     # via
