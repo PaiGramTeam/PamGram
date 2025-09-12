@@ -108,6 +108,7 @@ class PlayerStatsPlugins(Plugin):
                 ("成就达成数", "achievement_num"),
                 ("战利品开启数", "chest_num"),
                 ("逐光捡金", "abyss_process"),
+                ("差分宇宙", "season_title"),
                 ("梦境护照贴纸", "dream_paster_num"),
             ],
             "rogue": rogue.basic_info if rogue else None,
