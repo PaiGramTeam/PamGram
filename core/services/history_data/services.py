@@ -3,6 +3,11 @@ from typing import List
 
 from simnet.models.starrail.chronicle.challenge import StarRailChallenge
 from simnet.models.starrail.chronicle.challenge_boss import StarRailChallengeBoss, StarRailChallengeBossGroup
+from simnet.models.starrail.chronicle.challenge_peak import (
+    StarRailChallengePeak,
+    StarRailChallengePeakGroup,
+    StarRailChallengePeakRecord,
+)
 from simnet.models.starrail.chronicle.challenge_story import StarRailChallengeStory, StarRailChallengeStoryGroup
 from simnet.models.starrail.diary import StarRailDiary
 
@@ -13,6 +18,7 @@ from core.services.history_data.models import (
     HistoryDataChallengeStory,
     HistoryDataLedger,
     HistoryDataChallengeBoss,
+    HistoryDataChallengePeak,
 )
 from gram_core.base_service import BaseService
 from gram_core.services.history_data.services import HistoryDataBaseServices
@@ -29,6 +35,7 @@ __all__ = (
     "HistoryDataChallengeStoryServices",
     "HistoryDataChallengeBossServices",
     "HistoryDataLedgerServices",
+    "HistoryDataChallengePeakServices",
 )
 
 
@@ -121,4 +128,40 @@ class HistoryDataLedgerServices(BaseService, HistoryDataBaseServices):
             time_created=datetime.datetime.now(),
             type=HistoryDataLedgerServices.DATA_TYPE,
             data=jsonlib.loads(json_data),
+        )
+
+
+class HistoryDataChallengePeakServices(BaseService, HistoryDataBaseServices):
+    DATA_TYPE = HistoryDataTypeEnum.CHALLENGE_PEAK.value
+
+    @staticmethod
+    def exists_data(data: HistoryData, old_data: List[HistoryData]) -> bool:
+
+        def _get_data(_data: HistoryData):
+            group = _data.data.get("record", {})
+            detail = group.get("mob_records", []).copy()
+            if boss_record := group.get("boss_record"):
+                detail.append(boss_record)
+            _avatars = []
+            for floor in detail:
+                for avatar in floor.get("avatars", []):
+                    _avatars.append(avatar["id"])
+            return _avatars
+
+        avatars = _get_data(data)
+        return any(_get_data(d) == avatars for d in old_data)
+
+    @staticmethod
+    def create(user_id: int, peak_data: StarRailChallengePeak, record: StarRailChallengePeakRecord):
+        data = HistoryDataChallengePeak(peak_data=peak_data, record=record)
+        data_id = record.group.season
+        json_data = data.model_dump_json(by_alias=True)
+        dict_data = jsonlib.loads(json_data)
+        dict_data["peak_data"]["challenge_peak_records"] = []
+        return HistoryData(
+            user_id=user_id,
+            data_id=data_id,
+            time_created=datetime.datetime.now(),
+            type=HistoryDataChallengePeakServices.DATA_TYPE,
+            data=dict_data,
         )

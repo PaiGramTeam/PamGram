@@ -16,6 +16,7 @@ from core.services.history_data.services import (
     HistoryDataLedgerServices,
     HistoryDataChallengeStoryServices,
     HistoryDataChallengeBossServices,
+    HistoryDataChallengePeakServices,
 )
 from gram_core.basemodel import RegionEnum
 from gram_core.plugin import handler
@@ -23,6 +24,7 @@ from gram_core.services.cookies import CookiesService
 from gram_core.services.cookies.models import CookiesStatusEnum
 from plugins.starrail.challenge import ChallengePlugin
 from plugins.starrail.challenge_boss import ChallengeBossPlugin
+from plugins.starrail.challenge_peak import ChallengePeakPlugin
 from plugins.starrail.challenge_story import ChallengeStoryPlugin
 from plugins.starrail.ledger import LedgerPlugin
 from plugins.tools.genshin import GenshinHelper, PlayerNotFoundError, CookiesNotFoundError
@@ -52,6 +54,7 @@ class RefreshHistoryJob(Plugin):
         history_data_abyss_story: HistoryDataChallengeStoryServices,
         history_ledger: HistoryDataLedgerServices,
         history_data_abyss_boss: HistoryDataChallengeBossServices,
+        history_data_abyss_peak: HistoryDataChallengePeakServices,
     ):
         self.cookies = cookies
         self.genshin_helper = genshin_helper
@@ -59,6 +62,7 @@ class RefreshHistoryJob(Plugin):
         self.history_data_abyss_story = history_data_abyss_story
         self.history_data_ledger = history_ledger
         self.history_data_abyss_boss = history_data_abyss_boss
+        self.history_data_abyss_peak = history_data_abyss_peak
 
     @staticmethod
     async def send_notice(context: "ContextTypes.DEFAULT_TYPE", user_id: int, notice_text: str):
@@ -137,6 +141,19 @@ class RefreshHistoryJob(Plugin):
         notice_text = NOTICE_TEXT % ("末日幻影历史记录", now, uid, "挑战记录")
         await self.send_notice(context, user_id, notice_text)
 
+    async def save_abyss_peak_data(self, client: "StarRailClient") -> bool:
+        uid = client.player_id
+        abyss_data = await client.get_starrail_challenge_peak(uid, previous=False, lang="zh-cn")
+        if abyss_data.challenge_peak_best_record_brief.total_battle_num and abyss_data.challenge_peak_records:
+            group = abyss_data.challenge_peak_records[0]
+            return await ChallengePeakPlugin.save_abyss_data(self.history_data_abyss_peak, uid, abyss_data, group)
+        return False
+
+    async def send_abyss_peak_notice(self, context: "ContextTypes.DEFAULT_TYPE", user_id: int, uid: int):
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        notice_text = NOTICE_TEXT % ("异相仲裁历史记录", now, uid, "挑战记录")
+        await self.send_notice(context, user_id, notice_text)
+
     @handler.command(command="remove_same_history", block=False, admin=True)
     async def remove_same_history(self, update: "Update", _: "ContextTypes.DEFAULT_TYPE"):
         user = update.effective_user
@@ -152,6 +169,8 @@ class RefreshHistoryJob(Plugin):
         text += f"开拓月历数据移除数量：{num2}\n"
         num4 = await self.history_data_abyss_boss.remove_same_data()
         text += f"末日幻影数据移除数量：{num4}\n"
+        num5 = await self.history_data_abyss_peak.remove_same_data()
+        text += f"异相仲裁数据移除数量：{num5}\n"
         await reply.edit_text(text)
 
     @handler.command(command="refresh_all_history", block=False, admin=True)
@@ -181,6 +200,8 @@ class RefreshHistoryJob(Plugin):
                             await self.send_ledger_notice(context, user_id, client.player_id)
                         if await self.save_abyss_boss_data(client):
                             await self.send_abyss_boss_notice(context, user_id, client.player_id)
+                        if await self.save_abyss_peak_data(client):
+                            await self.send_abyss_peak_notice(context, user_id, client.player_id)
                 except (InvalidCookies, PlayerNotFoundError, CookiesNotFoundError):
                     continue
                 except SimnetBadRequest as exc:

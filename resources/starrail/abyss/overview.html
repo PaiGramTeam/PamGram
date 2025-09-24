@@ -42,13 +42,25 @@
     {% set summarize_class = 'summarize-boss' %}
     {% set floor_page = 'starrail/abyss/floor_boss.jinja2' %}
     {% endif %}
+    {% if title == '异相仲裁' %}
+    {% set overview_class = 'overview-abyss-peak' %}
+    {% set summarize_class = 'summarize-peak' %}
+    {% set floor_page = 'starrail/abyss/floor_peak.jinja2' %}
+    {% endif %}
     <div class="overview {{ overview_class }}">
         <div class="title">{{ title }}挑战回顾</div>
         <div class="summarize  {{ summarize_class }}">
             <div>
                 <div>UID: {{ uid }}</div>
-                <div class="star">
-                    <span>{{ stars }}</span>
+                <div>
+                    {% if title == '异相仲裁' %}
+                    <div class="star star_peak">
+                        <span>{{ boss_stars }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="star">
+                        <span>{{ stars }}</span>
+                    </div>
                 </div>
             </div>
             <div>

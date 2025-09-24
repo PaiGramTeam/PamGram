@@ -1,0 +1,74 @@
+<div class="floors">
+        <div class="floor floor-abyss-peak">
+            <div class="head">
+                <div class="floor-name">
+                    <div class="floor_num floor_num_peak"></div>
+                    <div>
+                        <div>UID: {{ uid }}</div>
+                        <div>{{ title }}·{{ season.group.name_mi18n }}·{{ data.floor_name }}</div>
+                    </div>
+                </div>
+                {% set star_class = '' %}
+                {% if data.floor_num == 0 %}
+                {% set star_class = 'star_peak' %}
+                {% endif %}
+                <div class="star {{ star_class }}">
+                    <div>
+                        <div>{{ data.floor.star_num }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hr"></div>
+            <div class="chamber">
+                <div class="chamber-info">
+                    <div>
+                        <span style="color: #A3A3A3">{{ data.floor_time }}</span>
+                    </div>
+                    <div class="stars">
+                        {% for n in range(data.floor.star_num) %}
+                            <div class="star {{ star_class }}"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="battles">
+                    <div class="battle">
+                        {% for character in data.floor.avatars %}
+                            <div class="character">
+                                {% if character.rank > 0 %}
+                                    {% set constellation = character.rank %}
+                                    {% set bg = ['blue', 'blue', 'green', 'green', 'red', 'red'][constellation - 1] %}
+                                    <div style="background-color: var(--{{ bg }})">
+                                        {{ constellation }} 命
+                                    </div>
+                                {% endif %}
+                                <div class="element" style="background-image: url('../../img/element/{{ character.element }}.png')"></div>
+                                <div class="icon"
+                                     style="background-image: url('../../background/rarity/half/{{ character.rarity }}.png')">
+                                    <img src="{{ character.icon }}" alt=""/>
+                                </div>
+                                <div class="caption">Lv.{{ character.level }}</div>
+                            </div>
+                        {% endfor %}
+                            <div class="battle-info">
+                                <div>已通关</div>
+                                <br/>
+                                <div class="score"></div>
+                                <br/>
+                                <div>使用轮次：{{ data.floor.round_num }}</div>
+                            </div>
+                    </div>
+                    {% if data.floor.buff %}
+                    <div class="buffs">
+                        <div class="buff-item">
+                            <img src="{{ data.floor.buff.icon }}" alt="buff-item" class="buff-item-icon">
+                            <p>
+                                <span class="buff-item-name">{{ data.floor.buff.name_mi18n }}：</span>
+                                <span class="buff-item-desc">{{ data.floor.buff.desc_mi18n }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+</div>

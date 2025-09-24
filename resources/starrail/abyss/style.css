@@ -65,6 +65,10 @@ body {
     background-image: linear-gradient(to top, rgb(0 0 0 / 10%), rgb(0 0 0 / 10%)), url("./background/abyss-boss-bg-grad.png");
 }
 
+.overview-abyss-peak {
+    background-image: linear-gradient(to top, rgb(0 0 0 / 10%), rgb(0 0 0 / 10%)), url("./background/abyss-peak-bg-grad.png");
+}
+
 .summarize {
     font-size: 30px;
     width: calc(100% - 90px);
@@ -113,6 +117,10 @@ body {
     height: 40px;
     background-size: cover;
     background-image: url("./background/star.png");
+}
+
+.star_peak::before {
+    background-image: url("./background/star_peak.png");
 }
 
 .star > span {
@@ -257,6 +265,7 @@ body {
     margin: 20px 0;
     padding: 0 30px;
     width: calc(100% - 60px);
+    height: 100%;
     border-radius: 20px;
     overflow: hidden;
     outline: rgb(233 229 220 / 30%) solid 3px;
@@ -276,8 +285,14 @@ body {
 }
 
 .floor-abyss-boss {
-        background-image: url('./background/abyss-boss-bg-grad.png');
+    background-image: url('./background/abyss-boss-bg-grad.png');
     background-size: contain;
+    background-color: #1c232c;
+}
+
+.floor-abyss-peak {
+    background-image: url('./background/abyss-peak-bg-grad-1.png');
+    background-size: cover;
     background-color: #1c232c;
 }
 
@@ -308,6 +323,10 @@ body {
     background-size: contain;
     filter: drop-shadow(0 0 5px rgb(0 0 0/80%)) grayscale(10%);
     position: relative;
+}
+
+.floor_num_peak {
+    background-image: url("./background/abyss.png");
 }
 
 .head > .star {
