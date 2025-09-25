@@ -1,7 +1,7 @@
 import asyncio
 import os
 import re
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from time import time
 from typing import List, Tuple, Dict
 
@@ -23,7 +23,7 @@ __all__ = (
 )
 
 
-class HyperionBase:
+class HyperionBase(ABC):
     LANG = "zh-cn"
 
     @staticmethod
@@ -182,7 +182,7 @@ class Hyperion(HyperionBase):
     async def get_post_info(self, gids: int, post_id: int, read: int = 1) -> PostInfo:
         params = {"gids": gids, "post_id": post_id, "read": read}
         response = await self.client.get(self.POST_FULL_URL, params=params)
-        return PostInfo.paste_data(response)
+        return PostInfo.paste_data(response, gids=gids)
 
     async def get_images_by_post_id(self, gids: int, post_id: int) -> List[ArtworkImage]:
         post_info = await self.get_post_info(gids, post_id)
@@ -204,7 +204,7 @@ class Hyperion(HyperionBase):
     ) -> List[PostRecommend]:
         resp = await self.get_new_list(gids, type_id, page_size)
         data = resp["list"]
-        return [PostRecommend.parse(i) for i in data]
+        return [PostRecommend.parse(i, gids=gids) for i in data]
 
     async def get_live_info(self, act_id: str) -> LiveInfo:
         headers = {"x-rpc-act_id": act_id}
