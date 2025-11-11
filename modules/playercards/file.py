@@ -1,4 +1,5 @@
 import asyncio
+import time
 from pathlib import Path
 from typing import Optional, Dict, Union
 
@@ -66,6 +67,7 @@ class PlayerCardsFile:
         avatarId = "avatarId"
         avatarDetailList = "avatarDetailList"
         avatarList = "avatarList"
+        timestamp = int(time.time())
         async with self._lock:
             old_data = await self.load_history_info(uid)
             if old_data is None:
@@ -75,11 +77,13 @@ class PlayerCardsFile:
             avatars = []
             avatar_ids = []
             for avatar in data.get(assistAvatarList, []):
+                avatar["pai_refresh_time"] = timestamp
                 avatars.append(avatar)
                 avatar_ids.append(avatar.get(avatarId, 0))
             for avatar in data.get(avatarDetailList, []):
                 if avatar.get(avatarId, 0) in avatar_ids:
                     continue
+                avatar["pai_refresh_time"] = timestamp
                 avatars.append(avatar)
                 avatar_ids.append(avatar.get(avatarId, 0))
             data[avatarList] = avatars

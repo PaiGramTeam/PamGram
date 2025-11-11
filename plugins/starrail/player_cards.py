@@ -1,5 +1,5 @@
 import math
-from typing import List, Tuple, Union, Optional, TYPE_CHECKING, Dict
+from typing import List, Tuple, Union, Optional, TYPE_CHECKING, Dict, Any
 
 from pydantic import BaseModel
 from starrailrelicscore.client.character import Character as CharacterClient
@@ -535,9 +535,12 @@ class RenderTemplate:
         skills = [0, 0, 0, 0, 0]
         for index in range(5):
             skills[index] = self.character.skillTreeList[index].level
+        stats = await self.de_stats()
+
         data = {
             "uid": mask_number(self.uid),
             "character": self.character,
+            "stats": stats,
             "character_detail": self.wiki_service.character.get_by_id(self.character.avatarId),
             "weapon": weapon,
             "weapon_detail": weapon_detail,
@@ -561,6 +564,16 @@ class RenderTemplate:
             query_selector=".text-neutral-200",
             ttl=7 * 24 * 60 * 60,
         )
+
+    async def de_stats(self) -> list[tuple[str, Any]]:
+        items = []
+        if self.character.property:
+            for i in self.character.property:
+                items.append((i.name, i.total))
+
+        items.append(("数据更新时间", self.character.pai_refresh_time_str()))
+
+        return items
 
     async def cache_images(self):
         c = self.character

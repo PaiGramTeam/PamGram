@@ -1,12 +1,10 @@
-{% if character.property != none  %}
 <div class="rounded-lg bg-black bg-opacity-20">
-  {% for prop in character.property %}
+  {% for (name, value) in stats %}
   <div
     class="px-7 py-1.5 flex justify-between even:bg-white even:bg-opacity-10"
   >
-    <div>{{ prop.name }}</div>
-    <div class="italic">{{ prop.total }}</div>
+    <div>{{ name }}</div>
+    <div class="italic">{{ value }}</div>
   </div>
   {% endfor %}
 </div>
-{% endif %}
