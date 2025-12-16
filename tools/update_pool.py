@@ -41,7 +41,7 @@ class WarpData(BaseModel):
             "name": [WarpData._extract_value(block, "名称") or ""],
             "start_time": WarpData._extract_value(block, "开始时间").replace("/", "-"),
             "end_time": WarpData._extract_value(block, "结束时间").replace("/", "-"),
-            "five": [WarpData._extract_value(block, "5星角色") or WarpData._extract_value(block, "5星光锥")],
+            "five": WarpData._extract_list(block, "5星角色") or WarpData._extract_list(block, "5星光锥"),
             "four": WarpData._extract_list(block, "4星角色") or WarpData._extract_list(block, "4星光锥"),
         }
         value = cls(**data)
