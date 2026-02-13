@@ -11,7 +11,7 @@ from tools.init import wiki
 
 
 def get_wiki_page():
-    page = wiki.pages["跃迁/3.0"]
+    page = wiki.pages["跃迁/4.0"]
     return page.text()
 
 
@@ -21,6 +21,8 @@ class WarpData(BaseModel):
     end_time: datetime
     five: List[str]
     four: List[str]
+
+    number: str
 
     @staticmethod
     def _extract_value(text, key):
@@ -43,6 +45,7 @@ class WarpData(BaseModel):
             "end_time": WarpData._extract_value(block, "结束时间").replace("/", "-"),
             "five": WarpData._extract_list(block, "5星角色") or WarpData._extract_list(block, "5星光锥"),
             "four": WarpData._extract_list(block, "4星角色") or WarpData._extract_list(block, "4星光锥"),
+            "number": WarpData._extract_value(block, "编号") or "",
         }
         value = cls(**data)
         if value.start_time.hour < 12:
@@ -77,7 +80,7 @@ def parse_text(text):
         soup = bs4.BeautifulSoup(content, "lxml")
         divs = soup.find_all("div")
         for div in divs:
-            avatar_pool, weapon_pool = None, None
+            pools: dict[str, list[WarpData]] = {}
             warp_blocks = re.findall(r"\{\{(.+?)}}", div.text, re.DOTALL)
             for block in warp_blocks:
                 try:
@@ -85,10 +88,14 @@ def parse_text(text):
                 except Exception as e:
                     traceback.print_exc()
                     continue
+                if warp_data.number not in pools:
+                    pools[warp_data.number] = [None, None]
+                avatar_pool, weapon_pool = pools[warp_data.number]
                 if "角色" in block:
                     if avatar_pool:
                         avatar_pool.name.extend(warp_data.name)
                         avatar_pool.five.extend(warp_data.five)
+                        avatar_pool.four.extend(warp_data.four)
                     else:
                         avatar_pool = warp_data
                 elif "光锥" in block:
@@ -98,11 +105,14 @@ def parse_text(text):
                         weapon_pool.four.extend(warp_data.four)
                     else:
                         weapon_pool = warp_data
+                pools[warp_data.number] = [avatar_pool, weapon_pool]
             print(version)
-            if avatar_pool:
-                avatar_pool.print_pool_format()
-            if weapon_pool:
-                weapon_pool.print_pool_format()
+            for number, pool in pools.items():
+                avatar_pool, weapon_pool = pool
+                if avatar_pool:
+                    avatar_pool.print_pool_format()
+                if weapon_pool:
+                    weapon_pool.print_pool_format()
 
 
 def main():
