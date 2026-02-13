@@ -45,6 +45,7 @@ class SkillData(BaseModel):
     id: int
     level: int
     max_level: int
+    include: bool
 
 
 class AvatarData(BaseModel):
@@ -115,9 +116,19 @@ class AvatarListPlugin(Plugin):
 
     @staticmethod
     def get_skill_data(character: Optional["StarrailCalculatorCharacterDetails"]) -> List[SkillData]:
-        if not character:
-            return [SkillData(id=i, level=1, max_level=10) for i in range(1, 5)]
-        return [SkillData(id=skill.id, level=skill.cur_level, max_level=skill.max_level) for skill in character.skills]
+        if not character or not character.skills:
+            return [SkillData(id=i, level=1, max_level=10, include=True) for i in range(1, 6)]
+        s = [
+            SkillData(id=skill.id, level=skill.cur_level, max_level=skill.max_level, include=True)
+            for skill in character.skills
+        ]
+        s_normal = s[:4]
+        # 欢愉技
+        huanyu_skill = next(filter(lambda x: x.id % 10000 == 2420, s), None)
+        if not huanyu_skill:
+            huanyu_skill = SkillData(id=2420, level=1, max_level=10, include=False)
+        s_normal.append(huanyu_skill)
+        return s_normal
 
     async def get_final_data(
         self, characters: List["StarRailDetailCharacter"], client: "StarRailClient"

@@ -30,6 +30,7 @@
           <th>战技</th>
           <th>爆发</th>
           <th>天赋</th>
+          <th>欢愉技</th>
           <th colspan="4">光锥</th>
         </tr>
       </thead>
@@ -46,10 +47,10 @@
           {% else %}
             {% set equip_star = '' %}
           {% endif %}
-          <tr class="h-8 border border-b">
+          <tr class="h-9 border border-b">
             <td class="text-right {{row_bg}}">{{ start_id + loop.index }}</td>
             <td class="role {{row_bg}}">
-              <img class="h-8 pl-2 img-drop-shadow" src="{{ avatar_data.icon }}"/>
+              <img class="h-9 pl-2 img-drop-shadow" src="{{ avatar_data.icon }}"/>
             </td>
             <td class="role text-left {{row_bg}}">{{ avatar_data.name }}</td>
             <td>{{ avatar_data.level }}</td>
@@ -90,7 +91,10 @@
                   {% set talent_style = talent_style + ' talent-level-4' %}
                 {% endif %}
               {% endif %}
-              <td class="{{ talent_style }}">{{ skill.level }}</td>
+              {% if not skill.include %}
+                {% set skill_level = '/' %}
+              {% endif %}
+              <td class="{{ talent_style }}">{{ skill_level }}</td>
             {% endfor %}
             {% if equipment != none %}
               <td class="weapon-{{ equip_star }}-star text-left pl-3">
