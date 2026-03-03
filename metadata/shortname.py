@@ -116,7 +116,7 @@ roles = {
     1501: ["火花", "sparxie"],
     1502: ["爻光", "yaoguang"],
 }
-not_real_roles = [1501]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
