@@ -8,7 +8,6 @@ from modules.apihelper.client.components.remote import Remote
 from modules.apihelper.models.genshin.calendar import Date, FinalAct, ActEnum, ActDetail, ActTime, BirthChar
 from modules.wiki.character import Character
 
-
 if TYPE_CHECKING:
     from core.dependence.assets import AssetsService
 
