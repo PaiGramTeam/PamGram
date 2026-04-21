@@ -1,4 +1,3 @@
-
 [project]
 name = "PamGram"
 version = "0.4.0"
@@ -29,7 +28,7 @@ dependencies = [
     "python-dotenv<2.0.0,>=1.0.0",
     "alembic<2.0.0,>=1.13.0",
     "black<27.0.0,>=26.0.0",
-    "rich<15.0.0,>=14.0.0",
+    "rich<16.0.0,>=15.0.0",
     "lxml<7.0.0,>=6.0.0",
     "arko-wrapper==0.3.0",
     "fastapi<1.0.0,>=0.116.0",
@@ -46,7 +45,7 @@ dependencies = [
     "simnet @ git+https://github.com/PaiGramTeam/SIMNet",
     "psutil<8.0.0,>=7.0.0",
     "influxdb-client[async,ciso]>=1.48.0",
-    "starrail-damage-cal<4.0.0,>=3.0.0",
+    "starrail-damage-cal<5.0.0,>=4.0.0",
     "starrailrelicscore @ git+https://github.com/PaiGramTeam/StarRailRelicScore",
     "starrailres @ git+https://github.com/PaiGramTeam/starrailres.py",
     "pydantic>=2.0.0,<3.0.0",
@@ -58,7 +57,7 @@ license = {text = "AGPL-3.0"}
 
 [project.optional-dependencies]
 pyro = ["PyroTgCrypto<2.0.0,>=1.2.7", "Pyrogram @ git+https://github.com/TeamPGM/pyrogram"]
-test = ["pytest<9.0.0,>=8.2.2", "pytest-asyncio<1.0.0,>=0.23.2", "flaky<4.0.0,>=3.7.0"]
+test = ["pytest<10.0.0,>=9.0.0", "pytest-asyncio<2.0.0,>=1.0.0", "flaky<4.0.0,>=3.7.0"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
