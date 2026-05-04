@@ -85,8 +85,6 @@ class PlayerCards(Plugin):
                 client: "StarRailClient"
                 raw_details = await client.get_starrail_characters()
                 data = self.client.from_simnet_to_enka(raw_details)
-                with open("test.json", "w", encoding="utf-8") as f:
-                    f.write(jsonlib.dumps(data, ensure_ascii=False, indent=4))
                 props = await self.client.get_property_from_dict(data)
                 data = await self.client.player_cards_file.merge_info(uid, data, props, use_old=True)
                 await self.cache.set(str(uid), data)
