@@ -71,8 +71,10 @@ class SimnetApiDataParser:
                 reverse_map[new_id] = []
             reverse_map[new_id].append((orig_id, num))
 
-        # 2. 将 reduce_list 转换为字典
-        reduce_dict = {item.id: item.level for item in reduce_list}
+        # 2. 将 reduce_list 转换为字典（相同 id 时累加 level）
+        reduce_dict: Dict[str, int] = {}
+        for item in reduce_list:
+            reduce_dict[item.id] = reduce_dict.get(item.id, 0) + item.level
 
         # 3. 创建 old_dict 用于查找
         old_dict = {item.id: item.level for item in old_list1}
