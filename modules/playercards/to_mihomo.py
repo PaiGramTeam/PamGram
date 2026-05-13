@@ -115,7 +115,9 @@ class SimnetApiDataParser:
         final_skills, skill_map = self.get_character_skill_upgrade_from_skill_tree(
             self.get_mihomo_map().index, cid, skill_tree_levels
         )
-        rank_affected = self.get_mihomo_map().index.get_character_skill_upgrade_from_rank(cid, data.rank)
+        rank_affected = self.get_mihomo_map().index.get_character_skill_upgrade_from_rank(
+            cid, data.rank, enhanced=bool(data.cur_enhanced_id)
+        )
         new_list = self.update_list1_with_reduction(skill_tree_levels, skill_map, rank_affected)
         return [{"pointId": i.id, "level": i.level} for i in new_list]
 
