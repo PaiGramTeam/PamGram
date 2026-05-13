@@ -121,7 +121,7 @@ roles = {
     1505: ["绯英", "evanescia"],
     1506: ["银狼LV.999", "银狼lv.999", "silverwolflv.999"],
 }
-not_real_roles = [1505]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
