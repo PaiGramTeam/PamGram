@@ -46,16 +46,6 @@ class DailyNotePlugin(Plugin):
             else None
         )
 
-        remained_time = None
-        for i in daily_info.expeditions:
-            if remained_time:
-                if remained_time < i.remaining_time:
-                    remained_time = i.remaining_time
-            else:
-                remained_time = i.remaining_time
-        if remained_time:
-            remained_time = (datetime.now().astimezone() + remained_time).strftime("%m-%d %H:%M")
-
         render_data = {
             "uid": mask_number(client.player_id),
             "day": day,
@@ -64,27 +54,17 @@ class DailyNotePlugin(Plugin):
             "max_resin": daily_info.max_stamina,
             "current_reserve_stamina": daily_info.current_reserve_stamina,
             "is_reserve_stamina_full": daily_info.is_reserve_stamina_full,
-            "expeditions": bool(daily_info.expeditions),
-            "remained_time": remained_time,
-            "current_expeditions": len(daily_info.expeditions),
-            "max_expeditions": daily_info.total_expedition_num,
             "current_train_score": daily_info.current_train_score,
             "max_train_score": daily_info.max_train_score,
             "remaining_weekly_discounts": daily_info.remaining_weekly_discounts,
             "max_weekly_discounts": daily_info.max_weekly_discounts,
-            "current_rogue_score": daily_info.current_rogue_score,
-            "max_rogue_score": daily_info.max_rogue_score,
-            "rogue_tourn_weekly_unlocked": daily_info.rogue_tourn_weekly_unlocked,
-            "rogue_tourn_weekly_max": daily_info.rogue_tourn_weekly_max,
-            "rogue_tourn_weekly_cur": daily_info.rogue_tourn_weekly_cur,
-            "rogue_tourn_exp_is_full": daily_info.rogue_tourn_exp_is_full,
-            "grid_fight_weekly_cur": daily_info.grid_fight_weekly_cur,
-            "grid_fight_weekly_max": daily_info.grid_fight_weekly_max,
+            "period_score": daily_info.period_score,
+            "period_max_score": daily_info.period_max_score,
         }
         render_result = await self.template_service.render(
             "starrail/daily_note/daily_note.html",
             render_data,
-            {"width": 600, "height": 1000},
+            {"width": 600, "height": 700},
             full_page=False,
             query_selector=".container",
             ttl=8 * 60,
