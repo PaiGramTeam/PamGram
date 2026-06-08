@@ -10,7 +10,7 @@
                 </div>
                 <div class="star">
                     <div>
-                        <div>{{ data.floor.star_num }}</div>
+                        <div>{% if data.extra_star_num %}{{ data.floor.star_num - data.extra_star_num }} + {{ data.extra_star_num }}{% else %}{{ data.floor.star_num }}{% endif %}</div>
                         <div class="score">总分：{{ data.floor.score }}</div>
                     </div>
                 </div>
@@ -22,9 +22,14 @@
                         <span style="color: #A3A3A3">{{ data.floor_time }}</span>
                     </div>
                     <div class="stars">
-                        {% for n in range(data.floor.star_num) %}
+                        {% for n in range(data.floor.star_num - data.extra_star_num) %}
                             <div class="star"></div>
                         {% endfor %}
+                        {% if data.extra_star_num %}
+                            {% for n in range(data.extra_star_num) %}
+                                <div class="star star_peak star-extra"></div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="battles">

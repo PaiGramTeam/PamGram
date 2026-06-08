@@ -23,6 +23,12 @@
         .boss-lower::before {
             background-image: url("{{ lower_boss.icon }}");
         }
+
+        {% if tierce_boss %}
+        .boss-tierce::before {
+            background-image: url("{{ tierce_boss.icon }}");
+        }
+        {% endif %}
         {% endif %}
     </style>
 </head>
@@ -79,6 +85,11 @@
                 <div class="star boss-lower">
                     <span>{{ lower_boss.name_mi18n }}</span>
                 </div>
+                {% if tierce_boss %}
+                <div class="star boss-tierce">
+                    <span>{{ tierce_boss.name_mi18n }}</span>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
         </div>

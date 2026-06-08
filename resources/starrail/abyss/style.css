@@ -455,6 +455,23 @@ body {
 
 .floors_row {
     display: flex;
+    align-items: stretch;
+}
+
+.floors_row > .floor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.floors_row > .floor > .chamber {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.floors_row > .floor > .chamber > .battles {
+    flex: 1;
 }
 
 .floors {
