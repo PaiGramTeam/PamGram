@@ -172,11 +172,17 @@ class ChallengeStoryPlugin(Plugin):
             raise AbyssUnlocked()
         if floor_data.is_fast:
             raise AbyssFastPassed()
+        # 收集所有节点数据，包含可能存在的第三节点
+        floor_nodes = [floor_data.node_1, floor_data.node_2]
+        if getattr(floor_data, "node_3", None) is not None:
+            floor_nodes.append(floor_data.node_3)
         render_data = {
             "floor": floor_data,
             "floor_time": floor_data.node_1.challenge_time.datetime.strftime("%Y-%m-%d %H:%M:%S"),
-            "floor_nodes": [floor_data.node_1, floor_data.node_2],
+            "floor_nodes": floor_nodes,
             "floor_num": floor,
+            "is_tierce": getattr(floor_data, "is_tierce", False),
+            "extra_star_num": getattr(floor_data, "extra_star_num", 0) or 0,
         }
         return render_data
 
@@ -282,7 +288,10 @@ class ChallengeStoryPlugin(Plugin):
         if "其" in last_battles.name:
             name = last_battles.name.split("其")[0]
         honor = ""
-        if data.story_data.total_stars == 12:
+        total_stars = data.story_data.total_stars
+        extra_stars = getattr(data.story_data, "extra_star_num", 0) or 0
+        total_stars_str = f"{total_stars}" + (f"+{extra_stars}" if extra_stars else "")
+        if total_stars == 12:
             fast_count = len([i for i in data.story_data.floors if i.is_fast])
             if data.story_data.total_battles == (4 - fast_count):
                 honor = "👑"
@@ -290,12 +299,18 @@ class ChallengeStoryPlugin(Plugin):
                 len(last_battles.node_1.avatars),
                 len(last_battles.node_2.avatars),
             )
+            # 若存在第三节点，需要将其纳入人数计算
+            if getattr(last_battles, "node_3", None) is not None:
+                num_of_characters = max(
+                    num_of_characters,
+                    len(last_battles.node_3.avatars),
+                )
             if num_of_characters == 2:
                 honor = "双通"
             elif num_of_characters == 1:
                 honor = "单通"
 
-        return f"{name} {time} {data.story_data.total_stars} ★ {honor}".strip()
+        return f"{name} {time} {total_stars_str} ★ {honor}".strip()
 
     async def get_session_button_data(self, user_id: int, uid: int, force: bool = False):
         redis = await self.cache.get(str(uid))
