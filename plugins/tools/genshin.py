@@ -6,10 +6,10 @@ from typing import Optional, Any
 from typing import TYPE_CHECKING, Union
 
 from pydantic import ValidationError
-from simnet import StarRailClient, Region
+from simnet import StarRailClient, Region, Game
 from simnet.errors import BadRequest as SimnetBadRequest, InvalidCookies, NetworkError, CookieException, NeedChallenge
 from simnet.models.starrail.calculator import StarrailCalculatorCharacterDetails, StarrailCalculatorCharacter
-from simnet.utils.player import recognize_game_biz
+from simnet.utils.player import recognize_region
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import StaleDataError
 from sqlmodel import BigInteger, Column, DateTime, Field, Index, Integer, SQLModel, TEXT, delete, func, select
@@ -39,6 +39,8 @@ __all__ = (
     "CookiesUpdateRequestError",
     "CharacterDetails",
 )
+
+GAME = Game.STARRAIL
 
 
 class CharacterDetailsSQLModel(SQLModel, table=True):
@@ -420,18 +422,19 @@ class GenshinHelper(Plugin):
         uid: Optional[int] = None,
         offset: int = 0,
     ) -> StarRailClient:
+        if uid:
+            simnet_region = recognize_region(uid, GAME)
+            if simnet_region == Region.CHINESE:
+                region = RegionEnum.HYPERION
+            elif simnet_region == Region.OVERSEAS:
+                region = RegionEnum.HOYOLAB
+            else:
+                raise PlayerNotFoundError(user_id)
         try:
             async with self.genshin(user_id, region, uid, offset) as client:
                 client.public = False
-                if uid and recognize_game_biz(uid, client.game) != recognize_game_biz(client.player_id, client.game):
-                    # 如果 uid 和 player_id 服务器不一致，说明是跨服的，需要使用公共的 cookies
-                    raise CookiesNotFoundError(user_id)
                 yield client
         except (CookiesNotFoundError, PlayerNotFoundError):
-            if uid:
-                if uid < 10:
-                    raise PlayerNotFoundError(user_id)
-                region = RegionEnum.HYPERION if uid < 600000000 else RegionEnum.HOYOLAB
             if uid is None and region is None:
                 raise PlayerNotFoundError(user_id)
             async with self.public_genshin(user_id, region, uid) as client:
