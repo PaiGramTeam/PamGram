@@ -124,9 +124,9 @@ class AvatarListPlugin(Plugin):
         ]
         s_normal = s[:4]
         # 欢愉技
-        huanyu_skill = next(filter(lambda x: x.id % 10000 == 2420, s), None)
+        huanyu_skill = next(filter(lambda x: x.id % 1000 == 420, s), None)
         if not huanyu_skill:
-            huanyu_skill = SkillData(id=2420, level=1, max_level=10, include=False)
+            huanyu_skill = SkillData(id=420, level=1, max_level=10, include=False)
         s_normal.append(huanyu_skill)
         return s_normal
 
