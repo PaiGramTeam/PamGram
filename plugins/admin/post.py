@@ -3,6 +3,7 @@ import math
 import os
 import re
 from asyncio import create_subprocess_shell, subprocess
+from dataclasses import dataclass
 from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 
 import aiofiles
@@ -40,10 +41,22 @@ from utils.log import logger
 
 if TYPE_CHECKING:
     from bs4 import Tag
-    from telegram import Update, Message
+    from telegram import Update, Message, Video
     from telegram.ext import ContextTypes
 
-    from modules.apihelper.models.genshin.hyperion import PostRecommend
+    from modules.apihelper.models.genshin.hyperion import PostInfo, PostRecommend
+
+
+@dataclass
+class FetchedPostData:
+    """fetch_post_data 返回值封装"""
+
+    post_info: "PostInfo"
+    post_images: List["ArtworkImage"]
+    post_text: str
+    post_tags: List[str]
+    post_text_caption: str
+    url: str
 
 
 class PostHandlerData:
@@ -419,13 +432,19 @@ class Post(Plugin.Conversation):
                     break
         return tags
 
-    async def fetch_post_data(self, post_id: int, post_type: "PostTypeEnum") -> tuple:
+    async def fetch_post_data(self, post_id: int, post_type: "PostTypeEnum") -> FetchedPostData:
         """获取文章数据的核心函数，可被自动推送和手动推送共用"""
         bbs = self.get_bbs_client(post_type)
         post_info = await bbs.get_post_info(self.gids[0], post_id)
         post_images = await bbs.get_images_by_post_id(self.gids[0], post_id)
         await bbs.close()
         post_images = await self.gif_to_mp4(post_images)
+        if video_urls := post_info.video_urls:
+            video_files = await self.prepare_video_file(video_urls)
+            video_images: List[ArtworkImage] = [
+                ArtworkImage(art_id=114514, file_name=video.file_id) for video in video_files
+            ]
+            post_images = video_images + post_images
         post_data = post_info["post"]["post"]
         post_subject = post_data["subject"]
         post_tags = self.get_tags_by_subject(post_subject)
@@ -437,15 +456,54 @@ class Post(Plugin.Conversation):
             post_text = self.safe_cut(post_text, max_len)
         post_text += f"\n\n[source]({url})"
         post_text_caption = post_text + escape_markdown("".join([f" #{tag}" for tag in post_tags]), version=2)
-        return post_info, post_images, post_text, post_tags, post_text_caption, url
+        return FetchedPostData(
+            post_info=post_info,
+            post_images=post_images,
+            post_text=post_text,
+            post_tags=post_tags,
+            post_text_caption=post_text_caption,
+            url=url,
+        )
+
+    async def prepare_video_file(self, video_urls: List[str]) -> List["Video"]:
+        """处理 post_info.video_urls，将每个视频 URL 通过 bot 发送到 channels_helper 频道，
+        将 telegram 返回的 file_id 作为列表返回，用于后续发送。
+
+        如果 channels_helper 未配置或发送失败，返回空列表。
+        """
+        if not video_urls:
+            return []
+        if not config.channels_helper:
+            logger.warning("未配置 channels_helper，无法预处理视频文件")
+            return []
+        bot = self.application.bot
+        file_ids: List["Video"] = []
+        for url in video_urls:
+            try:
+                message = await bot.send_video(config.channels_helper, video=url)
+            except BadRequest as exc:
+                logger.error("发送视频到 channels_helper 失败 url[%s] %s", url, exc.message)
+                continue
+            except Exception as exc:
+                logger.error("发送视频到 channels_helper 发生未知错误 url[%s]", url, exc_info=exc)
+                continue
+            video = message.video
+            if video is None:
+                logger.error("发送视频到 channels_helper 成功但未获取到 file url[%s]", url)
+                continue
+            file_ids.append(video)
+        return file_ids
 
     async def send_post_info(
         self, post_handler_data: PostHandlerData, message: "Message", post_id: int, post_type: "PostTypeEnum"
     ) -> int:
         """手动推送流程"""
-        post_info, post_images, post_text, post_tags, post_text_caption, url = await self.fetch_post_data(
-            post_id, post_type
-        )
+        fetched = await self.fetch_post_data(post_id, post_type)
+        post_info = fetched.post_info
+        post_images = fetched.post_images
+        post_text = fetched.post_text
+        post_tags = fetched.post_tags
+        post_text_caption = fetched.post_text_caption
         if post_info.video_urls:
             await message.reply_text("检测到视频，需要单独下载，视频链接：" + "\n".join(post_info.video_urls))
         try:
@@ -550,21 +608,19 @@ class Post(Plugin.Conversation):
         """自动推送流程"""
         try:
             # 1. 获取文章数据
-            post_info, post_images, post_text, post_tags, post_text_caption, url = await self.fetch_post_data(
-                post_id, post_type
-            )
+            fetched = await self.fetch_post_data(post_id, post_type)
 
             # 2. 自动选择频道
-            channel_id = self.get_channel_id_by_post_text(post_text + post_info.user_nickname)
+            channel_id = self.get_channel_id_by_post_text(fetched.post_text + fetched.post_info.user_nickname)
             channel_name = await self.get_chat_username(channel_id)
 
             # 3. 准备推送内容
-            post_text_final = post_text + f" @{escape_markdown(channel_name, version=2)}"
-            for tag in post_tags:
+            post_text_final = fetched.post_text + f" @{escape_markdown(channel_name, version=2)}"
+            for tag in fetched.post_tags:
                 post_text_final += f" \#{tag}"
 
             # 4. 执行推送
-            await self.send_post_images(channel_id, None, post_images, post_text_final)
+            await self.send_post_images(channel_id, None, fetched.post_images, post_text_final)
             logger.info("自动推送文章成功 post_id[%s]", post_id)
             return True
         except BadRequest as exc:
