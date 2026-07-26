@@ -125,7 +125,7 @@ roles = {
     1509: ["吉尔伽美什", "gilgamesh", "吉尔", "金闪闪", "英雄王"],
     1510: ["姬子•启行", "himeko nova"],
 }
-not_real_roles = [1508, 1509]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
