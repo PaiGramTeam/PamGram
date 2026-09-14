@@ -127,7 +127,7 @@ roles = {
     1512: ["知更鸟•晴歌", "robin summeretto"],
     1513: ["砂金•戏浪", "aventurine waveflair"],
 }
-not_real_roles = [1513]
+not_real_roles = []
 light_cones = {
     20000: ["锋镝"],
     20001: ["物穰"],
