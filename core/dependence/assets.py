@@ -96,9 +96,9 @@ class _AvatarAssets(_AssetsService):
             skills_s_data = [f"{i}.png" for i in skills_data if i.startswith(str(icon.id) + "_")]
             base_path = self.path / f"{icon.id}"
             base_path.mkdir(exist_ok=True, parents=True)
-            gacha_path = base_path / "gacha.webp"
-            icon_path = base_path / "icon.webp"
-            normal_path = base_path / "normal.webp"
+            gacha_path = base_path / "gacha.png"
+            icon_path = base_path / "icon.png"
+            normal_path = base_path / "normal.png"
             square_path = base_path / "square.png"
             eidolons_paths = [(base_path / f"eidolon_{eidolon_id}.webp") for eidolon_id in range(1, 7)]
             skills_paths = []
@@ -153,22 +153,22 @@ class _AvatarAssets(_AssetsService):
 
     def gacha(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
         icon = self.get_target(target, second_target)
-        return self.get_path(icon, "gacha")
+        return self.get_path(icon, "gacha", "png")
 
     def icon(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
         icon = self.get_target(target, second_target)
-        return self.get_path(icon, "icon")
+        return self.get_path(icon, "icon", "png")
 
     def normal(self, target: StrOrInt, second_target: StrOrInt = None) -> Path:
         icon = self.get_target(target, second_target)
-        return self.get_path(icon, "normal")
+        return self.get_path(icon, "normal", "png")
 
     def square(self, target: StrOrInt, second_target: StrOrInt = None, allow_icon: bool = True) -> Path:
         icon = self.get_target(target, second_target)
         path = self.get_path(icon, "square", "png")
         if not path.exists():
             if allow_icon:
-                return self.get_path(icon, "icon")
+                return self.get_path(icon, "icon", "png")
             raise AssetsCouldNotFound("角色素材图标不存在", target)
         return path
 
@@ -234,8 +234,8 @@ class _LightConeAssets(_AssetsService):
         for icon in self.data:
             base_path = self.path / f"{icon.id}"
             base_path.mkdir(exist_ok=True, parents=True)
-            gacha_path = base_path / "gacha.webp"
-            icon_path = base_path / "icon.webp"
+            gacha_path = base_path / "gacha.png"
+            icon_path = base_path / "icon.png"
             if not gacha_path.exists():
                 tasks.append(self._download(icon.gacha, gacha_path))
             if not icon_path.exists():
@@ -250,7 +250,7 @@ class _LightConeAssets(_AssetsService):
     def get_path(self, icon: LightConeIcon, name: str) -> Path:
         path = self.path / f"{icon.id}"
         path.mkdir(exist_ok=True, parents=True)
-        return path / f"{name}.webp"
+        return path / f"{name}.png"
 
     def get_by_id(self, id_: int) -> Optional[LightConeIcon]:
         return self.id_map.get(id_, None)
