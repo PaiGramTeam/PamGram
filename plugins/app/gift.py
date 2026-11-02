@@ -30,7 +30,7 @@ class GiftCodePlugin(Plugin):
         self.redis = redis.client
         self.redis_key = "gift:code"
         self.client = AsyncClient()
-        self.api = "https://hsr-gift.paimon.vip/code.json"
+        self.api = "https://hsr-gift.miyoushe.de5.net/code.json"
 
     async def get_gift_code(self) -> Optional[CodeList]:
         try:
