@@ -585,12 +585,15 @@ class Post(Plugin.Conversation):
                 )
 
     @staticmethod
-    def get_channel_id_by_post_text(post_text: str) -> int:
+    def get_channel_id_by_post_text(fetched: FetchedPostData) -> int:
         if not config.channels:
             return 0
+        post_user_id = fetched.post_info.user_uid
+        post_text = fetched.post_text + fetched.post_info.user_nickname
         channel_id = config.channels[0]
-        if "千星奇域" in post_text and len(config.channels) > 1:
-            channel_id = config.channels[1]
+        if len(config.channels) > 1:
+            if "千星奇域" in post_text or "千星商城" in post_text or post_user_id == 378227958:
+                channel_id = config.channels[1]
         return channel_id
 
     async def get_chat_username(self, chat_id: int) -> str:
@@ -611,7 +614,7 @@ class Post(Plugin.Conversation):
             fetched = await self.fetch_post_data(post_id, post_type)
 
             # 2. 自动选择频道
-            channel_id = self.get_channel_id_by_post_text(fetched.post_text + fetched.post_info.user_nickname)
+            channel_id = self.get_channel_id_by_post_text(fetched)
             channel_name = await self.get_chat_username(channel_id)
 
             # 3. 准备推送内容
